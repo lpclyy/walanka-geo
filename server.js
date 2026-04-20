@@ -20,7 +20,7 @@ app.use(express.static(path.join(__dirname, './')));
 // 数据库连接配置
 const dbConfig = {
   host: 'localhost',
-  user: 'root',
+  user: 'walanka',
   password: '123456',
   database: 'walanka_geo',
   waitForConnections: true,
