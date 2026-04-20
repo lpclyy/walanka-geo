@@ -145,13 +145,13 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    localStorage.setItem('token', data.token);
-                    alert('登录成功！');
-                    window.location.href = 'admin/dashboard.html';
-                } else {
-                    alert(data.error || '登录失败');
-                }
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        localStorage.setItem('token', data.token);
+                        alert('登录成功！');
+                        window.location.href = 'index.html';
+                    } else {
+                        alert(data.error || '登录失败');
+                    }
             } catch (error) {
                 console.error('登录失败:', error);
                 alert('登录失败，请稍后重试');

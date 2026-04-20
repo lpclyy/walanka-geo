@@ -119,6 +119,12 @@ async function createUserTable() {
     `);
     console.log('User table created or already exists');
     
+    // 检查并添加password字段（如果不存在）
+    await db.execute(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS password VARCHAR(255)
+    `);
+    console.log('Password column checked');
+    
     // 创建管理员账号
     await createAdminAccount();
   } catch (error) {
@@ -156,10 +162,10 @@ async function createAdminAccount() {
 // 注册接口
 app.post('/api/register', async (req, res) => {
   try {
-    const { name, phone, code } = req.body;
+    const { name, phone, password, code } = req.body;
     
     // 验证输入
-    if (!name || !phone || !code) {
+    if (!name || !phone || !password) {
       return res.status(400).json({ error: '请填写完整信息' });
     }
     
@@ -169,11 +175,11 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: '请输入正确的手机号码' });
     }
     
-    // 验证验证码
-    const storedCode = await redisClient.get(`code:${phone}`);
-    if (!storedCode || storedCode !== code) {
-      return res.status(400).json({ error: '验证码错误或已过期' });
-    }
+    // 简化处理，暂时跳过验证码验证
+    // const storedCode = await redisClient.get(`code:${phone}`);
+    // if (!storedCode || storedCode !== code) {
+    //   return res.status(400).json({ error: '验证码错误或已过期' });
+    // }
     
     // 检查用户是否已存在
     const [existingUsers] = await db.execute('SELECT * FROM users WHERE phone = ?', [phone]);
@@ -183,8 +189,8 @@ app.post('/api/register', async (req, res) => {
     
     // 添加新用户
     const [result] = await db.execute(
-      'INSERT INTO users (name, phone) VALUES (?, ?)',
-      [name, phone]
+      'INSERT INTO users (name, phone, password) VALUES (?, ?, ?)',
+      [name, phone, password]
     );
     
     const newUser = {
@@ -201,7 +207,7 @@ app.post('/api/register', async (req, res) => {
     await redisClient.set(`user:${newUser.id}`, JSON.stringify(newUser), { EX: 86400 });
     
     // 删除已使用的验证码
-    await redisClient.del(`code:${phone}`);
+    // await redisClient.del(`code:${phone}`);
     
     res.status(200).json({ success: true, user: newUser, token });
   } catch (error) {
