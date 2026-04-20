@@ -122,11 +122,8 @@
                 if (data.success) {
                     localStorage.setItem('user', JSON.stringify(data.user));
                     localStorage.setItem('token', data.token);
-                    if (data.user.role === 'admin') {
-                        window.location.href = 'admin/dashboard.html';
-                    } else {
-                        window.location.href = 'workbench.html';
-                    }
+                    // 无论用户角色，都跳转到工作台页面
+                    window.location.href = 'workbench.html';
                 } else {
                     alert(data.error || '登录失败');
                 }
