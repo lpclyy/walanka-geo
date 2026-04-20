@@ -341,7 +341,7 @@
                         <li>API接口访问</li>
                         <li>定制化解决方案</li>
                     </ul>
-                    <button class="btn-subscribe secondary" onclick="handleUpgrade('enterprise')">联系销售</button>
+                    <button class="btn-subscribe secondary" onclick="handleUpgrade('enterprise')">立即升级</button>
                 </div>
             </div>
             
@@ -541,19 +541,8 @@
 
         // 升级套餐处理
         function handleUpgrade(plan) {
-            const planNames = {
-                'free': '免费版',
-                'pro': '专业版',
-                'enterprise': '企业版'
-            };
-            const planPrices = {
-                'free': '¥0',
-                'pro': '¥999/月',
-                'enterprise': '¥2999/月'
-            };
-
-            const message = `您选择的是 ${planNames[plan]}（${planPrices[plan]}）\n\n请联系销售顾问开通：\n📞 电话：400-888-8888\n📧 邮箱：sales@walanka.com`;
-            alert(message);
+            // 跳转到支付页面
+            window.location.href = `payment.html?plan=${plan}`;
         }
     </script>
 </body>

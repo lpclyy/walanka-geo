@@ -684,6 +684,14 @@
 
     <script src="script.js"></script>
     <script>
+        // 检查登录状态
+        window.onload = function() {
+            const user = localStorage.getItem('user');
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        };
+        
         // 工作台模式切换功能
         document.querySelectorAll('.workbench-nav a').forEach(link => {
             link.addEventListener('click', function(e) {

@@ -55,7 +55,7 @@
                             </div>
                             <div style="width: 120px;">
                                 <label style="visibility: hidden;">验证码</label>
-                                <button type="button" id="sendCode" class="btn-secondary" style="width: 100%; height: 40px; margin-top: 2px;">发送验证码</button>
+                                <button type="button" id="sendCode" class="btn-secondary" style="width: 100%; height: 40px; margin-top: 2px;">获取验证码</button>
                             </div>
                         </div>
                         <div class="form-options">
@@ -107,7 +107,7 @@
     <script src="script.js"></script>
     <script>
         // 发送验证码功能
-        document.getElementById('sendCode').addEventListener('click', function() {
+        document.getElementById('sendCode').addEventListener('click', async function() {
             const phone = document.getElementById('phone').value;
             const phoneRegex = /^1[3-9]\d{9}$/;
             
@@ -116,24 +116,42 @@
                 return;
             }
             
-            // 模拟发送验证码
-            this.disabled = true;
-            let countdown = 60;
-            this.textContent = `${countdown}秒后重发`;
-            
-            const timer = setInterval(() => {
-                countdown--;
-                this.textContent = `${countdown}秒后重发`;
-                if (countdown <= 0) {
-                    clearInterval(timer);
-                    this.disabled = false;
-                    this.textContent = '发送验证码';
+            // 调用后端API发送验证码
+            try {
+                const response = await fetch('/api/send-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 开始倒计时
+                    this.disabled = true;
+                    let countdown = 60;
+                    this.textContent = `${countdown}秒后重发`;
+                    
+                    const timer = setInterval(() => {
+                        countdown--;
+                        this.textContent = `${countdown}秒后重发`;
+                        if (countdown <= 0) {
+                            clearInterval(timer);
+                            this.disabled = false;
+                            this.textContent = '获取验证码';
+                        }
+                    }, 1000);
+                    
+                    alert('验证码已发送到您的手机');
+                } else {
+                    alert(data.error || '发送验证码失败');
                 }
-            }, 1000);
-            
-            // 这里可以添加真实的短信发送API调用
-            console.log('发送验证码到手机号:', phone);
-            alert('验证码已发送到您的手机');
+            } catch (error) {
+                console.error('发送验证码失败:', error);
+                alert('发送验证码失败，请稍后重试');
+            }
         });
         
         // 注册功能
@@ -162,7 +180,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name, phone })
+                    body: JSON.stringify({ name, phone, code })
                 });
                 
                 const data = await response.json();

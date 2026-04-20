@@ -44,15 +44,9 @@
                             <label for="phone">手机号</label>
                             <input type="tel" id="phone" name="phone" required placeholder="请输入手机号码">
                         </div>
-                        <div class="form-group" style="display: flex; gap: 10px;">
-                            <div style="flex: 1;">
-                                <label for="code">验证码</label>
-                                <input type="text" id="code" name="code" required placeholder="请输入验证码">
-                            </div>
-                            <div style="width: 120px;">
-                                <label style="visibility: hidden;">验证码</label>
-                                <button type="button" id="sendCode" class="btn-secondary" style="width: 100%; height: 40px; margin-top: 2px;">发送验证码</button>
-                            </div>
+                        <div class="form-group">
+                            <label for="password">密码</label>
+                            <input type="password" id="password" name="password" required placeholder="请输入密码">
                         </div>
                         <div class="form-options">
                             <label>
@@ -102,44 +96,14 @@
 
     <script src="script.js"></script>
     <script>
-        // 发送验证码功能
-        document.getElementById('sendCode').addEventListener('click', function() {
-            const phone = document.getElementById('phone').value;
-            const phoneRegex = /^1[3-9]\d{9}$/;
-            
-            if (!phoneRegex.test(phone)) {
-                alert('请输入正确的手机号码');
-                return;
-            }
-            
-            // 模拟发送验证码
-            this.disabled = true;
-            let countdown = 60;
-            this.textContent = `${countdown}秒后重发`;
-            
-            const timer = setInterval(() => {
-                countdown--;
-                this.textContent = `${countdown}秒后重发`;
-                if (countdown <= 0) {
-                    clearInterval(timer);
-                    this.disabled = false;
-                    this.textContent = '发送验证码';
-                }
-            }, 1000);
-            
-            // 这里可以添加真实的短信发送API调用
-            console.log('发送验证码到手机号:', phone);
-            alert('验证码已发送到您的手机');
-        });
-        
         // 登录功能
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const phone = document.getElementById('phone').value;
-            const code = document.getElementById('code').value;
+            const password = document.getElementById('password').value;
             
-            if (!phone || !code) {
-                alert('请输入手机号和验证码');
+            if (!phone || !password) {
+                alert('请输入手机号和密码');
                 return;
             }
             
@@ -150,7 +114,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ phone })
+                    body: JSON.stringify({ phone, password })
                 });
                 
                 const data = await response.json();
