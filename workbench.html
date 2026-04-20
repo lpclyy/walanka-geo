@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瓦兰卡工作台 - 品牌AI表现监测与优化工具</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 工作台专属样式 */
+        .workbench-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .content-creation {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .content-creation h3 {
+            color: white;
+            margin-bottom: 20px;
+        }
+        .creation-tools {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .tool-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-light);
+        }
+        .tool-card h4 {
+            color: white;
+            margin-bottom: 10px;
+        }
+        .tool-card p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+        .update-log {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .log-content {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .brand-monitor-flow,
+        .geo-optimization-flow {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .flow-steps {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .flow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 120px;
+        }
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .flow-step.active .step-icon {
+            background: var(--secondary-color);
+        }
+        .flow-arrow {
+            color: #999;
+            font-size: 20px;
+        }
+        .pricing-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .pricing-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .pricing-card.featured {
+            background: var(--primary-color);
+            color: white;
+        }
+        .pricing-card.featured::before {
+            content: "推荐";
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .pricing-card h4 {
+            margin-bottom: 15px;
+        }
+        .price {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .pricing-card ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .pricing-card li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .pricing-card li:before {
+            content: "✓";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        .pricing-card.featured li:before {
+            color: white;
+        }
+        .upgrade-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .upgrade-notice p {
+            margin: 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header" style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; right: 0; z-index: 1000;">
+        <div class="container">
+            <div class="header-content" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="logo" style="display: flex; align-items: center;">
+                    <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20AI%20logo%20with%20smart%20bean%20concept%20teal%20color&image_size=square_hd" alt="瓦兰卡" style="width: 40px; height: 40px; margin-right: 10px;">
+                        <span class="logo-text" style="font-size: 20px; font-weight: bold; color: var(--primary-color);">瓦兰卡</span>
+                    </a>
+                </div>
+                <nav class="nav" style="flex: 1; margin: 0 30px;">
+                    <ul class="nav-menu" style="display: flex; justify-content: center; gap: 30px; list-style: none; padding: 0;">
+                        <li><a href="index.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">首页</a></li>
+                        <li><a href="index.html#features" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">功能介绍</a></li>
+                        <li><a href="index.html#cases" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">客户案例</a></li>
+                        <li><a href="index.html#faq" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">常见问题</a></li>
+                        <li><a href="geo-school.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">GEO学堂</a></li>
+                        <li><a href="workbench.html" style="text-decoration: none; color: white; font-weight: 500; padding: 8px 16px; border-radius: 20px; background: var(--primary-color); transition: all 0.3s ease;">工作台</a></li>
+                    </ul>
+                </nav>
+                <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
+                    <div class="user-info">
+                        <div class="user-avatar">189</div>
+                        <span style="font-weight: 500;">189****1312</span>
+                    </div>
+                    <a href="subscription.html" style="text-decoration: none; color: #666; font-size: 14px;">升级套餐</a>
+                    <a href="login.html" style="text-decoration: none; color: #666; font-size: 14px;">退出</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 工作台内容 -->
+    <section class="workbench" style="padding: 120px 0 30px; background: #f8f9fa;">
+        <div class="container">
+            <div class="workbench-content" style="display: flex; gap: 30px;">
+                <!-- 侧边栏 -->
+                <div class="workbench-sidebar" style="width: 250px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h3 style="color: var(--primary-color); margin-bottom: 20px; font-size: 18px;">控制台</h3>
+                    <ul class="workbench-nav" style="list-style: none; padding: 0;">
+                        <li class="active" style="margin-bottom: 5px;">
+                            <a href="#" data-mode="dashboard" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--primary-color); text-decoration: none; border-radius: 6px; background: rgba(13, 148, 136, 0.1); font-weight: 500;">
+                                <span class="nav-icon">📊</span>
+                                <span>数据总览</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" data-mode="brand-monitor" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <span class="nav-icon">🔍</span>
+                                <span>品牌AI可见度</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" data-mode="competitor-analysis" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <span class="nav-icon">📈</span>
+                                <span>竞品分析</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" data-mode="keyword-management" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <span class="nav-icon">🔑</span>
+                                <span>关键词管理</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" data-mode="content-creation" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <span class="nav-icon">✍️</span>
+                                <span>内容创作助手</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" data-mode="schema-tool" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <span class="nav-icon">⚙️</span>
+                                <span>Schema生成工具</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" data-mode="batch-analysis" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <span class="nav-icon">📋</span>
+                                <span>批量分析</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" data-mode="suggestions" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <span class="nav-icon">💡</span>
+                                <span>优化建议</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" data-mode="history" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <span class="nav-icon">🕒</span>
+                                <span>历史记录</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 主内容区 -->
+                <div class="workbench-main" style="flex: 1;">
+                    <div class="workbench-header">
+                        <div>
+                            <h2 style="color: #333; margin-bottom: 5px;">工作台</h2>
+                            <p style="color: #666; margin: 0;">快速了解瓦兰卡免费GEO工具</p>
+                        </div>
+                        <div class="user-info">
+                            <div class="user-avatar">189</div>
+                            <span style="font-weight: 500;">189****1312</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 数据总览模式 -->
+                    <div class="workbench-mode" id="dashboard">
+                        <div class="content-creation">
+                            <h3>瓦兰卡GEO内容创作助手</h3>
+                            <div class="creation-tools">
+                                <div class="tool-card">
+                                    <h4>100%文章原创保证 | 智能改写</h4>
+                                    <p>基于AI的内容创作，确保原创性</p>
+                                    <button class="btn-primary" style="background: white; color: #1e3c72; font-weight: bold;">立即使用</button>
+                                </div>
+                                <div class="tool-card">
+                                    <h4>智能标题生成 | 基于AI分析</h4>
+                                    <p>生成吸引眼球的标题</p>
+                                    <button class="btn-primary" style="background: white; color: #1e3c72; font-weight: bold;">立即使用</button>
+                                </div>
+                            </div>
+                            <div class="tool-actions" style="display: flex; gap: 10px;">
+                                <button class="btn-secondary" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">统一文章管理</button>
+                                <button class="btn-secondary" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">自动生成GEO内容</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 更新日志 -->
+                        <div class="update-log">
+                            <h3 style="color: #333; margin-bottom: 20px;">更新日志</h3>
+                            <div class="log-content">
+                                <div class="log-item" style="display: flex; gap: 20px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e9ecef;">
+                                    <span class="log-date" style="font-weight: 600; color: var(--primary-color); min-width: 120px;">2026-04-11</span>
+                                    <p style="margin: 0; color: #666;">内容创作助手 v3.0 发布啦！支持更多创作模式，提升内容质量和原创性。</p>
+                                </div>
+                                <div class="log-item" style="display: flex; gap: 20px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e9ecef;">
+                                    <span class="log-date" style="font-weight: 600; color: var(--primary-color); min-width: 120px;">2026-04-04</span>
+                                    <p style="margin: 0; color: #666;">GEO优化学堂上线！提供全面的GEO优化知识和教程。</p>
+                                </div>
+                                <div class="log-item" style="display: flex; gap: 20px;">
+                                    <span class="log-date" style="font-weight: 600; color: var(--primary-color); min-width: 120px;">2026-03-28</span>
+                                    <p style="margin: 0; color: #666;">品牌AI可见度监测功能升级，支持更多AI平台数据。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 品牌AI可见度模式 -->
+                    <div class="workbench-mode" id="brand-monitor" style="display: none;">
+                        <div class="brand-monitor-flow">
+                            <h3 style="color: #333; margin-bottom: 20px;">品牌AI可见度监测</h3>
+                            <div style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); padding: 25px; border-radius: 12px; margin-bottom: 20px; color: white;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; text-align: center;">
+                                    <div>
+                                        <div style="font-size: 36px; font-weight: 700;">85</div>
+                                        <div style="opacity: 0.9; font-size: 14px;">综合可见度</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 36px; font-weight: 700;">128</div>
+                                        <div style="opacity: 0.9; font-size: 14px;">被提及次数</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 36px; font-weight: 700;">+12%</div>
+                                        <div style="opacity: 0.9; font-size: 14px;">本周变化</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 36px; font-weight: 700;">TOP 5</div>
+                                        <div style="opacity: 0.9; font-size: 14px;">行业排名</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px;">
+                                    <h4 style="margin: 0 0 15px 0; color: #333; font-size: 16px;">AI平台分布</h4>
+                                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="color: #666; font-size: 14px;">豆包</span>
+                                            <div style="display: flex; align-items: center; gap: 10px;"><div style="width: 100px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;"><div style="width: 78%; height: 100%; background: var(--primary-color);"></div></div><span style="color: #333; font-weight: 500; font-size: 14px;">78%</span></div>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="color: #666; font-size: 14px;">文心一言</span>
+                                            <div style="display: flex; align-items: center; gap: 10px;"><div style="width: 100px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;"><div style="width: 65%; height: 100%; background: #0ea5e9;"></div></div><span style="color: #333; font-weight: 500; font-size: 14px;">65%</span></div>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="color: #666; font-size: 14px;">通义千问</span>
+                                            <div style="display: flex; align-items: center; gap: 10px;"><div style="width: 100px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;"><div style="width: 52%; height: 100%; background: #8b5cf6;"></div></div><span style="color: #333; font-weight: 500; font-size: 14px;">52%</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px;">
+                                    <h4 style="margin: 0 0 15px 0; color: #333; font-size: 16px;">近期趋势</h4>
+                                    <div style="display: flex; align-items: flex-end; gap: 8px; height: 100px;">
+                                        <div style="flex: 1; background: var(--primary-color); height: 45%; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; background: var(--primary-color); height: 55%; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; background: var(--primary-color); height: 50%; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; background: var(--primary-color); height: 65%; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; background: var(--primary-color); height: 70%; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; background: var(--primary-color); height: 80%; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; background: var(--primary-color); height: 100%; border-radius: 4px 4px 0 0;"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #999;">
+                                        <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 竞品分析模式 -->
+                    <div class="workbench-mode" id="competitor-analysis" style="display: none;">
+                        <div class="geo-optimization-flow">
+                            <h3 style="color: #333; margin-bottom: 20px;">竞品分析</h3>
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                                    <input type="text" placeholder="输入竞品名称" style="flex: 1; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                    <button style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500;">添加竞品</button>
+                                </div>
+                            </div>
+                            <div class="competitor-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                                <div class="competitor-card" style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                        <h4 style="margin: 0; color: #333;">竞品A公司</h4>
+                                        <span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; font-size: 12px;">领先</span>
+                                    </div>
+                                    <div style="display: flex; gap: 20px;">
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 24px; font-weight: 700; color: var(--primary-color);">85</div>
+                                            <div style="font-size: 12px; color: #666;">AI可见度</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 24px; font-weight: 700; color: #666;">12</div>
+                                            <div style="font-size: 12px; color: #666;">提及次数</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="competitor-card" style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                        <h4 style="margin: 0; color: #333;">竞品B品牌</h4>
+                                        <span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 20px; font-size: 12px;">持平</span>
+                                    </div>
+                                    <div style="display: flex; gap: 20px;">
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 24px; font-weight: 700; color: var(--primary-color);">72</div>
+                                            <div style="font-size: 12px; color: #666;">AI可见度</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <div style="font-size: 24px; font-weight: 700; color: #666;">8</div>
+                                            <div style="font-size: 12px; color: #666;">提及次数</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 关键词管理模式 -->
+                    <div class="workbench-mode" id="keyword-management" style="display: none;">
+                        <div class="geo-optimization-flow">
+                            <h3 style="color: #333; margin-bottom: 20px;">关键词管理</h3>
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                    <input type="text" placeholder="输入关键词" style="flex: 1; min-width: 200px; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                    <select style="padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; min-width: 120px;">
+                                        <option>全部类型</option>
+                                        <option>品牌词</option>
+                                        <option>行业词</option>
+                                        <option>长尾词</option>
+                                    </select>
+                                    <button style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500;">添加关键词</button>
+                                </div>
+                            </div>
+                            <div class="keyword-tags" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                                <span class="keyword-tag" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor-pointer;">
+                                    AI品牌优化
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </span>
+                                <span class="keyword-tag" style="background: #e2e8f0; color: #333; padding: 8px 16px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor-pointer;">
+                                    GEO优化
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </span>
+                                <span class="keyword-tag" style="background: #e2e8f0; color: #333; padding: 8px 16px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor-pointer;">
+                                    品牌可见度
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </span>
+                                <span class="keyword-tag" style="background: #e2e8f0; color: #333; padding: 8px 16px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px; cursor-pointer;">
+                                    智能营销
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </span>
+                            </div>
+                            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <thead style="background: #f8f9fa;">
+                                        <tr>
+                                            <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; font-size: 14px;">关键词</th>
+                                            <th style="padding: 12px 15px; text-align: center; font-weight: 600; color: #333; font-size: 14px;">类型</th>
+                                            <th style="padding: 12px 15px; text-align: center; font-weight: 600; color: #333; font-size: 14px;">搜索量</th>
+                                            <th style="padding: 12px 15px; text-align: center; font-weight: 600; color: #333; font-size: 14px;">竞争度</th>
+                                            <th style="padding: 12px 15px; text-align: center; font-weight: 600; color: #333; font-size: 14px;">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                                            <td style="padding: 12px 15px; color: #333;">瓦兰卡GEO</td>
+                                            <td style="padding: 12px 15px; text-align: center;"><span style="background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 12px; font-size: 12px;">品牌词</span></td>
+                                            <td style="padding: 12px 15px; text-align: center; color: #666;">1,250</td>
+                                            <td style="padding: 12px 15px; text-align: center;"><span style="color: #16a34a;">低</span></td>
+                                            <td style="padding: 12px 15px; text-align: center;"><button style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 14px;">删除</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 15px; color: #333;">AI品牌优化工具</td>
+                                            <td style="padding: 12px 15px; text-align: center;"><span style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 12px; font-size: 12px;">行业词</span></td>
+                                            <td style="padding: 12px 15px; text-align: center; color: #666;">3,480</td>
+                                            <td style="padding: 12px 15px; text-align: center;"><span style="color: #ea580c;">中</span></td>
+                                            <td style="padding: 12px 15px; text-align: center;"><button style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 14px;">删除</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 内容创作助手模式 -->
+                    <div class="workbench-mode" id="content-creation" style="display: none;">
+                        <div class="content-creation">
+                            <h3>内容创作助手</h3>
+                            <div class="creation-tools">
+                                <div class="tool-card">
+                                    <h4>100%文章原创保证 | 智能改写</h4>
+                                    <p>基于AI的内容创作，确保原创性</p>
+                                    <button class="btn-primary" style="background: white; color: #1e3c72; font-weight: bold;">立即使用</button>
+                                </div>
+                                <div class="tool-card">
+                                    <h4>智能标题生成 | 基于AI分析</h4>
+                                    <p>生成吸引眼球的标题</p>
+                                    <button class="btn-primary" style="background: white; color: #1e3c72; font-weight: bold;">立即使用</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Schema生成工具模式 -->
+                    <div class="workbench-mode" id="schema-tool" style="display: none;">
+                        <div class="geo-optimization-flow">
+                            <h3 style="color: #333; margin-bottom: 20px;">Schema生成工具</h3>
+                            <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display: block; font-weight: 500; color: #333; margin-bottom: 8px;">Schema类型</label>
+                                    <select style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                        <option>Organization (组织)</option>
+                                        <option>WebSite (网站)</option>
+                                        <option>Product (产品)</option>
+                                        <option>Article (文章)</option>
+                                        <option>FAQ (常见问题)</option>
+                                    </select>
+                                </div>
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display: block; font-weight: 500; color: #333; margin-bottom: 8px;">品牌/公司名称</label>
+                                    <input type="text" placeholder="请输入品牌名称" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                </div>
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display: block; font-weight: 500; color: #333; margin-bottom: 8px;">官方网址</label>
+                                    <input type="url" placeholder="https://example.com" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                </div>
+                                <button style="background: var(--primary-color); color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">生成Schema代码</button>
+                            </div>
+                            <div style="background: #1e293b; border-radius: 10px; padding: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span style="color: #f8fafc; font-weight: 500;">生成的Schema代码</span>
+                                    <button style="background: #334155; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;">复制代码</button>
+                                </div>
+                                <pre style="color: #22c55e; font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; line-height: 1.6; overflow-x: auto; margin: 0;">{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "瓦兰卡",
+  "url": "https://walanka.com",
+  "logo": "https://walanka.com/logo.png"
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 批量分析模式 -->
+                    <div class="workbench-mode" id="batch-analysis" style="display: none;">
+                        <div class="geo-optimization-flow">
+                            <h3 style="color: #333; margin-bottom: 20px;">批量分析</h3>
+                            <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display: block; font-weight: 500; color: #333; margin-bottom: 8px;">粘贴关键词列表（每行一个）</label>
+                                    <textarea placeholder="瓦兰卡GEO&#10;AI品牌优化&#10;智能营销工具&#10;..." style="width: 100%; height: 150px; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; resize: vertical; font-family: inherit;"></textarea>
+                                </div>
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                    <button style="background: var(--primary-color); color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">开始分析</button>
+                                    <button style="background: white; color: #333; border: 1px solid #e2e8f0; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px;">上传CSV文件</button>
+                                </div>
+                            </div>
+                            <div class="batch-results" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 32px; font-weight: 700; color: var(--primary-color);">156</div>
+                                    <div style="color: #666; font-size: 14px; margin-top: 5px;">分析总数</div>
+                                </div>
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 32px; font-weight: 700; color: #22c55e;">142</div>
+                                    <div style="color: #666; font-size: 14px; margin-top: 5px;">优化成功</div>
+                                </div>
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 32px; font-weight: 700; color: #f59e0b;">14</div>
+                                    <div style="color: #666; font-size: 14px; margin-top: 5px;">处理中</div>
+                                </div>
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 32px; font-weight: 700; color: #ef4444;">0</div>
+                                    <div style="color: #666; font-size: 14px; margin-top: 5px;">失败</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 优化建议模式 -->
+                    <div class="workbench-mode" id="suggestions" style="display: none;">
+                        <div class="geo-optimization-flow">
+                            <h3 style="color: #333; margin-bottom: 20px;">优化建议</h3>
+                            <div class="suggestion-cards" style="display: grid; gap: 15px;">
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; border-left: 4px solid #22c55e;">
+                                    <div style="display: flex; align-items: flex-start; gap: 15px;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #dcfce7; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <h4 style="margin: 0 0 8px 0; color: #333; font-size: 16px;">品牌提及率提升建议</h4>
+                                            <p style="margin: 0 0 12px 0; color: #666; font-size: 14px; line-height: 1.5;">您的品牌在AI平台提及率相比上周下降了3%，建议增加品牌关键词密度和更新品牌官方内容。</p>
+                                            <div style="display: flex; gap: 10px;">
+                                                <button style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;">查看详情</button>
+                                                <button style="background: white; color: #666; border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;">稍后处理</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                                    <div style="display: flex; align-items: flex-start; gap: 15px;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <h4 style="margin: 0 0 8px 0; color: #333; font-size: 16px;">Schema标记优化</h4>
+                                            <p style="margin: 0 0 12px 0; color: #666; font-size: 14px; line-height: 1.5;">检测到您的网站缺少Organization Schema标记，建议添加以提升AI平台对您品牌的识别度。</p>
+                                            <div style="display: flex; gap: 10px;">
+                                                <button style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;">立即优化</button>
+                                                <button style="background: white; color: #666; border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;">稍后处理</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; border-left: 4px solid #3b82f6;">
+                                    <div style="display: flex; align-items: flex-start; gap: 15px;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #dbeafe; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <h4 style="margin: 0 0 8px 0; color: #333; font-size: 16px;">内容更新提醒</h4>
+                                            <p style="margin: 0 0 12px 0; color: #666; font-size: 14px; line-height: 1.5;">您有3篇品牌相关内容超过30天未更新，建议更新以保持内容新鲜度，提升AI平台收录优先级。</p>
+                                            <div style="display: flex; gap: 10px;">
+                                                <button style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;">查看内容</button>
+                                                <button style="background: white; color: #666; border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;">忽略</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 历史记录模式 -->
+                    <div class="workbench-mode" id="history" style="display: none;">
+                        <div class="geo-optimization-flow">
+                            <h3 style="color: #333; margin-bottom: 20px;">历史记录</h3>
+                            <p style="color: #666; margin-bottom: 30px;">内容为空，管理员可编辑</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        // 工作台模式切换功能
+        document.querySelectorAll('.workbench-nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 移除所有导航项的active类
+                document.querySelectorAll('.workbench-nav li').forEach(li => {
+                    li.classList.remove('active');
+                });
+                
+                // 添加当前导航项的active类
+                this.parentElement.classList.add('active');
+                
+                // 获取目标模式ID
+                const modeId = this.getAttribute('data-mode');
+                
+                // 隐藏所有模式内容
+                document.querySelectorAll('.workbench-mode').forEach(mode => {
+                    mode.style.display = 'none';
+                });
+                
+                // 显示目标模式内容
+                document.getElementById(modeId).style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

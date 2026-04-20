@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瓦兰卡 - AI时代品牌优化专家</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header" style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; right: 0; z-index: 1000;">
+        <nav class="nav container" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
+            <div class="nav-brand" style="display: flex; align-items: center;">
+                <div class="brand-logo" style="display: flex; align-items: center;">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20AI%20logo%20with%20smart%20bean%20concept%20teal%20color&image_size=square_hd" alt="瓦兰卡" class="logo-img" style="width: 40px; height: 40px; margin-right: 10px;">
+                    <span class="brand-name" style="font-size: 20px; font-weight: bold; color: var(--primary-color);">瓦兰卡</span>
+                </div>
+            </div>
+            <div class="nav-menu" style="flex: 1; margin: 0 30px;">
+                <ul style="display: flex; justify-content: center; gap: 30px; list-style: none; padding: 0;">
+                    <li><a href="index.html" style="text-decoration: none; color: var(--primary-color); font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease; background: rgba(13, 148, 136, 0.1);">首页</a></li>
+                    <li><a href="#features" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">功能介绍</a></li>
+                    <li><a href="#cases" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">客户案例</a></li>
+                    <li><a href="#faq" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">常见问题</a></li>
+                    <li><a href="geo-school.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">GEO学堂</a></li>
+                    <li><a href="workbench.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">工作台</a></li>
+                </ul>
+            </div>
+            <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
+                <a href="login.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border: 1px solid var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">登录</a>
+                <a href="register.html" style="text-decoration: none; color: white; font-weight: 500; padding: 8px 16px; background: var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">注册</a>
+            </div>
+            <button class="menu-toggle" onclick="toggleMobileMenu()" style="display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer;">
+                <span class="menu-icon" style="display: block; width: 20px; height: 2px; background: #333;"></span>
+                <span class="menu-icon" style="display: block; width: 20px; height: 2px; background: #333;"></span>
+                <span class="menu-icon" style="display: block; width: 20px; height: 2px; background: #333;"></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" style="padding-top: 120px;">
+        <div class="container">
+            <div class="hero-wrapper">
+                <div class="hero-text">
+                    <div class="hero-badge">AI时代品牌优化专家</div>
+                    <h1 class="hero-title">瓦兰卡GEO<br>让品牌成为AI的标准答案</h1>
+                    <p class="hero-desc">通过智能技术帮助企业提升品牌在AI平台的影响力和转化率，提供全方位的品牌AI表现监测、诊断和优化方案。</p>
+                    <div class="hero-metrics">
+                        <div class="metric-item">
+                            <div class="metric-number">98%</div>
+                            <div class="metric-label">客户满意度</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-number">15000+</div>
+                            <div class="metric-label">服务企业</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-number">200%</div>
+                            <div class="metric-label">平均曝光提升</div>
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <a href="#" class="btn-primary">开始免费使用</a>
+                        <a href="#how-it-works" class="btn-secondary">了解更多</a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="visual-container">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20AI%20dashboard%20with%20teal%20color%20scheme&image_size=landscape_16_9" alt="智豆GEO平台" class="hero-image">
+                        <div class="floating-elements">
+                            <div class="floating-item">📊</div>
+                            <div class="floating-item">🎯</div>
+                            <div class="floating-item">🚀</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What is GEO Section -->
+    <section class="section geo-intro" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">什么是GEO优化？</h2>
+                <p class="section-subtitle">面向AI时代的全新内容优化体系</p>
+            </div>
+            <div class="geo-process">
+                <div class="process-step">
+                    <div class="step-number">01</div>
+                    <div class="step-content">
+                        <h3>AI时代的搜索变革</h3>
+                        <p>从传统的「搜索-点击-浏览」模式，转变为AI时代的「提问-答案-决策」模式，用户不再翻页筛选，只信任AI给出的最终结果。</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">02</div>
+                    <div class="step-content">
+                        <h3>成为AI的标准答案</h3>
+                        <p>GEO优化让您的品牌在AI回答中优先被提及，成为用户提问时的首选答案，抢占AI时代的品牌话语权。</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">03</div>
+                    <div class="step-content">
+                        <h3>高质量曝光与转化</h3>
+                        <p>用户对AI回答高度信任，品牌将获得权威背书和精准触达，快速占领用户心智，带来更强信任和更高转化。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market Trends Section -->
+    <section class="section market-trends">
+        <div class="container">
+            <div class="trends-content">
+                <div class="trends-text">
+                    <h2 class="section-title">把握AI时代的流量红利</h2>
+                    <p class="trends-desc">2026年春节，AI平台累计投入超45亿元完成全民级用户教育，推动中国生成式AI用户规模突破6亿、普及率达42.8%。超80%用户已习惯直接向AI提问获取答案，流量正从传统搜索不可逆地迁移至对话式AI。</p>
+                    <a href="#" class="btn-primary">抢占AI流量</a>
+                </div>
+                <div class="trends-stats">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-value">6亿+</div>
+                            <div class="stat-label">AI用户规模</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📈</div>
+                            <div class="stat-value">42.8%</div>
+                            <div class="stat-label">AI用户普及率</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💡</div>
+                            <div class="stat-value">80%</div>
+                            <div class="stat-label">用户习惯AI获取答案</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-value">19亿</div>
+                            <div class="stat-label">豆包单平台日互动量</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Features Section -->
+    <section class="section features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">核心功能</h2>
+                <p class="section-subtitle">全方位的品牌AI表现优化工具</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M24 4L4 14V34L24 44L44 34V14L24 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M24 20V44" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 14L24 24L44 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>品牌AI表现监测</h3>
+                    <ul class="feature-list">
+                        <li>品牌概览与趋势分析</li>
+                        <li>品牌AI可见性分析</li>
+                        <li>品牌AI情感分析</li>
+                        <li>关键词云和主题提取</li>
+                        <li>权威域名引用分析</li>
+                    </ul>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M24 8L40 16V32L24 40L8 32V16L24 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M24 8V40" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 16L40 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 32L40 32" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>提示词推荐与竞品分析</h3>
+                    <ul class="feature-list">
+                        <li>价值提示词推荐</li>
+                        <li>提示词管理</li>
+                        <li>竞品分析对比</li>
+                        <li>竞品添加管理</li>
+                    </ul>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 8L14 24L20 40" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M28 8L34 24L28 40" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>GEO优化诊断</h3>
+                    <ul class="feature-list">
+                        <li>品牌AI表现诊断</li>
+                        <li>品牌AI表现改进</li>
+                        <li>网页AI可见度的诊断</li>
+                        <li>网页AI可见度的建议</li>
+                        <li>GEO优化建议方案</li>
+                    </ul>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M24 4V44" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 24H44" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>GEO优化工具</h3>
+                    <ul class="feature-list">
+                        <li>Schema代码生成与部署</li>
+                        <li>网页AI可见度检测</li>
+                        <li>智能内容优化</li>
+                        <li>AI平台表现追踪</li>
+                        <li>优化效果评估</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Dashboard Section -->
+    <section class="section analytics">
+        <div class="container">
+            <div class="analytics-content">
+                <div class="analytics-visual">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20data%20analytics%20dashboard%20with%20teal%20theme&image_size=landscape_16_9" alt="数据分析仪表盘">
+                </div>
+                <div class="analytics-text">
+                    <h2 class="section-title">智能数据分析</h2>
+                    <p class="section-subtitle">多维度监测品牌在AI平台的表现</p>
+                    <div class="analytics-features">
+                        <div class="analytics-feature">
+                            <h4>品牌AI可见度</h4>
+                            <p>实时查看品牌在AI回答中的引用率、首段曝光率、官网引用率</p>
+                        </div>
+                        <div class="analytics-feature">
+                            <h4>品牌感知分析</h4>
+                            <p>监测AI对品牌的正面、负面评价，量化品牌心智影响力</p>
+                        </div>
+                        <div class="analytics-feature">
+                            <h4>热门主题分析</h4>
+                            <p>分析品牌相关的热门关键词和主题分布情况</p>
+                        </div>
+                        <div class="analytics-feature">
+                            <h4>权威引用分析</h4>
+                            <p>分析统计品牌在AI平台中相关答案的权威引用网址</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section testimonials" id="cases">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">客户成功案例</h2>
+                <p class="section-subtitle">来自各行业的真实反馈</p>
+            </div>
+            <div class="testimonials-slider">
+                <div class="testimonial-card">
+                    <div class="testimonial-avatar">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20businessman%20headshot%20asian&image_size=square_hd" alt="客户头像">
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-text">"使用智豆GEO后，品牌在豆包、元宝等AI问答中的提及率提升180%，用户咨询量明显增长，AI带来的精准客源成为我们新的增长渠道。"</p>
+                        <div class="testimonial-author">
+                            <h4>张小明</h4>
+                            <p>CEO，本地生活服务品牌</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-avatar">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20businesswoman%20headshot%20asian&image_size=square_hd" alt="客户头像">
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-text">"通过智豆GEO优化，我们的商品与服务被AI高频引用，客户决策周期缩短近一半，信任度更高，转化效果比传统推广更稳定。"</p>
+                        <div class="testimonial-author">
+                            <h4>李雨晴</h4>
+                            <p>数字营销总监，电商平台</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-avatar">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20marketing%20director%20headshot%20asian&image_size=square_hd" alt="客户头像">
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-text">"智豆GEO帮我们实现了AI平台的高曝光与权威背书，现在用户提问相关行业问题，AI优先推荐我们，品牌影响力显著提升。"</p>
+                        <div class="testimonial-author">
+                            <h4>王建国</h4>
+                            <p>营销总监，企业服务品牌</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">准备好提升您的品牌AI表现了吗？</h2>
+                <p class="cta-desc">加入15000+企业的选择，抢占AI时代的品牌话语权</p>
+                <div class="cta-actions">
+                    <a href="#" class="btn-primary large">立即免费试用</a>
+                    <a href="#" class="btn-secondary">预约演示</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="section faq" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">常见问题</h2>
+                <p class="section-subtitle">关于智豆GEO的常见疑问</p>
+            </div>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        <span class="question-text">什么是GEO(生成式引擎优化)？</span>
+                        <span class="question-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>GEO（生成式引擎优化，Generative Engine Optimization）是面向AI时代的全新内容优化体系，通过让内容更易被AI理解、采纳与引用，提升品牌与服务在AI平台中的优先提及率与曝光度。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        <span class="question-text">智豆GEO如何检测品牌的AI表现？</span>
+                        <span class="question-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>智豆GEO通过多维度数据监测，包括品牌AI可见度、品牌感知、品牌主题、权威引用分析等，全方位分析品牌在各大AI平台的表现。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        <span class="question-text">数据更新频率是多少？</span>
+                        <span class="question-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>我们的系统会定期更新数据，确保您获得最及时的品牌AI表现信息。具体更新频率根据您选择的套餐而定。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        <span class="question-text">数据安全和隐私保护如何保障？</span>
+                        <span class="question-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>我们高度重视数据安全和隐私保护，采用行业标准的加密技术和安全措施，确保您的数据安全。</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        <span class="question-text">是否提供培训和技术支持？</span>
+                        <span class="question-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>是的，我们提供专业的培训和技术支持团队，帮助您更好地使用智豆GEO平台。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" style="background: #f8f9fa; padding: 30px 0;">
+        <div class="container">
+            <div class="footer-bottom" style="text-align: center;">
+                <p class="copyright">© 2026 瓦兰卡科技. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

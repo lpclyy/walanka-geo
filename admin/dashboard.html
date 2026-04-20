@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员仪表板 - 瓦兰卡GEO</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .admin-sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e9ecef;
+        }
+        .admin-sidebar h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        .admin-sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .admin-sidebar li {
+            margin-bottom: 10px;
+        }
+        .admin-sidebar a {
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .admin-sidebar a:hover, .admin-sidebar a.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .admin-main {
+            flex: 1;
+            padding: 30px;
+        }
+        .admin-header {
+            margin-bottom: 30px;
+        }
+        .admin-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #666;
+        }
+        .content-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .content-header h3 {
+            color: #333;
+        }
+        .btn-add {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-add:hover {
+            background: var(--secondary-color);
+        }
+        .content-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .content-table th, .content-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .content-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .btn-edit, .btn-delete {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+        .btn-edit {
+            background: #4CAF50;
+            color: white;
+        }
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        .btn-edit:hover, .btn-delete:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html">
+                        <span class="logo-text">瓦兰卡</span>
+                    </a>
+                </div>
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="../index.html">首页</a></li>
+                        <li><a href="#">管理员中心</a></li>
+                    </ul>
+                    <div class="nav-actions">
+                        <a href="#" class="user-profile">管理员</a>
+                        <a href="../login.html" class="btn-secondary">退出</a>
+                    </div>
+                    <button class="menu-toggle" onclick="toggleMobileMenu()">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 管理员仪表板 -->
+    <section class="admin-dashboard">
+        <div class="container">
+            <div class="admin-content" style="display: flex;">
+                <!-- 侧边栏 -->
+                <div class="admin-sidebar">
+                    <h3>管理中心</h3>
+                    <ul>
+                        <li><a href="dashboard.html" class="active">仪表板</a></li>
+                        <li><a href="users.html">用户管理</a></li>
+                        <li><a href="articles.html">文章管理</a></li>
+                        <li><a href="page-editor.html">页面管理</a></li>
+                        <li><a href="settings.html">系统设置</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 主内容区 -->
+                <div class="admin-main">
+                    <div class="admin-header">
+                        <h2>管理员仪表板</h2>
+                        <p>欢迎回来，管理员</p>
+                    </div>
+                    
+                    <!-- 统计卡片 -->
+                    <div class="admin-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">1,234</div>
+                            <div class="stat-label">总用户数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">56</div>
+                            <div class="stat-label">文章数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">23</div>
+                            <div class="stat-label">客户案例</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">45</div>
+                            <div class="stat-label">FAQ条目</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 最近活动 -->
+                    <div class="content-section">
+                        <div class="content-header">
+                            <h3>最近活动</h3>
+                        </div>
+                        <table class="content-table">
+                            <thead>
+                                <tr>
+                                    <th>时间</th>
+                                    <th>活动</th>
+                                    <th>用户</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2026-04-16 10:30</td>
+                                    <td>用户注册</td>
+                                    <td>user1@example.com</td>
+                                </tr>
+                                <tr>
+                                    <td>2026-04-16 09:15</td>
+                                    <td>文章发布</td>
+                                    <td>admin</td>
+                                </tr>
+                                <tr>
+                                    <td>2026-04-15 16:45</td>
+                                    <td>功能更新</td>
+                                    <td>admin</td>
+                                </tr>
+                                <tr>
+                                    <td>2026-04-15 14:20</td>
+                                    <td>用户登录</td>
+                                    <td>user2@example.com</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 待处理事项 -->
+                    <div class="content-section">
+                        <div class="content-header">
+                            <h3>待处理事项</h3>
+                        </div>
+                        <table class="content-table">
+                            <thead>
+                                <tr>
+                                    <th>事项</th>
+                                    <th>类型</th>
+                                    <th>时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>审核新用户</td>
+                                    <td>用户管理</td>
+                                    <td>2026-04-16 11:00</td>
+                                    <td><button class="btn-edit">处理</button></td>
+                                </tr>
+                                <tr>
+                                    <td>审核文章</td>
+                                    <td>内容管理</td>
+                                    <td>2026-04-16 10:45</td>
+                                    <td><button class="btn-edit">处理</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <span class="logo-text">瓦兰卡</span>
+                    <p>AI时代品牌优化专家</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>产品</h4>
+                        <ul>
+                            <li><a href="../index.html#features">功能介绍</a></li>
+                            <li><a href="../index.html#pricing">价格方案</a></li>
+                            <li><a href="../geo-school.html">GEO学堂</a></li>
+                            <li><a href="../workbench.html">工作台</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>公司</h4>
+                        <ul>
+                            <li><a href="#about">关于我们</a></li>
+                            <li><a href="#contact">联系我们</a></li>
+                            <li><a href="#privacy">隐私政策</a></li>
+                            <li><a href="#terms">服务条款</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>支持</h4>
+                        <ul>
+                            <li><a href="#faq">常见问题</a></li>
+                            <li><a href="#support">技术支持</a></li>
+                            <li><a href="#docs">使用文档</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 瓦兰卡科技. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>

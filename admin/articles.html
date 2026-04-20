@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章管理 - 瓦兰卡GEO</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .admin-sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e9ecef;
+        }
+        .admin-sidebar h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        .admin-sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .admin-sidebar li {
+            margin-bottom: 10px;
+        }
+        .admin-sidebar a {
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .admin-sidebar a:hover, .admin-sidebar a.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .admin-main {
+            flex: 1;
+            padding: 30px;
+        }
+        .admin-header {
+            margin-bottom: 30px;
+        }
+        .admin-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .content-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .content-header h3 {
+            color: #333;
+        }
+        .btn-add {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-add:hover {
+            background: var(--secondary-color);
+        }
+        .content-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .content-table th, .content-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .content-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .btn-edit, .btn-delete {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+        .btn-edit {
+            background: #4CAF50;
+            color: white;
+        }
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        .btn-edit:hover, .btn-delete:hover {
+            opacity: 0.8;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            margin: 0;
+        }
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-save, .btn-cancel {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-save {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-save:hover {
+            background: var(--secondary-color);
+        }
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html">
+                        <span class="logo-text">瓦兰卡</span>
+                    </a>
+                </div>
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="../index.html">首页</a></li>
+                        <li><a href="#">管理员中心</a></li>
+                    </ul>
+                    <div class="nav-actions">
+                        <a href="#" class="user-profile">管理员</a>
+                        <a href="../login.html" class="btn-secondary">退出</a>
+                    </div>
+                    <button class="menu-toggle" onclick="toggleMobileMenu()">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 文章管理 -->
+    <section class="admin-dashboard">
+        <div class="container">
+            <div class="admin-content" style="display: flex;">
+                <!-- 侧边栏 -->
+                <div class="admin-sidebar">
+                    <h3>管理中心</h3>
+                    <ul>
+                        <li><a href="dashboard.html">仪表板</a></li>
+                        <li><a href="users.html">用户管理</a></li>
+                        <li><a href="articles.html" class="active">文章管理</a></li>
+                        <li><a href="features.html">功能管理</a></li>
+                        <li><a href="cases.html">案例管理</a></li>
+                        <li><a href="faq.html">FAQ管理</a></li>
+                        <li><a href="settings.html">系统设置</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 主内容区 -->
+                <div class="admin-main">
+                    <div class="admin-header">
+                        <h2>文章管理</h2>
+                        <p>管理GEO学堂中的文章</p>
+                    </div>
+                    
+                    <!-- 文章列表 -->
+                    <div class="content-section">
+                        <div class="content-header">
+                            <h3>文章列表</h3>
+                            <button class="btn-add" onclick="openAddModal()">添加文章</button>
+                        </div>
+                        <table class="content-table">
+                            <thead>
+                                <tr>
+                                    <th>标题</th>
+                                    <th>分类</th>
+                                    <th>发布日期</th>
+                                    <th>浏览量</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="articlesTableBody">
+                                <tr>
+                                    <td>不限篇数、永久免费！GEO 内容创作，用瓦兰卡免费GEO工具轻松掌握</td>
+                                    <td>产品更新</td>
+                                    <td>2026-04-16</td>
+                                    <td>2</td>
+                                    <td>
+                                        <button class="btn-edit" onclick="openEditModal(1)">编辑</button>
+                                        <button class="btn-delete" onclick="deleteArticle(1)">删除</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2026年 3-4月国内主流 AI平台核心数据全景报告</td>
+                                    <td>GEO行业动态</td>
+                                    <td>2026-04-06</td>
+                                    <td>40</td>
+                                    <td>
+                                        <button class="btn-edit" onclick="openEditModal(2)">编辑</button>
+                                        <button class="btn-delete" onclick="deleteArticle(2)">删除</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>瓦兰卡免费GEO工具更新日志</td>
+                                    <td>产品更新</td>
+                                    <td>2026-04-06</td>
+                                    <td>20</td>
+                                    <td>
+                                        <button class="btn-edit" onclick="openEditModal(3)">编辑</button>
+                                        <button class="btn-delete" onclick="deleteArticle(3)">删除</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>用瓦兰卡GEO进行GEO优化教程（商家低成本自己操作教程）</td>
+                                    <td>GEO技术干货</td>
+                                    <td>2026-04-06</td>
+                                    <td>47</td>
+                                    <td>
+                                        <button class="btn-edit" onclick="openEditModal(4)">编辑</button>
+                                        <button class="btn-delete" onclick="deleteArticle(4)">删除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 添加/编辑文章模态框 -->
+    <div id="articleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加文章</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="articleForm">
+                <input type="hidden" id="articleId" value="">
+                <div class="form-group">
+                    <label for="title">标题</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">分类</label>
+                    <select id="category" name="category" required>
+                        <option value="全部文章">全部文章</option>
+                        <option value="GEO行业动态">GEO行业动态</option>
+                        <option value="GEO技术干货">GEO技术干货</option>
+                        <option value="产品更新">产品更新</option>
+                        <option value="使用教程">使用教程</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="content">内容</label>
+                    <textarea id="content" name="content" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="date">发布日期</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn-save">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <span class="logo-text">瓦兰卡</span>
+                    <p>AI时代品牌优化专家</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>产品</h4>
+                        <ul>
+                            <li><a href="../index.html#features">功能介绍</a></li>
+                            <li><a href="../index.html#pricing">价格方案</a></li>
+                            <li><a href="../geo-school.html">GEO学堂</a></li>
+                            <li><a href="../workbench.html">工作台</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>公司</h4>
+                        <ul>
+                            <li><a href="#about">关于我们</a></li>
+                            <li><a href="#contact">联系我们</a></li>
+                            <li><a href="#privacy">隐私政策</a></li>
+                            <li><a href="#terms">服务条款</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>支持</h4>
+                        <ul>
+                            <li><a href="#faq">常见问题</a></li>
+                            <li><a href="#support">技术支持</a></li>
+                            <li><a href="#docs">使用文档</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 瓦兰卡科技. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+    <script>
+        // 打开添加模态框
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = '添加文章';
+            document.getElementById('articleId').value = '';
+            document.getElementById('title').value = '';
+            document.getElementById('category').value = '全部文章';
+            document.getElementById('content').value = '';
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('articleModal').style.display = 'block';
+        }
+        
+        // 打开编辑模态框
+        function openEditModal(id) {
+            document.getElementById('modalTitle').textContent = '编辑文章';
+            document.getElementById('articleId').value = id;
+            // 这里可以根据ID加载文章数据
+            document.getElementById('articleModal').style.display = 'block';
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('articleModal').style.display = 'none';
+        }
+        
+        // 删除文章
+        function deleteArticle(id) {
+            if (confirm('确定要删除这篇文章吗？')) {
+                // 这里可以实现删除逻辑
+                alert('文章已删除');
+            }
+        }
+        
+        // 表单提交
+        document.getElementById('articleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('articleId').value;
+            const title = document.getElementById('title').value;
+            const category = document.getElementById('category').value;
+            const content = document.getElementById('content').value;
+            const date = document.getElementById('date').value;
+            
+            // 这里可以实现保存逻辑
+            alert(id ? '文章已更新' : '文章已添加');
+            closeModal();
+        });
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('articleModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

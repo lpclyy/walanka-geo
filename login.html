@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 瓦兰卡GEO</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header" style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; right: 0; z-index: 1000;">
+        <nav class="nav container" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
+            <div class="nav-brand" style="display: flex; align-items: center;">
+                <div class="brand-logo" style="display: flex; align-items: center;">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20AI%20logo%20with%20smart%20bean%20concept%20teal%20color&image_size=square_hd" alt="瓦兰卡" class="logo-img" style="width: 40px; height: 40px; margin-right: 10px;">
+                    <span class="brand-name" style="font-size: 20px; font-weight: bold; color: var(--primary-color);">瓦兰卡</span>
+                </div>
+            </div>
+            <div class="nav-menu" style="flex: 1; margin: 0 30px;">
+                <ul style="display: flex; justify-content: center; gap: 30px; list-style: none; padding: 0;">
+                    <li><a href="index.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">首页</a></li>
+                    <li><a href="index.html#features" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">功能介绍</a></li>
+                    <li><a href="index.html#cases" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">客户案例</a></li>
+                    <li><a href="index.html#faq" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">常见问题</a></li>
+                    <li><a href="geo-school.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">GEO学堂</a></li>
+                    <li><a href="workbench.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">工作台</a></li>
+                </ul>
+            </div>
+            <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
+                <a href="login.html" style="text-decoration: none; color: var(--primary-color); font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease; background: rgba(13, 148, 136, 0.1);">登录</a>
+                <a href="register.html" style="text-decoration: none; color: white; font-weight: 500; padding: 8px 16px; background: var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">注册</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 登录表单 -->
+    <section class="login-section" style="padding-top: 120px;">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-form">
+                    <h2>登录</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="phone">手机号</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="请输入手机号码">
+                        </div>
+                        <div class="form-group" style="display: flex; gap: 10px;">
+                            <div style="flex: 1;">
+                                <label for="code">验证码</label>
+                                <input type="text" id="code" name="code" required placeholder="请输入验证码">
+                            </div>
+                            <div style="width: 120px;">
+                                <label style="visibility: hidden;">验证码</label>
+                                <button type="button" id="sendCode" class="btn-secondary" style="width: 100%; height: 40px; margin-top: 2px;">发送验证码</button>
+                            </div>
+                        </div>
+                        <div class="form-options">
+                            <label>
+                                <input type="checkbox" name="remember"> 记住我
+                            </label>
+                        </div>
+                        <button type="submit" class="btn-primary">登录</button>
+                    </form>
+                    <div class="form-footer">
+                        <p>还没有账号？ <a href="register.html">立即注册</a></p>
+                    </div>
+                </div>
+                <div class="login-info">
+                    <h3>欢迎使用瓦兰卡GEO</h3>
+                    <p>通过AI技术帮助企业提升品牌在AI平台的影响力和转化率，提供全方位的品牌AI表现监测、诊断、优化建议方案和GEO优化工具。</p>
+                    <div class="info-features">
+                        <div class="info-feature">
+                            <span class="feature-icon">📊</span>
+                            <p>品牌AI表现监测</p>
+                        </div>
+                        <div class="info-feature">
+                            <span class="feature-icon">🎯</span>
+                            <p>提示词推荐与竞品分析</p>
+                        </div>
+                        <div class="info-feature">
+                            <span class="feature-icon">🔍</span>
+                            <p>GEO优化诊断</p>
+                        </div>
+                        <div class="info-feature">
+                            <span class="feature-icon">⚙️</span>
+                            <p>GEO优化工具</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer" style="background: #f8f9fa; padding: 30px 0;">
+        <div class="container">
+            <div class="footer-bottom" style="text-align: center;">
+                <p>&copy; 2026 瓦兰卡科技. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // 发送验证码功能
+        document.getElementById('sendCode').addEventListener('click', function() {
+            const phone = document.getElementById('phone').value;
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            
+            if (!phoneRegex.test(phone)) {
+                alert('请输入正确的手机号码');
+                return;
+            }
+            
+            // 模拟发送验证码
+            this.disabled = true;
+            let countdown = 60;
+            this.textContent = `${countdown}秒后重发`;
+            
+            const timer = setInterval(() => {
+                countdown--;
+                this.textContent = `${countdown}秒后重发`;
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    this.disabled = false;
+                    this.textContent = '发送验证码';
+                }
+            }, 1000);
+            
+            // 这里可以添加真实的短信发送API调用
+            console.log('发送验证码到手机号:', phone);
+            alert('验证码已发送到您的手机');
+        });
+        
+        // 登录功能
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const phone = document.getElementById('phone').value;
+            const code = document.getElementById('code').value;
+            
+            if (!phone || !code) {
+                alert('请输入手机号和验证码');
+                return;
+            }
+            
+            // 调用后端API登录
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('token', data.token);
+                    if (data.user.role === 'admin') {
+                        window.location.href = 'admin/dashboard.html';
+                    } else {
+                        window.location.href = 'workbench.html';
+                    }
+                } else {
+                    alert(data.error || '登录失败');
+                }
+            } catch (error) {
+                console.error('登录失败:', error);
+                alert('登录失败，请稍后重试');
+            }
+        });
+    </script>
+</body>
+</html>

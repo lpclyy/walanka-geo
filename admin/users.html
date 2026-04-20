@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 瓦兰卡GEO</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .admin-sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e9ecef;
+        }
+        .admin-sidebar h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        .admin-sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .admin-sidebar li {
+            margin-bottom: 10px;
+        }
+        .admin-sidebar a {
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .admin-sidebar a:hover, .admin-sidebar a.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .admin-main {
+            flex: 1;
+            padding: 30px;
+        }
+        .admin-header {
+            margin-bottom: 30px;
+        }
+        .admin-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .content-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .content-header h3 {
+            color: #333;
+        }
+        .btn-add {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-add:hover {
+            background: var(--secondary-color);
+        }
+        .content-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .content-table th, .content-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .content-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .btn-edit, .btn-delete, .btn-role {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+        }
+        .btn-edit {
+            background: #4CAF50;
+            color: white;
+        }
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        .btn-role {
+            background: #2196F3;
+            color: white;
+        }
+        .btn-edit:hover, .btn-delete:hover, .btn-role:hover {
+            opacity: 0.8;
+        }
+        .status-active {
+            color: #4CAF50;
+            font-weight: 500;
+        }
+        .status-inactive {
+            color: #f44336;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html">
+                        <span class="logo-text">瓦兰卡</span>
+                    </a>
+                </div>
+                <nav class="nav">
+                    <ul class="nav-menu">
+                        <li><a href="../index.html">首页</a></li>
+                        <li><a href="#">管理员中心</a></li>
+                    </ul>
+                    <div class="nav-actions">
+                        <a href="#" class="user-profile">管理员</a>
+                        <a href="../login.html" class="btn-secondary">退出</a>
+                    </div>
+                    <button class="menu-toggle" onclick="toggleMobileMenu()">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 用户管理 -->
+    <section class="admin-dashboard">
+        <div class="container">
+            <div class="admin-content" style="display: flex;">
+                <!-- 侧边栏 -->
+                <div class="admin-sidebar">
+                    <h3>管理中心</h3>
+                    <ul>
+                        <li><a href="dashboard.html">仪表板</a></li>
+                        <li><a href="users.html" class="active">用户管理</a></li>
+                        <li><a href="articles.html">文章管理</a></li>
+                        <li><a href="features.html">功能管理</a></li>
+                        <li><a href="cases.html">案例管理</a></li>
+                        <li><a href="faq.html">FAQ管理</a></li>
+                        <li><a href="settings.html">系统设置</a></li>
+                    </ul>
+                </div>
+                
+                <!-- 主内容区 -->
+                <div class="admin-main">
+                    <div class="admin-header">
+                        <h2>用户管理</h2>
+                        <p>管理系统用户</p>
+                    </div>
+                    
+                    <!-- 用户列表 -->
+                    <div class="content-section">
+                        <div class="content-header">
+                            <h3>用户列表</h3>
+                            <button class="btn-add">添加用户</button>
+                        </div>
+                        <table class="content-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>姓名</th>
+                                    <th>邮箱</th>
+                                    <th>角色</th>
+                                    <th>状态</th>
+                                    <th>注册日期</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>管理员</td>
+                                    <td>admin@example.com</td>
+                                    <td>管理员</td>
+                                    <td><span class="status-active">活跃</span></td>
+                                    <td>2026-01-01</td>
+                                    <td>
+                                        <button class="btn-edit">编辑</button>
+                                        <button class="btn-role">修改角色</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>张三</td>
+                                    <td>zhangsan@example.com</td>
+                                    <td>用户</td>
+                                    <td><span class="status-active">活跃</span></td>
+                                    <td>2026-04-10</td>
+                                    <td>
+                                        <button class="btn-edit">编辑</button>
+                                        <button class="btn-role">修改角色</button>
+                                        <button class="btn-delete">删除</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>李四</td>
+                                    <td>lisi@example.com</td>
+                                    <td>用户</td>
+                                    <td><span class="status-active">活跃</span></td>
+                                    <td>2026-04-12</td>
+                                    <td>
+                                        <button class="btn-edit">编辑</button>
+                                        <button class="btn-role">修改角色</button>
+                                        <button class="btn-delete">删除</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>王五</td>
+                                    <td>wangwu@example.com</td>
+                                    <td>用户</td>
+                                    <td><span class="status-inactive">未激活</span></td>
+                                    <td>2026-04-15</td>
+                                    <td>
+                                        <button class="btn-edit">编辑</button>
+                                        <button class="btn-role">修改角色</button>
+                                        <button class="btn-delete">删除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <span class="logo-text">瓦兰卡</span>
+                    <p>AI时代品牌优化专家</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>产品</h4>
+                        <ul>
+                            <li><a href="../index.html#features">功能介绍</a></li>
+                            <li><a href="../index.html#pricing">价格方案</a></li>
+                            <li><a href="../geo-school.html">GEO学堂</a></li>
+                            <li><a href="../workbench.html">工作台</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>公司</h4>
+                        <ul>
+                            <li><a href="#about">关于我们</a></li>
+                            <li><a href="#contact">联系我们</a></li>
+                            <li><a href="#privacy">隐私政策</a></li>
+                            <li><a href="#terms">服务条款</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>支持</h4>
+                        <ul>
+                            <li><a href="#faq">常见问题</a></li>
+                            <li><a href="#support">技术支持</a></li>
+                            <li><a href="#docs">使用文档</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 瓦兰卡科技. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>
