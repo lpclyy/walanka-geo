@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3002;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, './')));
 
 // 数据库连接配置
 const dbConfig = {
