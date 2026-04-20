@@ -119,12 +119,6 @@ async function createUserTable() {
     `);
     console.log('User table created or already exists');
     
-    // 检查并添加password字段（如果不存在）
-    await db.execute(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS password VARCHAR(255)
-    `);
-    console.log('Password column checked');
-    
     // 创建管理员账号
     await createAdminAccount();
   } catch (error) {
@@ -174,12 +168,6 @@ app.post('/api/register', async (req, res) => {
     if (!phoneRegex.test(phone)) {
       return res.status(400).json({ error: '请输入正确的手机号码' });
     }
-    
-    // 简化处理，暂时跳过验证码验证
-    // const storedCode = await redisClient.get(`code:${phone}`);
-    // if (!storedCode || storedCode !== code) {
-    //   return res.status(400).json({ error: '验证码错误或已过期' });
-    // }
     
     // 检查用户是否已存在
     const [existingUsers] = await db.execute('SELECT * FROM users WHERE phone = ?', [phone]);
