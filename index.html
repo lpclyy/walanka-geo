@@ -29,6 +29,7 @@
             <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
                 <a href="login.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border: 1px solid var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">登录</a>
                 <a href="register.html" style="text-decoration: none; color: white; font-weight: 500; padding: 8px 16px; background: var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">注册</a>
+                <a href="admin/index.html" id="adminLink" style="display: none; text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border: 1px solid var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">管理员</a>
             </div>
             <button class="menu-toggle" onclick="toggleMobileMenu()" style="display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer;">
                 <span class="menu-icon" style="display: block; width: 20px; height: 2px; background: #333;"></span>
@@ -389,5 +390,21 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+        // 检查用户登录状态和角色
+        window.onload = function() {
+            const user = localStorage.getItem('user');
+            if (user) {
+                const userObj = JSON.parse(user);
+                if (userObj.role === 'admin') {
+                    // 显示管理员链接
+                    document.getElementById('adminLink').style.display = 'block';
+                    // 隐藏登录和注册按钮
+                    document.querySelector('a[href="login.html"]').style.display = 'none';
+                    document.querySelector('a[href="register.html"]').style.display = 'none';
+                }
+            }
+        };
+    </script>
 </body>
 </html>
