@@ -596,18 +596,6 @@
                                 <div style="margin-bottom: 20px;">
                                     <label style="display: block; font-weight: 500; color: #333; margin-bottom: 8px;">粘贴关键词列表（每行一个）</label>
                                     <textarea placeholder="瓦兰卡GEO&#10;AI品牌优化&#10;智能营销工具&#10;..." style="width: 100%; height: 150px; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; resize: vertical; font-family: inherit;"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 批量分析模式 -->
-                    <div class="workbench-mode" id="batch-analysis" style="display: none;">
-                        <div class="geo-optimization-flow">
-                            <h3 style="color: #333; margin-bottom: 20px;">批量分析</h3>
-                            <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
-                                <div style="margin-bottom: 20px;">
-                                    <label style="display: block; font-weight: 500; color: #333; margin-bottom: 8px;">粘贴关键词列表（每行一个）</label>
-                                    <textarea placeholder="瓦兰卡GEO&#10;AI品牌优化&#10;智能营销工具&#10;..." style="width: 100%; height: 150px; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; resize: vertical; font-family: inherit;"></textarea>
                                 </div>
                                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                                     <button style="background: var(--primary-color); color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">开始分析</button>
@@ -619,95 +607,95 @@
                     
                     <!-- AI对话模式 -->
                     <div class="workbench-mode" id="ai-chat" style="display: none;">
-            <div class="geo-optimization-flow">
-                <h3 style="color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-robot" style="color: var(--primary-color); font-size: 20px;"></i>
-                    AI对话
-                </h3>
-                <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.1); position: relative;">
-                    <!-- 装饰元素 -->
-                    <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: var(--primary-color); opacity: 0.1; border-radius: 0 16px 0 100px;"></div>
-                    <div style="position: absolute; bottom: 0; left: 0; width: 150px; height: 150px; background: var(--secondary-color); opacity: 0.05; border-radius: 100px 0 0 16px;"></div>
-                    
-                    <div id="chatMessages" style="border: 2px solid red; height: 400px; overflow-y: auto; padding: 25px; background: rgba(255,255,255,0.95); position: relative; z-index: 1;">
-                        <div class="chat-message bot" style="display: flex; gap: 12px; margin-bottom: 20px; animation: fadeIn 0.5s ease;">
-                            <div class="message-avatar" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);">
-                                <i class="fas fa-robot"></i>
+                        <div class="geo-optimization-flow">
+                            <h3 style="color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-robot" style="color: var(--primary-color); font-size: 20px;"></i>
+                                AI对话
+                            </h3>
+                            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.1); position: relative;">
+                                <!-- 装饰元素 -->
+                                <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: var(--primary-color); opacity: 0.1; border-radius: 0 16px 0 100px;"></div>
+                                <div style="position: absolute; bottom: 0; left: 0; width: 150px; height: 150px; background: var(--secondary-color); opacity: 0.05; border-radius: 100px 0 0 16px;"></div>
+                                
+                                <div id="chatMessages" style="height: 400px; overflow-y: auto; padding: 25px; background: rgba(255,255,255,0.95); position: relative; z-index: 1;">
+                                    <div class="chat-message bot" style="display: flex; gap: 12px; margin-bottom: 20px; animation: fadeIn 0.5s ease;">
+                                        <div class="message-avatar" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);">
+                                            <i class="fas fa-robot"></i>
+                                        </div>
+                                        <div class="message-content" style="background: white; padding: 18px; border-radius: 18px 18px 18px 4px; max-width: 80%; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid rgba(13, 148, 136, 0.1);">
+                                            <p style="margin: 0; color: #333; line-height: 1.5;">你好！我是瓦兰卡AI助手，有什么可以帮助你的吗？</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="background: white; padding: 25px; border-top: 1px solid #e2e8f0; position: relative; z-index: 1;">
+                                    <div style="display: flex; gap: 12px; align-items: center;">
+                                        <input type="text" id="aiQuestion" placeholder="输入你的问题..." style="flex: 1; padding: 14px 18px; border: 1px solid #e2e8f0; border-radius: 25px; font-size: 14px; transition: all 0.3s ease; background: #f8f9fa;">
+                                        <button id="sendQuestion" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); color: white; border: none; padding: 14px 28px; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);">
+                                            <i class="fas fa-paper-plane" style="margin-right: 5px;"></i> 发送
+                                        </button>
+                                    </div>
+                                    <div style="margin-top: 12px; font-size: 12px; color: #666; background: #f8f9fa; padding: 10px 15px; border-radius: 10px; border-left: 3px solid var(--primary-color);">
+                                        <p style="margin: 0; display: flex; align-items: center; gap: 5px;">
+                                            <i class="fas fa-lightbulb" style="color: var(--primary-color);"></i>
+                                            提示：你可以询问关于GEO优化、品牌AI表现、内容创作等相关问题
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="message-content" style="background: white; padding: 18px; border-radius: 18px 18px 18px 4px; max-width: 80%; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid rgba(13, 148, 136, 0.1);">
-                                <p style="margin: 0; color: #333; line-height: 1.5;">你好！我是瓦兰卡AI助手，有什么可以帮助你的吗？</p>
-                            </div>
                         </div>
+                        
+                        <style>
+                            @keyframes fadeIn {
+                                from { opacity: 0; transform: translateY(10px); }
+                                to { opacity: 1; transform: translateY(0); }
+                            }
+                            
+                            .chat-message.user {
+                                flex-direction: row-reverse;
+                                animation: fadeIn 0.5s ease;
+                            }
+                            
+                            .chat-message.user .message-content {
+                                border-radius: 18px 18px 4px 18px;
+                                background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+                                color: white;
+                            }
+                            
+                            .chat-message.user .message-avatar {
+                                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                            }
+                            
+                            #aiQuestion:focus {
+                                outline: none;
+                                border-color: var(--primary-color);
+                                box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+                                background: white;
+                            }
+                            
+                            #sendQuestion:hover {
+                                transform: translateY(-2px);
+                                box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4);
+                            }
+                            
+                            #chatMessages::-webkit-scrollbar {
+                                width: 6px;
+                            }
+                            
+                            #chatMessages::-webkit-scrollbar-track {
+                                background: #f1f5f9;
+                                border-radius: 3px;
+                            }
+                            
+                            #chatMessages::-webkit-scrollbar-thumb {
+                                background: var(--primary-color);
+                                border-radius: 3px;
+                            }
+                            
+                            #chatMessages::-webkit-scrollbar-thumb:hover {
+                                background: var(--primary-dark);
+                            }
+                        </style>
                     </div>
-                    <div style="background: white; padding: 25px; border-top: 1px solid #e2e8f0; position: relative; z-index: 1;">
-                        <div style="display: flex; gap: 12px; align-items: center;">
-                            <input type="text" id="aiQuestion" placeholder="输入你的问题..." style="flex: 1; padding: 14px 18px; border: 1px solid #e2e8f0; border-radius: 25px; font-size: 14px; transition: all 0.3s ease; background: #f8f9fa;">
-                            <button id="sendQuestion" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); color: white; border: none; padding: 14px 28px; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);">
-                                <i class="fas fa-paper-plane" style="margin-right: 5px;"></i> 发送
-                            </button>
-                        </div>
-                        <div style="margin-top: 12px; font-size: 12px; color: #666; background: #f8f9fa; padding: 10px 15px; border-radius: 10px; border-left: 3px solid var(--primary-color);">
-                            <p style="margin: 0; display: flex; align-items: center; gap: 5px;">
-                                <i class="fas fa-lightbulb" style="color: var(--primary-color);"></i>
-                                提示：你可以询问关于GEO优化、品牌AI表现、内容创作等相关问题
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <style>
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            
-            .chat-message.user {
-                flex-direction: row-reverse;
-                animation: fadeIn 0.5s ease;
-            }
-            
-            .chat-message.user .message-content {
-                border-radius: 18px 18px 4px 18px;
-                background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-                color: white;
-            }
-            
-            .chat-message.user .message-avatar {
-                background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            }
-            
-            #aiQuestion:focus {
-                outline: none;
-                border-color: var(--primary-color);
-                box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
-                background: white;
-            }
-            
-            #sendQuestion:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4);
-            }
-            
-            #chatMessages::-webkit-scrollbar {
-                width: 6px;
-            }
-            
-            #chatMessages::-webkit-scrollbar-track {
-                background: #f1f5f9;
-                border-radius: 3px;
-            }
-            
-            #chatMessages::-webkit-scrollbar-thumb {
-                background: var(--primary-color);
-                border-radius: 3px;
-            }
-            
-            #chatMessages::-webkit-scrollbar-thumb:hover {
-                background: var(--primary-dark);
-            }
-        </style>
                     
                     <!-- 优化建议模式 -->
                     <div class="workbench-mode" id="suggestions" style="display: none;">
