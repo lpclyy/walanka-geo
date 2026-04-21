@@ -1010,6 +1010,44 @@
         </div>
     </div>
 
+    <!-- 编辑文章模态框 -->
+    <div id="editArticleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑文章</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="editArticleForm">
+                <input type="hidden" id="editArticleId">
+                <div class="form-group">
+                    <label for="editArticleTitle">标题</label>
+                    <input type="text" id="editArticleTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="editArticleAuthor">作者</label>
+                    <input type="text" id="editArticleAuthor" required>
+                </div>
+                <div class="form-group">
+                    <label for="editArticleCategory">分类</label>
+                    <select id="editArticleCategory" required>
+                        <option value="教程">教程</option>
+                        <option value="报告">报告</option>
+                        <option value="公告">公告</option>
+                        <option value="技术">技术</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editArticleContent">内容</label>
+                    <textarea id="editArticleContent" rows="10" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-close">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- 添加用户模态框 -->
     <div id="addUserModal" class="modal">
         <div class="modal-content">
@@ -1085,6 +1123,75 @@
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="../script.js"></script>
     <script>
+        // 加载仪表盘数据
+        function loadDashboardData() {
+            // 加载总文章数
+            fetch('/api/admin/articles')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector('.stats-grid .stat-card:nth-child(1) .stat-value').textContent = data.articles.length;
+                    }
+                })
+                .catch(error => console.error('加载文章数据失败:', error));
+            
+            // 加载总用户数
+            fetch('/api/admin/users')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector('.stats-grid .stat-card:nth-child(2) .stat-value').textContent = data.users.length;
+                    }
+                })
+                .catch(error => console.error('加载用户数据失败:', error));
+            
+            // 加载今日访问量
+            fetch('/api/admin/stats/visits')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector('.stats-grid .stat-card:nth-child(3) .stat-value').textContent = data.visits;
+                    }
+                })
+                .catch(error => console.error('加载访问量数据失败:', error));
+            
+            // 加载活跃用户数
+            fetch('/api/admin/stats/active-users')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector('.stats-grid .stat-card:nth-child(4) .stat-value').textContent = data.activeUsers;
+                    }
+                })
+                .catch(error => console.error('加载活跃用户数据失败:', error));
+            
+            // 加载最近活动
+            fetch('/api/admin/activities')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const activityList = document.querySelector('.recent-activities');
+                        activityList.innerHTML = '<h3>最近活动</h3>';
+                        
+                        data.activities.forEach(activity => {
+                            const activityItem = document.createElement('div');
+                            activityItem.className = 'activity-item';
+                            activityItem.innerHTML = `
+                                <div class="activity-icon">
+                                    <i class="fas ${activity.icon}"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-time">${activity.time}</div>
+                                    <div class="activity-text">${activity.text}</div>
+                                </div>
+                            `;
+                            activityList.appendChild(activityItem);
+                        });
+                    }
+                })
+                .catch(error => console.error('加载活动数据失败:', error));
+        }
+        
         // 页面加载时检查登录状态
         window.onload = function() {
             const user = localStorage.getItem('user');
@@ -1105,6 +1212,9 @@
                         usersLink.style.opacity = '0.5';
                         usersLink.title = '只有超级管理员可访问';
                     }
+                    
+                    // 加载仪表盘数据
+                    loadDashboardData();
                 }
             }
         };
@@ -1308,8 +1418,28 @@
 
         // 编辑文章
         function editArticle(id) {
-            // 这里可以实现编辑文章功能
-            alert('编辑文章功能开发中');
+            // 从API获取文章信息
+            fetch(`/api/admin/articles/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const article = data.article;
+                        // 填充编辑文章模态框
+                        document.getElementById('editArticleId').value = article.id;
+                        document.getElementById('editArticleTitle').value = article.title;
+                        document.getElementById('editArticleAuthor').value = article.author;
+                        document.getElementById('editArticleCategory').value = article.category;
+                        document.getElementById('editArticleContent').value = article.content;
+                        // 打开编辑文章模态框
+                        openModal('editArticleModal');
+                    } else {
+                        alert(data.error || '获取文章信息失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('获取文章信息失败:', error);
+                    alert('获取文章信息失败');
+                });
         }
 
         // 删除文章
@@ -1323,6 +1453,7 @@
                     if (data.success) {
                         alert('文章删除成功！');
                         loadArticles();
+                        loadDashboardData();
                     } else {
                         alert(data.error || '删除文章失败');
                     }
@@ -1356,6 +1487,7 @@
                     alert('文章添加成功！');
                     closeModal('addArticleModal');
                     loadArticles();
+                    loadDashboardData();
                 } else {
                     alert(data.error || '添加文章失败');
                 }
@@ -1363,6 +1495,40 @@
             .catch(error => {
                 console.error('添加文章失败:', error);
                 alert('添加文章失败');
+            });
+        });
+        
+        // 编辑文章表单提交
+        document.getElementById('editArticleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('editArticleId').value;
+            const title = document.getElementById('editArticleTitle').value;
+            const author = document.getElementById('editArticleAuthor').value;
+            const category = document.getElementById('editArticleCategory').value;
+            const content = document.getElementById('editArticleContent').value;
+            
+            fetch(`/api/admin/articles/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, author, category, content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('文章编辑成功！');
+                    closeModal('editArticleModal');
+                    loadArticles();
+                    loadDashboardData();
+                } else {
+                    alert(data.error || '编辑文章失败');
+                }
+            })
+            .catch(error => {
+                console.error('编辑文章失败:', error);
+                alert('编辑文章失败');
             });
         });
 
@@ -1440,6 +1606,7 @@
                     if (data.success) {
                         alert('用户删除成功！');
                         loadUsers();
+                        loadDashboardData();
                     } else {
                         alert(data.error || '删除用户失败');
                     }
@@ -1495,6 +1662,7 @@
                     alert('用户添加成功！');
                     closeModal('addUserModal');
                     loadUsers();
+                    loadDashboardData();
                 } else {
                     alert(data.error || '添加用户失败');
                 }
