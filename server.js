@@ -1102,6 +1102,12 @@ app.post('/api/ai/chat', async (req, res) => {
     }
     
     // 调用豆包大模型API
+    console.log('调用豆包API:', {
+      apiUrl,
+      model,
+      question: question.substring(0, 50) + '...'
+    });
+    
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -1125,9 +1131,17 @@ app.post('/api/ai/chat', async (req, res) => {
       })
     });
     
+    console.log('API响应状态:', response.status);
+    
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`API调用失败: ${response.status} ${response.statusText} - ${errorData.error?.message || '未知错误'}`);
+      try {
+        const errorData = await response.json();
+        console.error('API错误响应:', errorData);
+        throw new Error(`API调用失败: ${response.status} ${response.statusText} - ${errorData.error?.message || '未知错误'}`);
+      } catch (error) {
+        console.error('解析错误响应失败:', error);
+        throw new Error(`API调用失败: ${response.status} ${response.statusText}`);
+      }
     }
     
     const data = await response.json();
