@@ -884,11 +884,20 @@
                     })
                 });
                 
+                console.log('API响应状态:', response.status);
+                
                 if (!response.ok) {
-                    throw new Error('API调用失败');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`API调用失败: ${response.status} ${response.statusText} - ${errorData.error?.message || '未知错误'}`);
                 }
                 
                 const data = await response.json();
+                console.log('API响应数据:', data);
+                
+                if (!data.choices || data.choices.length === 0 || !data.choices[0].message) {
+                    throw new Error('API响应格式错误');
+                }
+                
                 const answer = data.choices[0].message.content;
                 
                 // 显示AI回答
@@ -913,6 +922,7 @@
                         </div>
                         <div class="message-content" style="background: white; padding: 18px; border-radius: 18px 18px 18px 4px; max-width: 80%; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid rgba(13, 148, 136, 0.1);">
                             <p style="margin: 0; color: #ff4757; line-height: 1.5;">抱歉，我暂时无法回答这个问题，请稍后再试。</p>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">错误信息: ${error.message}</p>
                         </div>
                     </div>
                 `;
