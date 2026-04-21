@@ -1082,6 +1082,59 @@ app.get('/api/article/:id', (req, res) => {
   }
 });
 
+// AI对话接口
+app.post('/api/ai/chat', async (req, res) => {
+  try {
+    const { question } = req.body;
+    
+    if (!question) {
+      return res.status(400).json({ success: false, error: '问题不能为空' });
+    }
+    
+    // 调用豆包大模型API
+    const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ark-bb559119-5741-4f33-bc7f-7a74b5126b33-ed3a33'
+      },
+      body: JSON.stringify({
+        model: 'ep-20260421102756-rldv',
+        messages: [
+          {
+            role: 'system',
+            content: '你是瓦兰卡AI助手，专注于GEO优化、品牌AI表现监测、内容创作等相关领域的专业知识。请以专业、友好的语气回答用户的问题，提供详细且有价值的信息。'
+          },
+          {
+            role: 'user',
+            content: question
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`API调用失败: ${response.status} ${response.statusText} - ${errorData.error?.message || '未知错误'}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.choices || data.choices.length === 0 || !data.choices[0].message) {
+      throw new Error('API响应格式错误');
+    }
+    
+    const answer = data.choices[0].message.content;
+    
+    res.status(200).json({ success: true, answer });
+  } catch (error) {
+    console.error('AI对话失败:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // 健康检查接口
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });

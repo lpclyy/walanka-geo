@@ -855,32 +855,19 @@
             `;
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
-            // 调用豆包大模型API获取回答
+            // 调用后端API获取回答
             try {
                 // 移除正在输入的提示
                 document.getElementById('aiTyping').remove();
                 
-                // 调用豆包大模型API
-                const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+                // 调用后端API
+                const response = await fetch('/api/ai/chat', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ark-bb559119-5741-4f33-bc7f-7a74b5126b33-ed3a33'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: 'ep-20260421102756-rldv',
-                        messages: [
-                            {
-                                role: 'system',
-                                content: '你是瓦兰卡AI助手，专注于GEO优化、品牌AI表现监测、内容创作等相关领域的专业知识。请以专业、友好的语气回答用户的问题，提供详细且有价值的信息。'
-                            },
-                            {
-                                role: 'user',
-                                content: question
-                            }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 1000
+                        question: question
                     })
                 });
                 
@@ -888,17 +875,17 @@
                 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
-                    throw new Error(`API调用失败: ${response.status} ${response.statusText} - ${errorData.error?.message || '未知错误'}`);
+                    throw new Error(`API调用失败: ${response.status} ${response.statusText} - ${errorData.error || '未知错误'}`);
                 }
                 
                 const data = await response.json();
                 console.log('API响应数据:', data);
                 
-                if (!data.choices || data.choices.length === 0 || !data.choices[0].message) {
-                    throw new Error('API响应格式错误');
+                if (!data.success || !data.answer) {
+                    throw new Error(data.error || 'API响应格式错误');
                 }
                 
-                const answer = data.choices[0].message.content;
+                const answer = data.answer;
                 
                 // 显示AI回答
                 chatMessages.innerHTML += `
