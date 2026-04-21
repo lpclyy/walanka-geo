@@ -102,6 +102,15 @@
             padding: 30px;
             transition: all 0.3s ease;
             max-width: calc(100% - 250px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .content-section {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto 20px;
         }
         
         .admin-header {
@@ -578,6 +587,7 @@
             </div>
             <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
                 <span id="adminName" style="font-weight: 500;">管理员</span>
+                <a href="../workbench.html" class="btn btn-secondary">返回工作台</a>
                 <a href="../index.html" class="btn btn-secondary">返回前台</a>
             </div>
         </nav>
@@ -609,11 +619,6 @@
                         <div>
                             <h2>仪表盘</h2>
                             <p>欢迎回来，管理员！</p>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
-                                <i class="fas fa-arrow-left"></i> 返回工作台
-                            </button>
                         </div>
                     </div>
 
@@ -682,9 +687,6 @@
                             <p>管理GEO学堂中的文章</p>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
-                                <i class="fas fa-arrow-left"></i> 返回工作台
-                            </button>
                             <button class="btn btn-primary" id="addArticleBtn">
                                 <i class="fas fa-plus"></i> 添加文章
                             </button>
@@ -751,9 +753,6 @@
                             <p>管理系统用户和管理员账号</p>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
-                                <i class="fas fa-arrow-left"></i> 返回工作台
-                            </button>
                             <button class="btn btn-primary" id="addUserBtn">
                                 <i class="fas fa-user-plus"></i> 添加用户
                             </button>
@@ -831,9 +830,6 @@
                             <p>修改首页各个板块的文字和图片</p>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
-                                <i class="fas fa-arrow-left"></i> 返回工作台
-                            </button>
                             <button class="btn btn-primary" id="savePageBtn">
                                 <i class="fas fa-save"></i> 保存更改
                             </button>
@@ -920,9 +916,6 @@
                             <p>管理AI问答功能的API配置</p>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
-                                <i class="fas fa-arrow-left"></i> 返回工作台
-                            </button>
                             <button class="btn btn-primary" id="addApiBtn">
                                 <i class="fas fa-plus"></i> 添加API
                             </button>

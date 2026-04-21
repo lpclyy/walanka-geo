@@ -196,33 +196,33 @@
 </head>
 <body>
     <!-- 导航栏 -->
-    <header class="header" style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; right: 0; z-index: 1000;">
-        <div class="container">
-            <div class="header-content" style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="logo" style="display: flex; align-items: center;">
+    <header class="header" style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; white-space: nowrap;">
+        <div class="container" style="width: 100%; max-width: 1400px; margin: 0 auto; padding: 0 20px;">
+            <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; height: 70px;">
+                <div class="logo" style="display: flex; align-items: center; flex-shrink: 0;">
                     <a href="index.html" style="display: flex; align-items: center; text-decoration: none;">
                         <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20AI%20logo%20with%20smart%20bean%20concept%20teal%20color&image_size=square_hd" alt="瓦兰卡" style="width: 40px; height: 40px; margin-right: 10px;">
                         <span class="logo-text" style="font-size: 20px; font-weight: bold; color: var(--primary-color);">瓦兰卡</span>
                     </a>
                 </div>
-                <nav class="nav" style="flex: 1; margin: 0 30px;">
-                    <ul class="nav-menu" style="display: flex; justify-content: center; gap: 30px; list-style: none; padding: 0;">
-                        <li><a href="index.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">首页</a></li>
-                        <li><a href="index.html#features" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">功能介绍</a></li>
-                        <li><a href="index.html#cases" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">客户案例</a></li>
-                        <li><a href="index.html#faq" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">常见问题</a></li>
-                        <li><a href="geo-school.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease;">GEO学堂</a></li>
-                        <li><a href="workbench.html" style="text-decoration: none; color: white; font-weight: 500; padding: 8px 16px; border-radius: 20px; background: var(--primary-color); transition: all 0.3s ease;">工作台</a></li>
+                <nav class="nav" style="flex: 1; margin: 0 30px; min-width: 0;">
+                    <ul class="nav-menu" style="display: flex; justify-content: center; gap: 20px; list-style: none; padding: 0; margin: 0; overflow-x: auto; white-space: nowrap;">
+                        <li style="display: inline-block;"><a href="index.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease; display: inline-block;">首页</a></li>
+                        <li style="display: inline-block;"><a href="index.html#features" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease; display: inline-block;">功能介绍</a></li>
+                        <li style="display: inline-block;"><a href="index.html#cases" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease; display: inline-block;">客户案例</a></li>
+                        <li style="display: inline-block;"><a href="index.html#faq" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease; display: inline-block;">常见问题</a></li>
+                        <li style="display: inline-block;"><a href="geo-school.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease; display: inline-block;">GEO学堂</a></li>
+                        <li style="display: inline-block;"><a href="workbench.html" style="text-decoration: none; color: white; font-weight: 500; padding: 8px 16px; border-radius: 20px; background: var(--primary-color); transition: all 0.3s ease; display: inline-block;">工作台</a></li>
                     </ul>
                 </nav>
-                <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
+                <div class="nav-actions" style="display: flex; align-items: center; gap: 15px; flex-shrink: 0;">
                     <a href="admin/index.html" id="adminLink" style="display: none; text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border: 1px solid var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">后台管理</a>
-                    <div class="user-info">
+                    <div class="user-info" style="display: flex; align-items: center; gap: 10px;">
                         <div class="user-avatar" id="userAvatar"></div>
                         <span style="font-weight: 500;" id="userName"></span>
                     </div>
                     <a href="subscription.html" style="text-decoration: none; color: #666; font-size: 14px;">升级套餐</a>
-                    <a href="login.html" style="text-decoration: none; color: #666; font-size: 14px;">退出</a>
+                    <a href="login.html" id="logoutLink" style="text-decoration: none; color: #666; font-size: 14px;">退出</a>
                 </div>
             </div>
         </div>
@@ -795,6 +795,13 @@
                 }
             }
         };
+        
+        // 退出功能
+        document.getElementById('logoutLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
         
         // 工作台模式切换功能
         document.querySelectorAll('.workbench-nav a').forEach(link => {
