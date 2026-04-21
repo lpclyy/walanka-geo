@@ -28,48 +28,32 @@
         .admin-dashboard {
             padding-top: 80px;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: #f8f9fa;
             position: relative;
-            overflow: hidden;
-        }
-        
-        .admin-dashboard::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+CjxyZWN0IHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmZmZmMTAiIHN0cm9rZS13aWR0aD0iMSI+PC9yZWN0Pgo8cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00eiIgc3Ryb2tlPSIjZmZmZmZmMjAiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=');
-            opacity: 0.3;
-            z-index: 0;
         }
         
         .admin-container {
             display: flex;
             position: relative;
-            z-index: 1;
         }
         
         .admin-sidebar {
             width: 250px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             min-height: calc(100vh - 80px);
             position: fixed;
             transition: all 0.3s ease;
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            border-right: 1px solid #e2e8f0;
         }
         
         .admin-sidebar h3 {
             padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            border-bottom: 1px solid #e2e8f0;
+            color: var(--primary-color);
             font-size: 18px;
             font-weight: 600;
             margin: 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .admin-nav {
@@ -79,49 +63,31 @@
         }
         
         .admin-nav li {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid #f1f5f9;
         }
         
         .admin-nav a {
             display: block;
             padding: 15px 20px;
             text-decoration: none;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--gray-700);
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 10px;
             position: relative;
-            overflow: hidden;
-        }
-        
-        .admin-nav a::before {
-            content: '';
-            position: absolute;
-            left: -100%;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .admin-nav a:hover::before {
-            left: 100%;
         }
         
         .admin-nav a:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+            background: #f8f9fa;
+            color: var(--primary-color);
             transform: translateX(5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
         .admin-nav a.active {
-            background: rgba(13, 148, 136, 0.8);
+            background: var(--primary-color);
             color: white;
-            border-left: 4px solid #10b981;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border-left: 4px solid var(--primary-dark);
         }
         
         .admin-nav a i {
@@ -135,42 +101,40 @@
             margin-left: 250px;
             padding: 30px;
             transition: all 0.3s ease;
+            max-width: calc(100% - 250px);
         }
         
         .admin-header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid #e2e8f0;
         }
         
         .admin-header h2 {
             margin: 0;
-            color: white;
+            color: var(--gray-800);
             font-size: 24px;
             font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .admin-header p {
             margin: 5px 0 0;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--gray-500);
         }
         
         .content-section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: white;
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid #e2e8f0;
         }
         
         .stats-grid {
@@ -181,44 +145,24 @@
         }
         
         .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: white;
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             text-align: center;
             transition: all 0.3s ease;
             border-top: 4px solid var(--primary-color);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary-color), var(--success-color), var(--secondary-color));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-card:hover::before {
-            transform: scaleX(1);
+            border: 1px solid #e2e8f0;
         }
         
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
         
         .stat-card h3 {
             margin: 0 0 15px;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--gray-600);
             font-size: 16px;
             font-weight: 500;
         }
@@ -226,9 +170,8 @@
         .stat-card .stat-value {
             font-size: 36px;
             font-weight: bold;
-            color: white;
+            color: var(--primary-color);
             margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .stat-card .stat-change {
@@ -238,32 +181,30 @@
         }
         
         .recent-activities {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: white;
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
         }
         
         .recent-activities h3 {
             margin: 0 0 20px;
-            color: white;
+            color: var(--gray-800);
             font-size: 18px;
             font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .activity-item {
             padding: 15px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid #f1f5f9;
             display: flex;
             gap: 15px;
             transition: all 0.3s ease;
         }
         
         .activity-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: #f8f9fa;
             padding-left: 10px;
             border-radius: 5px;
         }
@@ -276,13 +217,12 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            background: var(--primary-color);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
         }
         
         .activity-content {
@@ -290,13 +230,13 @@
         }
         
         .activity-time {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--gray-500);
             font-size: 14px;
             margin-bottom: 5px;
         }
         
         .activity-text {
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--gray-700);
             font-size: 14px;
         }
         
@@ -307,8 +247,8 @@
             right: 0;
             padding: 15px;
             text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            background: #f8f9fa;
+            border-top: 1px solid #e2e8f0;
         }
         
         .logout-btn a {
@@ -365,27 +305,27 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            background: var(--primary-color);
             color: white;
-            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
+            box-shadow: 0 2px 5px rgba(13, 148, 136, 0.2);
         }
         
         .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(13, 148, 136, 0.4);
+            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
         }
         
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: #f8f9fa;
+            color: var(--gray-700);
+            border: 1px solid #e2e8f0;
         }
         
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #e2e8f0;
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .btn-success {
@@ -420,7 +360,7 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--gray-700);
             font-weight: 500;
         }
         
@@ -429,17 +369,17 @@
         .form-group textarea {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid #e2e8f0;
             border-radius: 6px;
             font-size: 14px;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+            background: white;
+            color: var(--gray-800);
         }
         
         .form-group input::placeholder,
         .form-group textarea::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--gray-400);
         }
         
         .form-group input:focus,
@@ -447,8 +387,7 @@
         .form-group textarea:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.3);
-            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
         }
         
         /* 表格样式 */
@@ -456,7 +395,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background: rgba(255, 255, 255, 0.05);
+            background: white;
             border-radius: 10px;
             overflow: hidden;
         }
@@ -465,21 +404,21 @@
         .table td {
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid #f1f5f9;
         }
         
         .table th {
-            background: rgba(255, 255, 255, 0.1);
+            background: #f8f9fa;
             font-weight: 600;
-            color: white;
+            color: var(--gray-700);
         }
         
         .table td {
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--gray-700);
         }
         
         .table tr:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: #f8f9fa;
         }
         
         /* 标签页样式 */
@@ -489,7 +428,7 @@
         
         .tab-header {
             display: flex;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid #e2e8f0;
             margin-bottom: 20px;
         }
         
@@ -497,18 +436,18 @@
             padding: 12px 24px;
             cursor: pointer;
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--gray-500);
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
             position: relative;
         }
         
         .tab-item:hover {
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--gray-800);
         }
         
         .tab-item.active {
-            color: white;
+            color: var(--primary-color);
             border-bottom-color: var(--primary-color);
         }
         
@@ -671,6 +610,11 @@
                             <h2>仪表盘</h2>
                             <p>欢迎回来，管理员！</p>
                         </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
+                                <i class="fas fa-arrow-left"></i> 返回工作台
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 统计卡片 -->
@@ -737,9 +681,14 @@
                             <h2>文章管理</h2>
                             <p>管理GEO学堂中的文章</p>
                         </div>
-                        <button class="btn btn-primary" id="addArticleBtn">
-                            <i class="fas fa-plus"></i> 添加文章
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
+                                <i class="fas fa-arrow-left"></i> 返回工作台
+                            </button>
+                            <button class="btn btn-primary" id="addArticleBtn">
+                                <i class="fas fa-plus"></i> 添加文章
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 文章列表 -->
@@ -801,9 +750,14 @@
                             <h2>用户管理</h2>
                             <p>管理系统用户和管理员账号</p>
                         </div>
-                        <button class="btn btn-primary" id="addUserBtn">
-                            <i class="fas fa-user-plus"></i> 添加用户
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
+                                <i class="fas fa-arrow-left"></i> 返回工作台
+                            </button>
+                            <button class="btn btn-primary" id="addUserBtn">
+                                <i class="fas fa-user-plus"></i> 添加用户
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 标签页 -->
@@ -876,9 +830,14 @@
                             <h2>页面编辑</h2>
                             <p>修改首页各个板块的文字和图片</p>
                         </div>
-                        <button class="btn btn-primary" id="savePageBtn">
-                            <i class="fas fa-save"></i> 保存更改
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
+                                <i class="fas fa-arrow-left"></i> 返回工作台
+                            </button>
+                            <button class="btn btn-primary" id="savePageBtn">
+                                <i class="fas fa-save"></i> 保存更改
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 页面编辑内容 -->
@@ -886,28 +845,68 @@
                         <div class="section">
                             <h3 style="margin-bottom: 20px; color: var(--gray-800);">首页横幅</h3>
                             <div class="form-group">
-                                <label for="bannerTitle">标题</label>
-                                <input type="text" id="bannerTitle" value="瓦兰卡免费GEO工具，智能内容创作助手">
+                                <label for="hero_title">标题</label>
+                                <input type="text" id="hero_title" placeholder="输入Hero标题">
                             </div>
                             <div class="form-group">
-                                <label for="bannerSubtitle">副标题</label>
-                                <input type="text" id="bannerSubtitle" value="基于AI技术，为您提供高质量的GEO内容创作服务">
-                            </div>
-                            <div class="form-group">
-                                <label for="bannerImage">横幅图片</label>
-                                <input type="text" id="bannerImage" value="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20AI%20technology%20banner%20with%20smart%20content%20creation%20concept%20teal%20color&image_size=landscape_16_9">
+                                <label for="hero_subtitle">副标题</label>
+                                <textarea id="hero_subtitle" rows="3" placeholder="输入Hero副标题"></textarea>
                             </div>
                         </div>
 
                         <div class="section" style="margin-top: 30px;">
                             <h3 style="margin-bottom: 20px; color: var(--gray-800);">功能介绍</h3>
                             <div class="form-group">
-                                <label for="featureTitle">标题</label>
-                                <input type="text" id="featureTitle" value="核心功能">
+                                <label for="feature_title">标题</label>
+                                <input type="text" id="feature_title" placeholder="输入功能标题">
                             </div>
                             <div class="form-group">
-                                <label for="featureDescription">描述</label>
-                                <textarea id="featureDescription" rows="3">瓦兰卡免费GEO工具提供全方位的品牌AI表现监测、诊断、优化建议方案和GEO优化工具，帮助企业提升品牌在AI平台的影响力和转化率。</textarea>
+                                <label for="feature_subtitle">描述</label>
+                                <textarea id="feature_subtitle" rows="3" placeholder="输入功能副标题"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="section" style="margin-top: 30px;">
+                            <h3 style="margin-bottom: 20px; color: var(--gray-800);">价格/CTA</h3>
+                            <div class="form-group">
+                                <label for="pricing_title">标题</label>
+                                <input type="text" id="pricing_title" placeholder="输入价格标题">
+                            </div>
+                            <div class="form-group">
+                                <label for="pricing_subtitle">描述</label>
+                                <textarea id="pricing_subtitle" rows="3" placeholder="输入价格副标题"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="section" style="margin-top: 30px;">
+                            <h3 style="margin-bottom: 20px; color: var(--gray-800);">客户评价</h3>
+                            <div class="form-group">
+                                <label for="testimonial_title">标题</label>
+                                <input type="text" id="testimonial_title" placeholder="输入评价标题">
+                            </div>
+                            <div class="form-group">
+                                <label for="testimonial_subtitle">描述</label>
+                                <textarea id="testimonial_subtitle" rows="3" placeholder="输入评价副标题"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="section" style="margin-top: 30px;">
+                            <h3 style="margin-bottom: 20px; color: var(--gray-800);">常见问题</h3>
+                            <div class="form-group">
+                                <label for="faq_title">标题</label>
+                                <input type="text" id="faq_title" placeholder="输入FAQ标题">
+                            </div>
+                            <div class="form-group">
+                                <label for="faq_subtitle">描述</label>
+                                <textarea id="faq_subtitle" rows="3" placeholder="输入FAQ副标题"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="section" style="margin-top: 30px;">
+                            <h3 style="margin-bottom: 20px; color: var(--gray-800);">页脚</h3>
+                            <div class="form-group">
+                                <label for="footer_text">页脚文本</label>
+                                <textarea id="footer_text" rows="3" placeholder="输入页脚文本"></textarea>
                             </div>
                         </div>
                     </div>
@@ -920,9 +919,14 @@
                             <h2>API管理</h2>
                             <p>管理AI问答功能的API配置</p>
                         </div>
-                        <button class="btn btn-primary" id="addApiBtn">
-                            <i class="fas fa-plus"></i> 添加API
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="window.location.href='../workbench.html'">
+                                <i class="fas fa-arrow-left"></i> 返回工作台
+                            </button>
+                            <button class="btn btn-primary" id="addApiBtn">
+                                <i class="fas fa-plus"></i> 添加API
+                            </button>
+                        </div>
                     </div>
 
                     <!-- API列表 -->
@@ -991,6 +995,15 @@
                 <div class="form-group">
                     <label for="articleAuthor">作者</label>
                     <input type="text" id="articleAuthor" required>
+                </div>
+                <div class="form-group">
+                    <label for="articleCategory">分类</label>
+                    <select id="articleCategory" required>
+                        <option value="教程">教程</option>
+                        <option value="报告">报告</option>
+                        <option value="公告">公告</option>
+                        <option value="技术">技术</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="articleContent">内容</label>
@@ -1124,6 +1137,21 @@
                 // 显示对应的内容区域
                 const sectionId = this.getAttribute('data-section');
                 document.getElementById(sectionId).style.display = 'block';
+                
+                // 加载用户列表
+                if (sectionId === 'users') {
+                    loadUsers();
+                }
+                
+                // 加载文章列表
+                if (sectionId === 'articles') {
+                    loadArticles();
+                }
+                
+                // 加载页面内容
+                if (sectionId === 'page-editor') {
+                    loadPageContent();
+                }
             });
         });
 
@@ -1183,25 +1211,305 @@
             openModal('addUserModal');
         });
 
+        // 加载页面内容
+        function loadPageContent() {
+            fetch('/api/admin/page-content/home')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const content = data.content;
+                        
+                        // 填充表单数据
+                        if (content.hero_title) document.getElementById('hero_title').value = content.hero_title;
+                        if (content.hero_subtitle) document.getElementById('hero_subtitle').value = content.hero_subtitle;
+                        if (content.feature_title) document.getElementById('feature_title').value = content.feature_title;
+                        if (content.feature_subtitle) document.getElementById('feature_subtitle').value = content.feature_subtitle;
+                        if (content.pricing_title) document.getElementById('pricing_title').value = content.pricing_title;
+                        if (content.pricing_subtitle) document.getElementById('pricing_subtitle').value = content.pricing_subtitle;
+                        if (content.testimonial_title) document.getElementById('testimonial_title').value = content.testimonial_title;
+                        if (content.testimonial_subtitle) document.getElementById('testimonial_subtitle').value = content.testimonial_subtitle;
+                        if (content.faq_title) document.getElementById('faq_title').value = content.faq_title;
+                        if (content.faq_subtitle) document.getElementById('faq_subtitle').value = content.faq_subtitle;
+                        if (content.footer_text) document.getElementById('footer_text').value = content.footer_text;
+                    } else {
+                        alert('加载页面内容失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('加载页面内容失败:', error);
+                    alert('加载页面内容失败');
+                });
+        }
+
         // 保存页面更改
         document.getElementById('savePageBtn').addEventListener('click', function() {
-            alert('页面更改已保存！');
+            const content = {
+                hero_title: document.getElementById('hero_title').value,
+                hero_subtitle: document.getElementById('hero_subtitle').value,
+                feature_title: document.getElementById('feature_title').value,
+                feature_subtitle: document.getElementById('feature_subtitle').value,
+                pricing_title: document.getElementById('pricing_title').value,
+                pricing_subtitle: document.getElementById('pricing_subtitle').value,
+                testimonial_title: document.getElementById('testimonial_title').value,
+                testimonial_subtitle: document.getElementById('testimonial_subtitle').value,
+                faq_title: document.getElementById('faq_title').value,
+                faq_subtitle: document.getElementById('faq_subtitle').value,
+                footer_text: document.getElementById('footer_text').value
+            };
+            
+            fetch('/api/admin/page-content/home', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(content)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('页面更改已保存！');
+                } else {
+                    alert(data.error || '保存页面内容失败');
+                }
+            })
+            .catch(error => {
+                console.error('保存页面内容失败:', error);
+                alert('保存页面内容失败');
+            });
         });
 
-        // 添加文章表单提交
+        // 加载文章列表
+        function loadArticles() {
+            fetch('/api/admin/articles')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const articleList = document.querySelector('.article-list tbody');
+                        articleList.innerHTML = '';
+                        
+                        data.articles.forEach(article => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${article.id}</td>
+                                <td>${article.title}</td>
+                                <td>${article.author}</td>
+                                <td>${article.category}</td>
+                                <td>${article.date}</td>
+                                <td>${article.views}</td>
+                                <td>
+                                    <button class="btn btn-secondary btn-sm" onclick="editArticle(${article.id})">编辑</button>
+                                    <button class="btn btn-danger btn-sm" style="margin-left: 8px;" onclick="deleteArticle(${article.id})">删除</button>
+                                </td>
+                            `;
+                            articleList.appendChild(tr);
+                        });
+                    } else {
+                        alert('加载文章列表失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('加载文章列表失败:', error);
+                    alert('加载文章列表失败');
+                });
+        }
+
+        // 编辑文章
+        function editArticle(id) {
+            // 这里可以实现编辑文章功能
+            alert('编辑文章功能开发中');
+        }
+
+        // 删除文章
+        function deleteArticle(id) {
+            if (confirm('确定要删除这篇文章吗？')) {
+                fetch(`/api/admin/articles/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('文章删除成功！');
+                        loadArticles();
+                    } else {
+                        alert(data.error || '删除文章失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('删除文章失败:', error);
+                    alert('删除文章失败');
+                });
+            }
+        }
+
+        // 修改添加文章表单提交
         document.getElementById('addArticleForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            // 这里可以添加表单提交逻辑
-            alert('文章添加成功！');
-            closeModal('addArticleModal');
+            
+            const title = document.getElementById('articleTitle').value;
+            const author = document.getElementById('articleAuthor').value;
+            const category = document.getElementById('articleCategory').value;
+            const content = document.getElementById('articleContent').value;
+            
+            fetch('/api/admin/articles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, author, category, content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('文章添加成功！');
+                    closeModal('addArticleModal');
+                    loadArticles();
+                } else {
+                    alert(data.error || '添加文章失败');
+                }
+            })
+            .catch(error => {
+                console.error('添加文章失败:', error);
+                alert('添加文章失败');
+            });
         });
+
+        // 加载用户列表
+        function loadUsers() {
+            fetch('/api/admin/users')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const userTab = document.querySelector('#user-tab tbody');
+                        const adminTab = document.querySelector('#admin-tab tbody');
+                        
+                        // 清空现有数据
+                        userTab.innerHTML = '';
+                        adminTab.innerHTML = '';
+                        
+                        // 填充用户数据
+                        data.users.forEach(user => {
+                            const tr = document.createElement('tr');
+                            const createdDate = new Date(user.created_at).toISOString().split('T')[0];
+                            
+                            if (user.role === 'user') {
+                                tr.innerHTML = `
+                                    <td>${user.id}</td>
+                                    <td>${user.name}</td>
+                                    <td>${user.phone}</td>
+                                    <td>${createdDate}</td>
+                                    <td>
+                                        <button class="btn btn-secondary btn-sm" onclick="editUser(${user.id})">编辑</button>
+                                        <button class="btn btn-danger btn-sm" style="margin-left: 8px;" onclick="deleteUser(${user.id})">删除</button>
+                                        <button class="btn btn-success btn-sm" style="margin-left: 8px;" onclick="setAdmin(${user.id})">设为管理员</button>
+                                    </td>
+                                `;
+                                userTab.appendChild(tr);
+                            } else if (user.role === 'admin') {
+                                tr.innerHTML = `
+                                    <td>${user.id}</td>
+                                    <td>${user.name}</td>
+                                    <td>${user.phone}</td>
+                                    <td>${createdDate}</td>
+                                    <td>
+                                        ${user.name === 'root' ? '<span style="color: var(--gray-400);">超级管理员</span>' : `
+                                            <button class="btn btn-secondary btn-sm" onclick="editUser(${user.id})">编辑</button>
+                                            <button class="btn btn-danger btn-sm" style="margin-left: 8px;" onclick="deleteUser(${user.id})">删除</button>
+                                        `}
+                                    </td>
+                                `;
+                                adminTab.appendChild(tr);
+                            }
+                        });
+                    } else {
+                        alert('加载用户列表失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('加载用户列表失败:', error);
+                    alert('加载用户列表失败');
+                });
+        }
+
+        // 编辑用户
+        function editUser(id) {
+            // 这里可以实现编辑用户功能
+            alert('编辑用户功能开发中');
+        }
+
+        // 删除用户
+        function deleteUser(id) {
+            if (confirm('确定要删除这个用户吗？')) {
+                fetch(`/api/admin/users/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('用户删除成功！');
+                        loadUsers();
+                    } else {
+                        alert(data.error || '删除用户失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('删除用户失败:', error);
+                    alert('删除用户失败');
+                });
+            }
+        }
+
+        // 将用户设为管理员
+        function setAdmin(id) {
+            if (confirm('确定要将这个用户设为管理员吗？')) {
+                fetch(`/api/admin/users/${id}/set-admin`, {
+                    method: 'PUT'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('用户已设为管理员！');
+                        loadUsers();
+                    } else {
+                        alert(data.error || '设置管理员失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('设置管理员失败:', error);
+                    alert('设置管理员失败');
+                });
+            }
+        }
 
         // 添加用户表单提交
         document.getElementById('addUserForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            // 这里可以添加表单提交逻辑
-            alert('用户添加成功！');
-            closeModal('addUserModal');
+            
+            const name = document.getElementById('userName').value;
+            const phone = document.getElementById('userPhone').value;
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userRole').value;
+            
+            fetch('/api/admin/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, phone, password, role })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('用户添加成功！');
+                    closeModal('addUserModal');
+                    loadUsers();
+                } else {
+                    alert(data.error || '添加用户失败');
+                }
+            })
+            .catch(error => {
+                console.error('添加用户失败:', error);
+                alert('添加用户失败');
+            });
         });
 
         // API管理功能

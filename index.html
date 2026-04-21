@@ -29,7 +29,6 @@
             <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
                 <a href="login.html" style="text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border: 1px solid var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">登录</a>
                 <a href="register.html" style="text-decoration: none; color: white; font-weight: 500; padding: 8px 16px; background: var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">注册</a>
-                <a href="admin/index.html" id="adminLink" style="display: none; text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border: 1px solid var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">管理员</a>
             </div>
             <button class="menu-toggle" onclick="toggleMobileMenu()" style="display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer;">
                 <span class="menu-icon" style="display: block; width: 20px; height: 2px; background: #333;"></span>
@@ -391,18 +390,41 @@
 
     <script src="script.js"></script>
     <script>
-        // 检查用户登录状态和角色
+        // 加载页面内容
+        async function loadPageContent() {
+            try {
+                const response = await fetch('/api/admin/page-content/home');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const content = data.content;
+                    
+                    // 更新页面内容
+                    if (content.hero_title) document.querySelector('.hero-title').textContent = content.hero_title;
+                    if (content.hero_subtitle) document.querySelector('.hero-desc').textContent = content.hero_subtitle;
+                    if (content.feature_title) document.querySelector('.features .section-title').textContent = content.feature_title;
+                    if (content.feature_subtitle) document.querySelector('.features .section-subtitle').textContent = content.feature_subtitle;
+                    if (content.pricing_title) document.querySelector('.cta-title').textContent = content.pricing_title;
+                    if (content.pricing_subtitle) document.querySelector('.cta-desc').textContent = content.pricing_subtitle;
+                    if (content.testimonial_title) document.querySelector('.testimonials .section-title').textContent = content.testimonial_title;
+                    if (content.testimonial_subtitle) document.querySelector('.testimonials .section-subtitle').textContent = content.testimonial_subtitle;
+                    if (content.faq_title) document.querySelector('.faq .section-title').textContent = content.faq_title;
+                    if (content.faq_subtitle) document.querySelector('.faq .section-subtitle').textContent = content.faq_subtitle;
+                    if (content.footer_text) document.querySelector('.copyright').textContent = content.footer_text;
+                }
+            } catch (error) {
+                console.error('加载页面内容失败:', error);
+            }
+        }
+
+        // 检查用户登录状态
         window.onload = function() {
             const user = localStorage.getItem('user');
             if (user) {
-                const userObj = JSON.parse(user);
-                if (userObj.role === 'admin') {
-                    // 显示管理员链接
-                    document.getElementById('adminLink').style.display = 'block';
-                    // 隐藏登录和注册按钮
-                    document.querySelector('a[href="login.html"]').style.display = 'none';
-                    document.querySelector('a[href="register.html"]').style.display = 'none';
-                }
+                window.location.href = 'workbench.html';
+            } else {
+                // 加载页面内容
+                loadPageContent();
             }
         };
     </script>

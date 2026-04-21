@@ -216,6 +216,7 @@
                     </ul>
                 </nav>
                 <div class="nav-actions" style="display: flex; align-items: center; gap: 15px;">
+                    <a href="admin/index.html" id="adminLink" style="display: none; text-decoration: none; color: #333; font-weight: 500; padding: 8px 16px; border: 1px solid var(--primary-color); border-radius: 20px; transition: all 0.3s ease;">后台管理</a>
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar"></div>
                         <span style="font-weight: 500;" id="userName"></span>
@@ -776,7 +777,7 @@
 
     <script src="script.js"></script>
     <script>
-        // 检查登录状态并显示用户信息
+        // 检查登录状态并显示用户信息和管理员按钮
         window.onload = function() {
             const user = localStorage.getItem('user');
             if (!user) {
@@ -788,6 +789,10 @@
                 document.getElementById('userName').textContent = userObj.phone.substring(0, 3) + '****' + userObj.phone.substring(7);
                 document.getElementById('headerUserAvatar').textContent = userObj.phone.substring(0, 3);
                 document.getElementById('headerUserName').textContent = userObj.phone.substring(0, 3) + '****' + userObj.phone.substring(7);
+                // 显示管理员按钮
+                if (userObj.role === 'admin') {
+                    document.getElementById('adminLink').style.display = 'block';
+                }
             }
         };
         

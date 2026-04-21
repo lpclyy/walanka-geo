@@ -98,6 +98,12 @@ async function connectDB() {
     
     // 创建用户表
     await createUserTable();
+    
+    // 创建文章表
+    await createArticleTable();
+    
+    // 创建页面内容表
+    await createPageContentTable();
   } catch (error) {
     console.error('MySQL connection failed:', error);
     process.exit(1);
@@ -123,6 +129,82 @@ async function createUserTable() {
     await createAdminAccount();
   } catch (error) {
     console.error('Create table failed:', error);
+  }
+}
+
+// 创建文章表
+async function createArticleTable() {
+  try {
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS articles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        author VARCHAR(100) NOT NULL,
+        content TEXT NOT NULL,
+        category VARCHAR(50) NOT NULL,
+        views INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('Article table created or already exists');
+    
+    // 插入默认文章
+    await insertDefaultArticles();
+  } catch (error) {
+    console.error('Create article table failed:', error);
+  }
+}
+
+// 插入默认文章
+async function insertDefaultArticles() {
+  try {
+    // 检查是否已有文章
+    const [existingArticles] = await db.execute('SELECT * FROM articles LIMIT 1');
+    if (existingArticles.length === 0) {
+      const defaultArticles = [
+        {
+          title: '不限篇数、永久免费！GEO 内容创作，用瓦兰卡免费GEO工具轻松掌握',
+          author: '瓦兰卡免费GEO',
+          content: '瓦兰卡免费GEO工具是国内首个免费的GEO优化平台，通过AI技术帮助企业提升品牌在AI平台的影响力和转化率。',
+          category: '教程'
+        },
+        {
+          title: '2026年 3-4月国内主流 AI平台核心数据全景报告',
+          author: '瓦兰卡免费GEO',
+          content: '本报告分析了2026年3-4月国内主流AI平台的核心数据，为企业提供GEO优化的参考。',
+          category: '报告'
+        },
+        {
+          title: '瓦兰卡免费GEO工具更新日志',
+          author: '瓦兰卡免费GEO',
+          content: '本文档记录了瓦兰卡免费GEO工具的更新历史和功能变化。',
+          category: '公告'
+        },
+        {
+          title: '用瓦兰卡GEO进行GEO优化教程（商家低成本自己操作教程）',
+          author: '瓦兰卡免费GEO',
+          content: '本教程详细介绍了如何使用瓦兰卡GEO工具进行GEO优化，帮助商家低成本自己操作。',
+          category: '教程'
+        },
+        {
+          title: 'GEO优化技术深度解析',
+          author: '瓦兰卡技术团队',
+          content: '本文深入解析了GEO优化的技术原理和实践方法，帮助企业更好地理解和应用GEO优化。',
+          category: '技术'
+        }
+      ];
+      
+      for (const article of defaultArticles) {
+        await db.execute(
+          'INSERT INTO articles (title, author, content, category) VALUES (?, ?, ?, ?)',
+          [article.title, article.author, article.content, article.category]
+        );
+      }
+      console.log('默认文章插入成功');
+    }
+  } catch (error) {
+    console.error('插入默认文章失败:', error);
   }
 }
 
@@ -287,15 +369,7 @@ app.post('/api/admin/login', async (req, res) => {
 // 获取所有文章
 app.get('/api/admin/articles', async (req, res) => {
   try {
-    // 这里可以从数据库获取文章列表
-    const articles = [
-      { id: 1, title: '不限篇数、永久免费！GEO 内容创作，用瓦兰卡免费GEO工具轻松掌握', author: '瓦兰卡免费GEO', date: '2026/04/10', views: 2 },
-      { id: 2, title: '2026年 3-4月国内主流 AI平台核心数据全景报告', author: '瓦兰卡免费GEO', date: '2026/04/06', views: 40 },
-      { id: 3, title: '瓦兰卡免费GEO工具更新日志', author: '瓦兰卡免费GEO', date: '2026/04/06', views: 20 },
-      { id: 4, title: '用瓦兰卡GEO进行GEO优化教程（商家低成本自己操作教程）', author: '瓦兰卡免费GEO', date: '2026/04/06', views: 47 },
-      { id: 5, title: 'GEO优化技术深度解析', author: '瓦兰卡技术团队', date: '2026/04/01', views: 35 }
-    ];
-    
+    const [articles] = await db.execute('SELECT id, title, author, category, views, DATE_FORMAT(created_at, "%Y/%m/%d") as date FROM articles ORDER BY created_at DESC');
     res.status(200).json({ success: true, articles });
   } catch (error) {
     console.error('获取文章列表失败:', error);
@@ -306,13 +380,18 @@ app.get('/api/admin/articles', async (req, res) => {
 // 添加文章
 app.post('/api/admin/articles', async (req, res) => {
   try {
-    const { title, author, date, content } = req.body;
+    const { title, author, content, category } = req.body;
     
-    if (!title || !author || !date || !content) {
+    if (!title || !author || !content || !category) {
       return res.status(400).json({ success: false, error: '请填写完整信息' });
     }
     
-    // 这里可以将文章保存到数据库
+    // 将文章保存到数据库
+    const [result] = await db.execute(
+      'INSERT INTO articles (title, author, content, category) VALUES (?, ?, ?, ?)',
+      [title, author, content, category]
+    );
+    
     res.status(200).json({ success: true, message: '文章添加成功' });
   } catch (error) {
     console.error('添加文章失败:', error);
@@ -324,13 +403,18 @@ app.post('/api/admin/articles', async (req, res) => {
 app.put('/api/admin/articles/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, author, date, content } = req.body;
+    const { title, author, content, category } = req.body;
     
-    if (!title || !author || !date || !content) {
+    if (!title || !author || !content || !category) {
       return res.status(400).json({ success: false, error: '请填写完整信息' });
     }
     
-    // 这里可以更新数据库中的文章
+    // 更新数据库中的文章
+    await db.execute(
+      'UPDATE articles SET title = ?, author = ?, content = ?, category = ? WHERE id = ?',
+      [title, author, content, category, id]
+    );
+    
     res.status(200).json({ success: true, message: '文章更新成功' });
   } catch (error) {
     console.error('更新文章失败:', error);
@@ -343,11 +427,209 @@ app.delete('/api/admin/articles/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
-    // 这里可以从数据库删除文章
+    // 从数据库删除文章
+    await db.execute('DELETE FROM articles WHERE id = ?', [id]);
+    
     res.status(200).json({ success: true, message: '文章删除成功' });
   } catch (error) {
     console.error('删除文章失败:', error);
     res.status(500).json({ success: false, error: '删除文章失败' });
+  }
+});
+
+// 获取文章详情
+app.get('/api/articles/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 获取文章详情
+    const [articles] = await db.execute('SELECT * FROM articles WHERE id = ?', [id]);
+    if (articles.length === 0) {
+      return res.status(404).json({ success: false, error: '文章不存在' });
+    }
+    
+    // 增加浏览量
+    await db.execute('UPDATE articles SET views = views + 1 WHERE id = ?', [id]);
+    
+    res.status(200).json({ success: true, article: articles[0] });
+  } catch (error) {
+    console.error('获取文章详情失败:', error);
+    res.status(500).json({ success: false, error: '获取文章详情失败' });
+  }
+});
+
+// 获取分类文章
+app.get('/api/articles/category/:category', async (req, res) => {
+  try {
+    const { category } = req.params;
+    
+    // 获取分类文章
+    const [articles] = await db.execute(
+      'SELECT id, title, author, category, views, DATE_FORMAT(created_at, "%Y/%m/%d") as date FROM articles WHERE category = ? ORDER BY created_at DESC',
+      [category]
+    );
+    
+    res.status(200).json({ success: true, articles });
+  } catch (error) {
+    console.error('获取分类文章失败:', error);
+    res.status(500).json({ success: false, error: '获取分类文章失败' });
+  }
+});
+
+// 页面内容管理接口
+
+// 创建页面内容表
+async function createPageContentTable() {
+  try {
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS page_content (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        page_name VARCHAR(50) NOT NULL,
+        section_name VARCHAR(50) NOT NULL,
+        content TEXT NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_page_section (page_name, section_name)
+      )
+    `);
+    console.log('Page content table created or already exists');
+    
+    // 插入默认首页内容
+    await insertDefaultPageContent();
+  } catch (error) {
+    console.error('Create page content table failed:', error);
+  }
+}
+
+// 插入默认首页内容
+async function insertDefaultPageContent() {
+  try {
+    // 检查是否已有首页内容
+    const [existingContent] = await db.execute('SELECT * FROM page_content WHERE page_name = "home" LIMIT 1');
+    if (existingContent.length === 0) {
+      const defaultContent = [
+        {
+          page_name: 'home',
+          section_name: 'hero_title',
+          content: '瓦兰卡免费GEO工具'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'hero_subtitle',
+          content: '不限篇数、永久免费的GEO内容创作助手'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'feature_title',
+          content: '为什么选择瓦兰卡'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'feature_subtitle',
+          content: '国内首个免费的GEO优化平台，通过AI技术帮助企业提升品牌在AI平台的影响力和转化率'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'pricing_title',
+          content: '免费使用'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'pricing_subtitle',
+          content: '无需信用卡，立即开始使用'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'testimonial_title',
+          content: '用户评价'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'testimonial_subtitle',
+          content: '听听我们的用户怎么说'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'faq_title',
+          content: '常见问题'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'faq_subtitle',
+          content: '关于瓦兰卡免费GEO工具的常见问题'  
+        },
+        {
+          page_name: 'home',
+          section_name: 'footer_text',
+          content: '© 2026 瓦兰卡免费GEO工具. 保留所有权利.'  
+        }
+      ];
+      
+      for (const item of defaultContent) {
+        await db.execute(
+          'INSERT INTO page_content (page_name, section_name, content) VALUES (?, ?, ?)',
+          [item.page_name, item.section_name, item.content]
+        );
+      }
+      console.log('默认首页内容插入成功');
+    }
+  } catch (error) {
+    console.error('插入默认首页内容失败:', error);
+  }
+}
+
+// 获取页面内容
+app.get('/api/admin/page-content/:page', async (req, res) => {
+  try {
+    const { page } = req.params;
+    
+    const [content] = await db.execute(
+      'SELECT section_name, content FROM page_content WHERE page_name = ?',
+      [page]
+    );
+    
+    // 转换为对象格式
+    const contentObj = {};
+    content.forEach(item => {
+      contentObj[item.section_name] = item.content;
+    });
+    
+    res.status(200).json({ success: true, content: contentObj });
+  } catch (error) {
+    console.error('获取页面内容失败:', error);
+    res.status(500).json({ success: false, error: '获取页面内容失败' });
+  }
+});
+
+// 更新页面内容
+app.put('/api/admin/page-content/:page', async (req, res) => {
+  try {
+    const { page } = req.params;
+    const content = req.body;
+    
+    // 开始事务
+    await db.execute('START TRANSACTION');
+    
+    try {
+      // 遍历更新内容
+      for (const [section, value] of Object.entries(content)) {
+        await db.execute(
+          'INSERT INTO page_content (page_name, section_name, content) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE content = ?',
+          [page, section, value, value]
+        );
+      }
+      
+      // 提交事务
+      await db.execute('COMMIT');
+      
+      res.status(200).json({ success: true, message: '页面内容更新成功' });
+    } catch (error) {
+      // 回滚事务
+      await db.execute('ROLLBACK');
+      throw error;
+    }
+  } catch (error) {
+    console.error('更新页面内容失败:', error);
+    res.status(500).json({ success: false, error: '更新页面内容失败' });
   }
 });
 
@@ -395,6 +677,145 @@ app.post('/api/payment/create', async (req, res) => {
   } catch (error) {
     console.error('创建支付订单失败:', error);
     res.status(500).json({ success: false, error: '创建支付订单失败' });
+  }
+});
+
+// 用户管理接口
+
+// 获取用户列表
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const [users] = await db.execute('SELECT id, name, phone, role, created_at FROM users');
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    console.error('获取用户列表失败:', error);
+    res.status(500).json({ success: false, error: '获取用户列表失败' });
+  }
+});
+
+// 添加用户
+app.post('/api/admin/users', async (req, res) => {
+  try {
+    const { name, phone, password, role } = req.body;
+    
+    if (!name || !phone || !password) {
+      return res.status(400).json({ success: false, error: '请填写完整信息' });
+    }
+    
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ success: false, error: '请输入正确的手机号码' });
+    }
+    
+    // 检查用户是否已存在
+    const [existingUsers] = await db.execute('SELECT * FROM users WHERE phone = ?', [phone]);
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ success: false, error: '该手机号已注册' });
+    }
+    
+    // 添加新用户
+    const [result] = await db.execute(
+      'INSERT INTO users (name, phone, password, role) VALUES (?, ?, ?, ?)',
+      [name, phone, password, role || 'user']
+    );
+    
+    const newUser = {
+      id: result.insertId,
+      name,
+      phone,
+      role: role || 'user',
+      created_at: new Date()
+    };
+    
+    res.status(200).json({ success: true, message: '用户添加成功', user: newUser });
+  } catch (error) {
+    console.error('添加用户失败:', error);
+    res.status(500).json({ success: false, error: '添加用户失败' });
+  }
+});
+
+// 编辑用户
+app.put('/api/admin/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, password, role } = req.body;
+    
+    if (!name || !phone) {
+      return res.status(400).json({ success: false, error: '请填写完整信息' });
+    }
+    
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ success: false, error: '请输入正确的手机号码' });
+    }
+    
+    // 检查手机号是否已被其他用户使用
+    const [existingUsers] = await db.execute('SELECT * FROM users WHERE phone = ? AND id != ?', [phone, id]);
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ success: false, error: '该手机号已被其他用户使用' });
+    }
+    
+    // 更新用户信息
+    if (password) {
+      await db.execute(
+        'UPDATE users SET name = ?, phone = ?, password = ?, role = ? WHERE id = ?',
+        [name, phone, password, role, id]
+      );
+    } else {
+      await db.execute(
+        'UPDATE users SET name = ?, phone = ?, role = ? WHERE id = ?',
+        [name, phone, role, id]
+      );
+    }
+    
+    const [updatedUsers] = await db.execute('SELECT id, name, phone, role, created_at FROM users WHERE id = ?', [id]);
+    const updatedUser = updatedUsers[0];
+    
+    res.status(200).json({ success: true, message: '用户更新成功', user: updatedUser });
+  } catch (error) {
+    console.error('更新用户失败:', error);
+    res.status(500).json({ success: false, error: '更新用户失败' });
+  }
+});
+
+// 删除用户
+app.delete('/api/admin/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 不能删除超级管理员
+    const [users] = await db.execute('SELECT * FROM users WHERE id = ?', [id]);
+    if (users.length > 0 && users[0].name === 'root') {
+      return res.status(400).json({ success: false, error: '不能删除超级管理员' });
+    }
+    
+    // 删除用户
+    await db.execute('DELETE FROM users WHERE id = ?', [id]);
+    
+    res.status(200).json({ success: true, message: '用户删除成功' });
+  } catch (error) {
+    console.error('删除用户失败:', error);
+    res.status(500).json({ success: false, error: '删除用户失败' });
+  }
+});
+
+// 将用户设为管理员
+app.put('/api/admin/users/:id/set-admin', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 更新用户角色
+    await db.execute('UPDATE users SET role = ? WHERE id = ?', ['admin', id]);
+    
+    const [updatedUsers] = await db.execute('SELECT id, name, phone, role, created_at FROM users WHERE id = ?', [id]);
+    const updatedUser = updatedUsers[0];
+    
+    res.status(200).json({ success: true, message: '用户已设为管理员', user: updatedUser });
+  } catch (error) {
+    console.error('设置管理员失败:', error);
+    res.status(500).json({ success: false, error: '设置管理员失败' });
   }
 });
 
