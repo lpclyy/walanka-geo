@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const tencentcloud = require("tencentcloud-sdk-nodejs");
 const SmsClient = tencentcloud.sms.v20210111.Client;
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -1091,15 +1092,24 @@ app.post('/api/ai/chat', async (req, res) => {
       return res.status(400).json({ success: false, error: '问题不能为空' });
     }
     
+    // 从环境变量获取配置
+    const apiKey = process.env.DOUBAO_API_KEY;
+    const apiUrl = process.env.DOUBAO_API_URL;
+    const model = process.env.DOUBAO_MODEL;
+    
+    if (!apiKey || !apiUrl || !model) {
+      return res.status(500).json({ success: false, error: 'API配置未设置' });
+    }
+    
     // 调用豆包大模型API
-    const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ark-bb559119-5741-4f33-bc7f-7a74b5126b33-ed3a33'
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'ep-20260421102756-rldv',
+        model: model,
         messages: [
           {
             role: 'system',
