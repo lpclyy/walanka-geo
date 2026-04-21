@@ -88,7 +88,11 @@ const redisClient = redis.createClient({
 });
 
 // 连接Redis
-redisClient.connect().catch(console.error);
+redisClient.connect().catch(error => {
+  console.error('Redis连接失败:', error);
+  // 继续启动服务器，即使Redis连接失败
+  console.log('Redis连接失败，但服务器将继续运行');
+});
 
 // 连接MySQL
 let db;

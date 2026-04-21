@@ -2920,6 +2920,47 @@
             });
         });
         
+        // 处理非下拉菜单导航项点击
+        document.querySelectorAll('.workbench-nav > li > a:not(.nav-dropdown-toggle)').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 移除所有导航项的active类
+                document.querySelectorAll('.workbench-nav li').forEach(li => {
+                    if (li && li.classList) {
+                        li.classList.remove('active');
+                    }
+                });
+                
+                // 添加当前导航项的active类
+                const parentLi = this.parentElement;
+                if (parentLi && parentLi.classList) {
+                    parentLi.classList.add('active');
+                }
+                
+                // 获取目标模式ID
+                const modeId = this.getAttribute('data-mode');
+                
+                // 隐藏所有模式内容
+                document.querySelectorAll('.workbench-mode').forEach(mode => {
+                    mode.style.display = 'none';
+                });
+                
+                // 显示目标模式内容
+                const targetMode = document.getElementById(modeId);
+                if (targetMode) {
+                    targetMode.style.display = 'block';
+                } else {
+                    // 如果目标模式不存在，显示数据总览
+                    const dashboard = document.getElementById('dashboard');
+                    if (dashboard) {
+                        dashboard.style.display = 'block';
+                    }
+                    console.warn(`模式 ${modeId} 不存在，显示数据总览`);
+                }
+            });
+        });
+        
         // AI对话功能
         document.getElementById('sendQuestion').addEventListener('click', async function() {
             const question = document.getElementById('aiQuestion').value.trim();
