@@ -242,30 +242,155 @@
                                 <span>数据总览</span>
                             </a>
                         </li>
+                        
+                        <!-- 品牌AI可见度下拉菜单 -->
                         <li style="margin-bottom: 5px;">
-                            <a href="#" data-mode="brand-monitor" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
-                                <span class="nav-icon">🔍</span>
-                                <span>品牌AI可见度</span>
+                            <a href="#" class="nav-dropdown-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="nav-icon">🔍</span>
+                                    <span>品牌AI可见度</span>
+                                </div>
+                                <span class="dropdown-arrow">▼</span>
                             </a>
+                            <ul class="nav-dropdown" style="list-style: none; padding: 0; margin: 5px 0 0 0; display: none;">
+                                <li>
+                                    <a href="#" data-mode="brand-overview" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>品牌概览</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="brand-visibility" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>品牌可见度</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="brand-perception" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>品牌感知</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="topic-analysis" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>主题分析</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="reference-analysis" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>引用分析</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="prompt-list" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>提示词列表</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="answer-snapshot" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>答案快照</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="improvement-suggestions" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>改进建议</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="export-pdf" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>导出PDF报告</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+                        
+                        <!-- 竞品分析下拉菜单 -->
                         <li style="margin-bottom: 5px;">
-                            <a href="#" data-mode="competitor-analysis" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
-                                <span class="nav-icon">📈</span>
-                                <span>竞品分析</span>
+                            <a href="#" class="nav-dropdown-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="nav-icon">📈</span>
+                                    <span>竞品分析</span>
+                                </div>
+                                <span class="dropdown-arrow">▼</span>
                             </a>
+                            <ul class="nav-dropdown" style="list-style: none; padding: 0; margin: 5px 0 0 0; display: none;">
+                                <li>
+                                    <a href="#" data-mode="competitor-brand-analysis" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>竞品品牌分析</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="competitor-prompt-analysis" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>竞品提示词分析</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="competitor-settings" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>竞品设置</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+                        
+                        <!-- 关键词管理下拉菜单 -->
                         <li style="margin-bottom: 5px;">
-                            <a href="#" data-mode="keyword-management" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
-                                <span class="nav-icon">🔑</span>
-                                <span>关键词管理</span>
+                            <a href="#" class="nav-dropdown-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="nav-icon">🔑</span>
+                                    <span>关键词管理</span>
+                                </div>
+                                <span class="dropdown-arrow">▼</span>
                             </a>
+                            <ul class="nav-dropdown" style="list-style: none; padding: 0; margin: 5px 0 0 0; display: none;">
+                                <li>
+                                    <a href="#" data-mode="keyword-list" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>关键词列表</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="keyword-group" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>关键词分组</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="keyword-monitor" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>关键词监控</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+                        
+                        <!-- 内容创作助手下拉菜单 -->
                         <li style="margin-bottom: 5px;">
-                            <a href="#" data-mode="content-creation" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
-                                <span class="nav-icon">✍️</span>
-                                <span>内容创作助手</span>
+                            <a href="#" class="nav-dropdown-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="nav-icon">✍️</span>
+                                    <span>内容创作助手</span>
+                                </div>
+                                <span class="dropdown-arrow">▼</span>
                             </a>
+                            <ul class="nav-dropdown" style="list-style: none; padding: 0; margin: 5px 0 0 0; display: none;">
+                                <li>
+                                    <a href="#" data-mode="article-writer" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>文章创作</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="title-generator" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>标题生成</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="content-rewriter" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>内容改写</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="content-management" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>内容管理</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+                        
+                        <!-- 其他工具 -->
                         <li style="margin-bottom: 5px;">
                             <a href="#" data-mode="schema-tool" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
                                 <span class="nav-icon">⚙️</span>
@@ -278,18 +403,64 @@
                                 <span>批量分析</span>
                             </a>
                         </li>
+                        
+                        <!-- 优化建议下拉菜单 -->
                         <li style="margin-bottom: 5px;">
-                            <a href="#" data-mode="suggestions" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
-                                <span class="nav-icon">💡</span>
-                                <span>优化建议</span>
+                            <a href="#" class="nav-dropdown-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="nav-icon">💡</span>
+                                    <span>优化建议</span>
+                                </div>
+                                <span class="dropdown-arrow">▼</span>
                             </a>
+                            <ul class="nav-dropdown" style="list-style: none; padding: 0; margin: 5px 0 0 0; display: none;">
+                                <li>
+                                    <a href="#" data-mode="geo-suggestions" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>GEO优化建议</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="content-suggestions" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>内容优化建议</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="brand-suggestions" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>品牌优化建议</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+                        
+                        <!-- 历史记录下拉菜单 -->
                         <li style="margin-bottom: 5px;">
-                            <a href="#" data-mode="history" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
-                                <span class="nav-icon">🕒</span>
-                                <span>历史记录</span>
+                            <a href="#" class="nav-dropdown-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="nav-icon">🕒</span>
+                                    <span>历史记录</span>
+                                </div>
+                                <span class="dropdown-arrow">▼</span>
                             </a>
+                            <ul class="nav-dropdown" style="list-style: none; padding: 0; margin: 5px 0 0 0; display: none;">
+                                <li>
+                                    <a href="#" data-mode="analysis-history" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>分析历史</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="creation-history" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>创作历史</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="ai-chat-history" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>AI对话历史</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+                        
+                        <!-- AI对话 -->
                         <li style="margin-bottom: 5px;">
                             <a href="#" data-mode="ai-chat" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
                                 <span class="nav-icon">🤖</span>
@@ -758,6 +929,256 @@
                             <p style="color: #666; margin-bottom: 30px;">内容为空，管理员可编辑</p>
                         </div>
                     </div>
+                    
+                    <!-- 品牌概览模式 -->
+                    <div class="workbench-mode" id="brand-overview" style="display: none;">
+                        <div class="brand-overview-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">品牌概览</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>品牌概览页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 品牌可见度模式 -->
+                    <div class="workbench-mode" id="brand-visibility" style="display: none;">
+                        <div class="brand-visibility-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">品牌可见度</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>品牌可见度页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 品牌感知模式 -->
+                    <div class="workbench-mode" id="brand-perception" style="display: none;">
+                        <div class="brand-perception-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">品牌感知</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>品牌感知页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 主题分析模式 -->
+                    <div class="workbench-mode" id="topic-analysis" style="display: none;">
+                        <div class="topic-analysis-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">主题分析</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>主题分析页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 引用分析模式 -->
+                    <div class="workbench-mode" id="reference-analysis" style="display: none;">
+                        <div class="reference-analysis-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">引用分析</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>引用分析页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 提示词列表模式 -->
+                    <div class="workbench-mode" id="prompt-list" style="display: none;">
+                        <div class="prompt-list-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">提示词列表</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>提示词列表页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 答案快照模式 -->
+                    <div class="workbench-mode" id="answer-snapshot" style="display: none;">
+                        <div class="answer-snapshot-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">答案快照</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>答案快照页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 改进建议模式 -->
+                    <div class="workbench-mode" id="improvement-suggestions" style="display: none;">
+                        <div class="improvement-suggestions-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">改进建议</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>改进建议页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 导出PDF报告模式 -->
+                    <div class="workbench-mode" id="export-pdf" style="display: none;">
+                        <div class="export-pdf-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">导出PDF报告</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>导出PDF报告页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 竞品品牌分析模式 -->
+                    <div class="workbench-mode" id="competitor-brand-analysis" style="display: none;">
+                        <div class="competitor-brand-analysis-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">竞品品牌分析</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>竞品品牌分析页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 竞品提示词分析模式 -->
+                    <div class="workbench-mode" id="competitor-prompt-analysis" style="display: none;">
+                        <div class="competitor-prompt-analysis-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">竞品提示词分析</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>竞品提示词分析页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 竞品设置模式 -->
+                    <div class="workbench-mode" id="competitor-settings" style="display: none;">
+                        <div class="competitor-settings-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">竞品设置</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>竞品设置页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 关键词列表模式 -->
+                    <div class="workbench-mode" id="keyword-list" style="display: none;">
+                        <div class="keyword-list-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">关键词列表</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>关键词列表页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 关键词分组模式 -->
+                    <div class="workbench-mode" id="keyword-group" style="display: none;">
+                        <div class="keyword-group-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">关键词分组</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>关键词分组页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 关键词监控模式 -->
+                    <div class="workbench-mode" id="keyword-monitor" style="display: none;">
+                        <div class="keyword-monitor-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">关键词监控</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>关键词监控页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 文章创作模式 -->
+                    <div class="workbench-mode" id="article-writer" style="display: none;">
+                        <div class="article-writer-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">文章创作</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>文章创作页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 标题生成模式 -->
+                    <div class="workbench-mode" id="title-generator" style="display: none;">
+                        <div class="title-generator-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">标题生成</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>标题生成页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 内容改写模式 -->
+                    <div class="workbench-mode" id="content-rewriter" style="display: none;">
+                        <div class="content-rewriter-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">内容改写</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>内容改写页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 内容管理模式 -->
+                    <div class="workbench-mode" id="content-management" style="display: none;">
+                        <div class="content-management-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">内容管理</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>内容管理页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- GEO优化建议模式 -->
+                    <div class="workbench-mode" id="geo-suggestions" style="display: none;">
+                        <div class="geo-suggestions-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">GEO优化建议</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>GEO优化建议页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 内容优化建议模式 -->
+                    <div class="workbench-mode" id="content-suggestions" style="display: none;">
+                        <div class="content-suggestions-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">内容优化建议</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>内容优化建议页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 品牌优化建议模式 -->
+                    <div class="workbench-mode" id="brand-suggestions" style="display: none;">
+                        <div class="brand-suggestions-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">品牌优化建议</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>品牌优化建议页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 分析历史模式 -->
+                    <div class="workbench-mode" id="analysis-history" style="display: none;">
+                        <div class="analysis-history-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">分析历史</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>分析历史页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 创作历史模式 -->
+                    <div class="workbench-mode" id="creation-history" style="display: none;">
+                        <div class="creation-history-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">创作历史</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>创作历史页面内容</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI对话历史模式 -->
+                    <div class="workbench-mode" id="ai-chat-history" style="display: none;">
+                        <div class="ai-chat-history-container">
+                            <h3 style="color: #333; margin-bottom: 20px;">AI对话历史</h3>
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <p>AI对话历史页面内容</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -924,6 +1345,56 @@
             if (e.key === 'Enter') {
                 document.getElementById('sendQuestion').click();
             }
+        });
+        
+        // 下拉菜单功能
+        document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 切换下拉菜单显示/隐藏
+                const dropdown = this.nextElementSibling;
+                if (dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                    this.querySelector('.dropdown-arrow').textContent = '▼';
+                } else {
+                    dropdown.style.display = 'block';
+                    this.querySelector('.dropdown-arrow').textContent = '▲';
+                }
+            });
+        });
+        
+        // 处理下拉菜单项点击
+        document.querySelectorAll('.nav-dropdown a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 移除所有导航项的active类
+                document.querySelectorAll('.workbench-nav li').forEach(li => {
+                    li.classList.remove('active');
+                });
+                
+                // 添加当前导航项的active类
+                this.parentElement.parentElement.parentElement.classList.add('active');
+                
+                // 获取目标模式ID
+                const modeId = this.getAttribute('data-mode');
+                
+                // 隐藏所有模式内容
+                document.querySelectorAll('.workbench-mode').forEach(mode => {
+                    mode.style.display = 'none';
+                });
+                
+                // 显示目标模式内容
+                const targetMode = document.getElementById(modeId);
+                if (targetMode) {
+                    targetMode.style.display = 'block';
+                } else {
+                    // 如果目标模式不存在，显示数据总览
+                    document.getElementById('dashboard').style.display = 'block';
+                    console.warn(`模式 ${modeId} 不存在，显示数据总览`);
+                }
+            });
         });
         
 
