@@ -476,6 +476,30 @@ app.get('/api/articles/category/:category', async (req, res) => {
   }
 });
 
+// 获取文章列表（支持分类筛选）
+app.get('/api/articles', async (req, res) => {
+  try {
+    const { category } = req.query;
+    
+    let query = 'SELECT id, title, author, category, views, DATE_FORMAT(created_at, "%Y/%m/%d") as date FROM articles';
+    let params = [];
+    
+    if (category && category !== 'all') {
+      query += ' WHERE category = ?';
+      params.push(category);
+    }
+    
+    query += ' ORDER BY created_at DESC';
+    
+    const [articles] = await db.execute(query, params);
+    
+    res.status(200).json({ success: true, articles });
+  } catch (error) {
+    console.error('获取文章列表失败:', error);
+    res.status(500).json({ success: false, error: '获取文章列表失败' });
+  }
+});
+
 // 页面内容管理接口
 
 // 创建页面内容表
