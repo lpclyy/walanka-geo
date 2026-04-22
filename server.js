@@ -442,6 +442,62 @@ app.delete('/api/admin/articles/:id', async (req, res) => {
   }
 });
 
+// 获取文章详情（管理员）
+app.get('/api/admin/articles/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 获取文章详情
+    const [articles] = await db.execute('SELECT * FROM articles WHERE id = ?', [id]);
+    if (articles.length === 0) {
+      return res.status(404).json({ success: false, error: '文章不存在' });
+    }
+    
+    res.status(200).json({ success: true, article: articles[0] });
+  } catch (error) {
+    console.error('获取文章详情失败:', error);
+    res.status(500).json({ success: false, error: '获取文章详情失败' });
+  }
+});
+
+// 获取今日访问量
+app.get('/api/admin/stats/visits', async (req, res) => {
+  try {
+    // 模拟数据
+    res.status(200).json({ success: true, visits: 42 });
+  } catch (error) {
+    console.error('获取访问量失败:', error);
+    res.status(500).json({ success: false, error: '获取访问量失败' });
+  }
+});
+
+// 获取活跃用户数
+app.get('/api/admin/stats/active-users', async (req, res) => {
+  try {
+    // 模拟数据
+    res.status(200).json({ success: true, activeUsers: 1 });
+  } catch (error) {
+    console.error('获取活跃用户数失败:', error);
+    res.status(500).json({ success: false, error: '获取活跃用户数失败' });
+  }
+});
+
+// 获取最近活动
+app.get('/api/admin/activities', async (req, res) => {
+  try {
+    // 模拟数据
+    const activities = [
+      { icon: 'fa-sign-in-alt', time: '今天 10:30', text: '管理员登录系统' },
+      { icon: 'fa-user-plus', time: '昨天 14:20', text: '系统自动创建管理员账号' },
+      { icon: 'fa-cog', time: '2026/04/06 09:15', text: '系统初始化完成' }
+    ];
+    res.status(200).json({ success: true, activities });
+  } catch (error) {
+    console.error('获取活动数据失败:', error);
+    res.status(500).json({ success: false, error: '获取活动数据失败' });
+  }
+});
+
 // 获取文章详情
 app.get('/api/articles/:id', async (req, res) => {
   try {
