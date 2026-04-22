@@ -263,10 +263,15 @@ app.get('/api/admin/stats/active-users', async (req, res) => {
 
 app.get('/api/admin/activities', async (req, res) => {
   try {
+    // 模拟活动数据，包含用户和文章操作
     const activities = [
-      { icon: 'fa-sign-in-alt', time: '今天 10:30', text: '管理员登录系统' },
-      { icon: 'fa-user-plus', time: '昨天 14:20', text: '系统自动创建管理员账号' },
-      { icon: 'fa-cog', time: '2026/04/06 09:15', text: '系统初始化完成' }
+      { icon: 'fa-user-plus', time: '今天 14:30', text: '管理员添加了新用户' },
+      { icon: 'fa-user-edit', time: '今天 13:45', text: '管理员修改了用户信息' },
+      { icon: 'fa-user-minus', time: '今天 11:20', text: '管理员删除了用户' },
+      { icon: 'fa-file-plus', time: '昨天 16:15', text: '管理员添加了新文章' },
+      { icon: 'fa-file-edit', time: '昨天 14:50', text: '管理员编辑了文章' },
+      { icon: 'fa-file-minus', time: '昨天 10:30', text: '管理员删除了文章' },
+      { icon: 'fa-sign-in-alt', time: '昨天 09:00', text: '管理员登录系统' }
     ];
     res.status(200).json({ success: true, activities });
   } catch (error) {
@@ -437,6 +442,109 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// 用户管理API
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const [users] = await db.execute('SELECT id, name, phone, role, created_at FROM users');
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    console.error('获取用户列表失败:', error);
+    res.status(500).json({ success: false, error: '获取用户列表失败' });
+  }
+});
+
+app.post('/api/admin/users', async (req, res) => {
+  try {
+    const { name, phone, password, role } = req.body;
+    
+    if (!name || !phone || !password) {
+      return res.status(400).json({ success: false, error: '请填写完整信息' });
+    }
+    
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ success: false, error: '请输入正确的手机号码' });
+    }
+    
+    const [existingUsers] = await db.execute('SELECT * FROM users WHERE phone = ?', [phone]);
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ success: false, error: '该手机号已注册' });
+    }
+    
+    const [result] = await db.execute(
+      'INSERT INTO users (name, phone, password, role) VALUES (?, ?, ?, ?)',
+      [name, phone, password, role || 'user']
+    );
+    
+    const newUser = {
+      id: result.insertId,
+      name,
+      phone,
+      role: role || 'user',
+      created_at: new Date()
+    };
+    
+    res.status(200).json({ success: true, message: '用户添加成功', user: newUser });
+  } catch (error) {
+    console.error('添加用户失败:', error);
+    res.status(500).json({ success: false, error: '添加用户失败' });
+  }
+});
+
+app.put('/api/admin/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, password, role } = req.body;
+    
+    if (!name || !phone) {
+      return res.status(400).json({ success: false, error: '请填写完整信息' });
+    }
+    
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ success: false, error: '请输入正确的手机号码' });
+    }
+    
+    const [existingUsers] = await db.execute('SELECT * FROM users WHERE phone = ? AND id != ?', [phone, id]);
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ success: false, error: '该手机号已被其他用户使用' });
+    }
+    
+    if (password) {
+      await db.execute(
+        'UPDATE users SET name = ?, phone = ?, password = ?, role = ? WHERE id = ?',
+        [name, phone, password, role, id]
+      );
+    } else {
+      await db.execute(
+        'UPDATE users SET name = ?, phone = ?, role = ? WHERE id = ?',
+        [name, phone, role, id]
+      );
+    }
+    
+    const [updatedUsers] = await db.execute('SELECT id, name, phone, role, created_at FROM users WHERE id = ?', [id]);
+    const updatedUser = updatedUsers[0];
+    
+    res.status(200).json({ success: true, message: '用户更新成功', user: updatedUser });
+  } catch (error) {
+    console.error('更新用户失败:', error);
+    res.status(500).json({ success: false, error: '更新用户失败' });
+  }
+});
+
+app.delete('/api/admin/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    await db.execute('DELETE FROM users WHERE id = ?', [id]);
+    
+    res.status(200).json({ success: true, message: '用户删除成功' });
+  } catch (error) {
+    console.error('删除用户失败:', error);
+    res.status(500).json({ success: false, error: '删除用户失败' });
+  }
+});
+
 app.get('*', (req, res) => {
   const filePath = path.join(__dirname, req.path);
   if (fs.existsSync(filePath) && !fs.statSync(filePath).isDirectory()) {
@@ -447,8 +555,16 @@ app.get('*', (req, res) => {
 });
 
 async function startServer() {
-  await database.connectDB();
-  await database.connectRedis();
+  try {
+    await database.connectDB();
+  } catch (error) {
+    console.error('数据库连接失败，服务器将继续运行:', error);
+  }
+  try {
+    await database.connectRedis();
+  } catch (error) {
+    console.error('Redis连接失败，服务器将继续运行:', error);
+  }
   db = database.getDB();
   redisClient = database.getRedisClient();
   app.listen(PORT, () => {
