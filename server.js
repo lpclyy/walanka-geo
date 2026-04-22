@@ -128,6 +128,7 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { phone, password } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress;
     
     if (!phone || !password) {
       return res.status(400).json({ error: '请填写完整信息' });
@@ -146,6 +147,9 @@ app.post('/api/admin/login', async (req, res) => {
     }
     
     const token = jwt.sign({ id: user.id, phone: user.phone, role: user.role }, config.jwtSecret, { expiresIn: config.jwtExpiresIn });
+    
+    // 记录登录活动
+    await activityService.logActivity(user.id, user.name, 'login', '登录了管理系统', ipAddress);
     
     res.status(200).json({
       success: true,
@@ -176,6 +180,7 @@ app.get('/api/admin/articles', async (req, res) => {
 app.post('/api/admin/articles', async (req, res) => {
   try {
     const { title, author, content, category } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress;
     
     if (!title || !author || !content || !category) {
       return res.status(400).json({ success: false, error: '请填写完整信息' });
@@ -184,6 +189,16 @@ app.post('/api/admin/articles', async (req, res) => {
     const [result] = await db.execute(
       'INSERT INTO articles (title, author, content, category) VALUES (?, ?, ?, ?)',
       [title, author, content, category]
+    );
+    
+    // 记录添加文章活动
+    const adminUser = JSON.parse(req.headers.authorization?.split(' ')[1] || '{}');
+    await activityService.logActivity(
+      adminUser.id || 1, 
+      adminUser.name || '管理员', 
+      'add_article', 
+      `添加了文章《${title}》`, 
+      ipAddress
     );
     
     res.status(200).json({ success: true, message: '文章添加成功' });
@@ -197,6 +212,7 @@ app.put('/api/admin/articles/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, author, content, category } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress;
     
     if (!title || !author || !content || !category) {
       return res.status(400).json({ success: false, error: '请填写完整信息' });
@@ -205,6 +221,16 @@ app.put('/api/admin/articles/:id', async (req, res) => {
     await db.execute(
       'UPDATE articles SET title = ?, author = ?, content = ?, category = ? WHERE id = ?',
       [title, author, content, category, id]
+    );
+    
+    // 记录编辑文章活动
+    const adminUser = JSON.parse(req.headers.authorization?.split(' ')[1] || '{}');
+    await activityService.logActivity(
+      adminUser.id || 1, 
+      adminUser.name || '管理员', 
+      'edit_article', 
+      `编辑了文章《${title}》`, 
+      ipAddress
     );
     
     res.status(200).json({ success: true, message: '文章更新成功' });
@@ -217,8 +243,23 @@ app.put('/api/admin/articles/:id', async (req, res) => {
 app.delete('/api/admin/articles/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    
+    // 获取文章信息
+    const [articles] = await db.execute('SELECT title FROM articles WHERE id = ?', [id]);
+    const articleTitle = articles.length > 0 ? articles[0].title : '未知文章';
     
     await db.execute('DELETE FROM articles WHERE id = ?', [id]);
+    
+    // 记录删除文章活动
+    const adminUser = JSON.parse(req.headers.authorization?.split(' ')[1] || '{}');
+    await activityService.logActivity(
+      adminUser.id || 1, 
+      adminUser.name || '管理员', 
+      'delete_article', 
+      `删除了文章《${articleTitle}》`, 
+      ipAddress
+    );
     
     res.status(200).json({ success: true, message: '文章删除成功' });
   } catch (error) {
@@ -261,18 +302,11 @@ app.get('/api/admin/stats/active-users', async (req, res) => {
   }
 });
 
+const activityService = require('./services/activityService');
+
 app.get('/api/admin/activities', async (req, res) => {
   try {
-    // 模拟活动数据，包含用户和文章操作
-    const activities = [
-      { icon: 'fa-user-plus', time: '今天 14:30', text: '管理员添加了新用户' },
-      { icon: 'fa-user-edit', time: '今天 13:45', text: '管理员修改了用户信息' },
-      { icon: 'fa-user-minus', time: '今天 11:20', text: '管理员删除了用户' },
-      { icon: 'fa-file-plus', time: '昨天 16:15', text: '管理员添加了新文章' },
-      { icon: 'fa-file-edit', time: '昨天 14:50', text: '管理员编辑了文章' },
-      { icon: 'fa-file-minus', time: '昨天 10:30', text: '管理员删除了文章' },
-      { icon: 'fa-sign-in-alt', time: '昨天 09:00', text: '管理员登录系统' }
-    ];
+    const activities = await activityService.getRecentActivities(10);
     res.status(200).json({ success: true, activities });
   } catch (error) {
     console.error('获取活动数据失败:', error);
@@ -456,6 +490,7 @@ app.get('/api/admin/users', async (req, res) => {
 app.post('/api/admin/users', async (req, res) => {
   try {
     const { name, phone, password, role } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress;
     
     if (!name || !phone || !password) {
       return res.status(400).json({ success: false, error: '请填写完整信息' });
@@ -484,6 +519,16 @@ app.post('/api/admin/users', async (req, res) => {
       created_at: new Date()
     };
     
+    // 记录添加用户活动
+    const adminUser = JSON.parse(req.headers.authorization?.split(' ')[1] || '{}');
+    await activityService.logActivity(
+      adminUser.id || 1, 
+      adminUser.name || '管理员', 
+      'add_user', 
+      `添加了新用户 ${name}`, 
+      ipAddress
+    );
+    
     res.status(200).json({ success: true, message: '用户添加成功', user: newUser });
   } catch (error) {
     console.error('添加用户失败:', error);
@@ -495,6 +540,7 @@ app.put('/api/admin/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { name, phone, password, role } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress;
     
     if (!name || !phone) {
       return res.status(400).json({ success: false, error: '请填写完整信息' });
@@ -525,6 +571,16 @@ app.put('/api/admin/users/:id', async (req, res) => {
     const [updatedUsers] = await db.execute('SELECT id, name, phone, role, created_at FROM users WHERE id = ?', [id]);
     const updatedUser = updatedUsers[0];
     
+    // 记录编辑用户活动
+    const adminUser = JSON.parse(req.headers.authorization?.split(' ')[1] || '{}');
+    await activityService.logActivity(
+      adminUser.id || 1, 
+      adminUser.name || '管理员', 
+      'edit_user', 
+      `修改了用户 ${name} 的信息`, 
+      ipAddress
+    );
+    
     res.status(200).json({ success: true, message: '用户更新成功', user: updatedUser });
   } catch (error) {
     console.error('更新用户失败:', error);
@@ -535,8 +591,23 @@ app.put('/api/admin/users/:id', async (req, res) => {
 app.delete('/api/admin/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    
+    // 获取用户信息
+    const [users] = await db.execute('SELECT name FROM users WHERE id = ?', [id]);
+    const userName = users.length > 0 ? users[0].name : '未知用户';
     
     await db.execute('DELETE FROM users WHERE id = ?', [id]);
+    
+    // 记录删除用户活动
+    const adminUser = JSON.parse(req.headers.authorization?.split(' ')[1] || '{}');
+    await activityService.logActivity(
+      adminUser.id || 1, 
+      adminUser.name || '管理员', 
+      'delete_user', 
+      `删除了用户 ${userName}`, 
+      ipAddress
+    );
     
     res.status(200).json({ success: true, message: '用户删除成功' });
   } catch (error) {

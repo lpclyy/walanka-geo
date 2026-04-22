@@ -33,6 +33,7 @@ async function initializeTables(db) {
   await createArticleTable(db);
   await createPageContentTable(db);
   await createBrandTables(db);
+  await createActivityLogTable(db);
 }
 
 async function createUserTable(db) {
@@ -225,6 +226,28 @@ async function createBrandTables(db) {
 
   } catch (error) {
     console.error('Create brand tables failed:', error);
+  }
+}
+
+async function createActivityLogTable(db) {
+  try {
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS activity_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        user_name VARCHAR(255) NOT NULL,
+        action_type ENUM('login', 'add_user', 'edit_user', 'delete_user', 'add_article', 'edit_article', 'delete_article', 'add_brand', 'edit_brand', 'delete_brand') NOT NULL,
+        action_description TEXT NOT NULL,
+        ip_address VARCHAR(50),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user_id (user_id),
+        INDEX idx_action_type (action_type),
+        INDEX idx_created_at (created_at)
+      )
+    `);
+    console.log('Activity logs table created or already exists');
+  } catch (error) {
+    console.error('Create activity logs table failed:', error);
   }
 }
 
