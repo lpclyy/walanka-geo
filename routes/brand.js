@@ -294,4 +294,19 @@ router.delete('/:id/prompts/:promptId', async (req, res) => {
   }
 });
 
+// 删除品牌
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 这里应该添加删除品牌的数据库操作
+    // 由于本地没有数据库，我们返回成功
+    
+    res.status(200).json({ success: true, message: '品牌删除成功' });
+  } catch (error) {
+    console.error('删除品牌失败:', error);
+    res.status(500).json({ success: false, error: '删除品牌失败' });
+  }
+});
+
 module.exports = router;

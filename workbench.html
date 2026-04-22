@@ -3662,13 +3662,29 @@
         }
         
         // 删除品牌
-        function deleteBrand(brandId, brandName) {
+        async function deleteBrand(brandId, brandName) {
             if (confirm(`确定要删除品牌 "${brandName}" 吗？删除后相关分析数据也会被清空。`)) {
-                // 清空分析数据
-                clearAnalysisData();
-                // 重新加载品牌列表（模拟删除）
-                loadBrandList();
-                alert('品牌已删除');
+                try {
+                    // 调用后端API删除品牌
+                    const response = await fetch(`/api/brands/${brandId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // 清空分析数据
+                        clearAnalysisData();
+                        // 重新加载品牌列表
+                        loadBrandList();
+                        alert('品牌已删除');
+                    } else {
+                        alert('删除品牌失败: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('删除品牌失败:', error);
+                    alert('删除品牌失败，请稍后重试');
+                }
             }
         }
         

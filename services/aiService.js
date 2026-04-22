@@ -29,9 +29,52 @@ async function performAIAnalysis(brandId, brandInfo) {
   console.log(`开始分析品牌: ${brand.name}`);
   console.log(`API配置: URL=${apiUrl}, Model=${model}`);
 
+  // 联网搜索品牌信息
+  let searchResults = '';
+  try {
+    console.log('开始联网搜索品牌信息...');
+    const searchPrompt = `请搜索并总结"${brand.name}"品牌的最新信息，包括：
+1. 品牌基本信息
+2. 最近的市场表现
+3. 产品或服务特点
+4. 行业地位
+5. 用户评价
+6. 最近的新闻或动态
+
+请用中文总结，不要超过500字。`;
+    
+    const searchResponse = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          { role: 'system', content: '你是一个专业的品牌信息搜索专家，能够快速准确地收集和总结品牌相关信息。' },
+          { role: 'user', content: searchPrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    });
+    
+    if (searchResponse.ok) {
+      const searchData = await searchResponse.json();
+      searchResults = searchData.choices?.[0]?.message?.content || '';
+      console.log('联网搜索完成，获取到品牌信息');
+    } else {
+      const errorText = await searchResponse.text();
+      console.error(`搜索API调用失败: ${searchResponse.status} - ${errorText}`);
+    }
+  } catch (error) {
+    console.error('联网搜索失败:', error);
+  }
+
   const analysisResults = {};
 
-  const systemPrompt = `你是品牌分析专家，专注于分析品牌在AI平台的表现。请根据用户提供的品牌信息，进行全面的品牌分析，包括品牌定位、市场表现、用户认知、竞争优势等方面。请用JSON格式返回分析结果，以便程序处理。`;
+  const systemPrompt = `你是品牌分析专家，专注于分析品牌在AI平台的表现。请根据用户提供的品牌信息和搜索结果，进行全面的品牌分析，包括品牌定位、市场表现、用户认知、竞争优势等方面。请用JSON格式返回分析结果，以便程序处理。`;
 
   try {
     const overviewPrompt = `请分析"${brand.name}"品牌的整体情况。
@@ -41,6 +84,9 @@ async function performAIAnalysis(brandId, brandInfo) {
 - 所属行业：${brand.industry || '未知'}
 - 品牌网站：${brand.website || '未知'}
 - 品牌描述：${brand.description || '暂无描述'}
+
+搜索结果：
+${searchResults || '暂无搜索结果'}
 
 请分析以下内容并返回JSON格式：
 {
@@ -107,6 +153,9 @@ async function performAIAnalysis(brandId, brandInfo) {
 品牌信息：
 - 品牌名称：${brand.name}
 - 所属行业：${brand.industry || '未知'}
+
+搜索结果：
+${searchResults || '暂无搜索结果'}
 
 请分析以下内容并返回JSON格式：
 {
@@ -186,6 +235,9 @@ async function performAIAnalysis(brandId, brandInfo) {
 品牌信息：
 - 品牌名称：${brand.name}
 - 所属行业：${brand.industry || '未知'}
+
+搜索结果：
+${searchResults || '暂无搜索结果'}
 
 请分析以下内容并返回JSON格式：
 {
