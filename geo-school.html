@@ -153,9 +153,10 @@
                         data.articles.forEach(article => {
                             const articleItem = document.createElement('div');
                             articleItem.className = 'article-item';
+                            const contentPreview = article.content ? article.content.substring(0, 150) + '...' : '暂无内容';
                             articleItem.innerHTML = `
                                 <h3><a href="article-detail.html?id=${article.id}">${article.title}</a></h3>
-                                <p>${article.content.substring(0, 150)}...</p>
+                                <p>${contentPreview}</p>
                                 <div class="article-meta">
                                     <span class="author">${article.author}</span>
                                     <span class="date">${article.date}</span>
