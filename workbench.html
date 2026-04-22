@@ -3309,6 +3309,7 @@
         
         // 品牌管理功能
         let currentBrandId = null;
+        let currentBrandInfo = null;
         let selectedPromptIds = [];
         let customPrompts = [];
         
@@ -3357,6 +3358,7 @@
                 
                 if (data.success) {
                     currentBrandId = data.brandId;
+                    currentBrandInfo = { name, website, description, industry: '未知' };
                     displayPromptSuggestions(data.suggestedPrompts);
                     goToStep(2);
                     loadBrandList();
@@ -3437,9 +3439,9 @@
                 alert('请至少选择一个提示词');
                 return;
             }
-            
+
             goToStep(3);
-            
+
             try {
                 const response = await fetch(`/api/brands/${currentBrandId}/analyze`, {
                     method: 'POST',
@@ -3448,14 +3450,19 @@
                     },
                     body: JSON.stringify({
                         selectedPromptIds,
-                        customPrompts
+                        customPrompts,
+                        brandInfo: currentBrandInfo
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    pollAnalysisProgress();
+                    if (data.analysis) {
+                        showAnalysisResultDirectly(data.analysis);
+                    } else {
+                        pollAnalysisProgress();
+                    }
                 } else {
                     alert(data.error || '开始分析失败');
                     goToStep(1);
@@ -3499,23 +3506,37 @@
             try {
                 const response = await fetch(`/api/brands/${currentBrandId}/analysis`);
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    const analysis = data.analysis;
-                    const overview = JSON.parse(analysis.overview);
-                    
-                    document.getElementById('summaryBrandName').textContent = overview.brandName;
-                    document.getElementById('summaryScore').textContent = `${overview.overallScore}/100`;
-                    document.getElementById('summaryPromptCount').textContent = `${selectedPromptIds.length + customPrompts.length}个`;
-                    
-                    goToStep(4);
-                    loadBrandList();
+                    displayAnalysisResult(data.analysis);
                 } else {
                     alert(data.error || '获取分析结果失败');
                 }
             } catch (error) {
                 console.error('获取分析结果失败:', error);
                 alert('获取分析结果失败，请稍后重试');
+            }
+        }
+
+        // 直接显示分析结果（用于数据库连接失败时）
+        function showAnalysisResultDirectly(analysis) {
+            displayAnalysisResult(analysis);
+        }
+
+        // 显示分析结果
+        function displayAnalysisResult(analysis) {
+            try {
+                const overview = JSON.parse(analysis.overview);
+
+                document.getElementById('summaryBrandName').textContent = overview.brandName;
+                document.getElementById('summaryScore').textContent = `${overview.overallScore}/100`;
+                document.getElementById('summaryPromptCount').textContent = `${selectedPromptIds.length + customPrompts.length}个`;
+
+                goToStep(4);
+                loadBrandList();
+            } catch (error) {
+                console.error('解析分析结果失败:', error);
+                alert('解析分析结果失败，请稍后重试');
             }
         }
         

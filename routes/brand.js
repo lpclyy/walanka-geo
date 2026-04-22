@@ -81,15 +81,33 @@ router.get('/:id', async (req, res) => {
 router.post('/:id/analyze', async (req, res) => {
   try {
     const { id } = req.params;
-    const { selectedPromptIds, customPrompts } = req.body;
-    
-    // 直接返回成功响应，避免数据库操作
+    const { selectedPromptIds, customPrompts, brandInfo } = req.body;
+
+    const aiService = require('../services/aiService');
+
+    let analysisResult = await aiService.performAIAnalysis(id, brandInfo);
+
+    if (analysisResult) {
+      const mockAnalysis = {
+        id: 1,
+        brand_id: id,
+        overview: JSON.stringify(analysisResult.overview),
+        visibility: JSON.stringify(analysisResult.visibility),
+        perception: JSON.stringify(analysisResult.perception),
+        topics: JSON.stringify(analysisResult.topics),
+        citations: JSON.stringify(analysisResult.citations),
+        snapshots: JSON.stringify(analysisResult.snapshots),
+        suggestions: JSON.stringify(analysisResult.suggestions),
+        created_at: new Date().toISOString()
+      };
+
+      return res.status(200).json({ success: true, analysis: mockAnalysis, message: '分析完成' });
+    }
+
     res.status(200).json({ success: true, message: '分析已开始', status: 'analyzing' });
   } catch (error) {
     console.error('开始分析失败:', error);
-    
-    // 如果发生任何错误，返回模拟的成功响应
-    res.status(200).json({ success: true, message: '分析已开始', status: 'analyzing' });
+    res.status(500).json({ success: false, error: '开始分析失败' });
   }
 });
 
