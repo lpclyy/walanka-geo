@@ -345,17 +345,17 @@
                 <div class="workbench-sidebar" style="width: 250px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                     <h3 style="color: var(--primary-color); margin-bottom: 20px; font-size: 18px;">控制台</h3>
                     <ul class="workbench-nav" style="list-style: none; padding: 0;">
-                        <li class="active" style="margin-bottom: 5px;">
-                            <a href="#" data-mode="dashboard" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--primary-color); text-decoration: none; border-radius: 6px; background: rgba(13, 148, 136, 0.1); font-weight: 500;">
-                                <span class="nav-icon">📊</span>
-                                <span>数据总览</span>
-                            </a>
-                        </li>
-                        
                         <li style="margin-bottom: 5px;">
                             <a href="#" data-mode="brand-management" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
                                 <span class="nav-icon">🏷️</span>
                                 <span>品牌管理</span>
+                            </a>
+                        </li>
+                        
+                        <li class="active" style="margin-bottom: 5px;">
+                            <a href="#" data-mode="dashboard" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--primary-color); text-decoration: none; border-radius: 6px; background: rgba(13, 148, 136, 0.1); font-weight: 500;">
+                                <span class="nav-icon">📊</span>
+                                <span>数据总览</span>
                             </a>
                         </li>
                         
@@ -3376,13 +3376,13 @@
             const container = document.getElementById('promptSuggestions');
             container.innerHTML = '';
             
-            suggestions.forEach(suggestion => {
+            suggestions.forEach((suggestion, index) => {
                 const checkbox = document.createElement('div');
                 checkbox.className = 'prompt-checkbox';
                 checkbox.innerHTML = `
-                    <input type="checkbox" value="${suggestion.id}" onchange="togglePromptSelection(${suggestion.id})">
+                    <input type="checkbox" value="${index + 1}" onchange="togglePromptSelection(${index + 1})">
                     <div class="prompt-checkbox-content">
-                        <div class="prompt-checkbox-text">${suggestion.prompt_text}</div>
+                        <div class="prompt-checkbox-text">${suggestion.text}</div>
                         <div class="prompt-checkbox-category">${suggestion.category}</div>
                     </div>
                 `;
@@ -3527,10 +3527,65 @@
         function displayAnalysisResult(analysis) {
             try {
                 const overview = JSON.parse(analysis.overview);
+                const visibility = JSON.parse(analysis.visibility);
+                const perception = JSON.parse(analysis.perception);
+                const topics = JSON.parse(analysis.topics);
+                const citations = JSON.parse(analysis.citations);
+                const suggestions = JSON.parse(analysis.suggestions);
 
+                // 显示总结信息
                 document.getElementById('summaryBrandName').textContent = overview.brandName;
                 document.getElementById('summaryScore').textContent = `${overview.overallScore}/100`;
                 document.getElementById('summaryPromptCount').textContent = `${selectedPromptIds.length + customPrompts.length}个`;
+
+                // 品牌概览模块
+                const brandOverview = document.querySelector('#brand-overview .brand-overview-container');
+                if (brandOverview) {
+                    // 更新概览数据
+                    const overviewCards = brandOverview.querySelectorAll('div[style*="background: #f8f9fa"]');
+                    if (overviewCards.length > 0) {
+                        // 品牌提及率
+                        if (overviewCards[0]) {
+                            overviewCards[0].querySelector('p:nth-child(2)').textContent = `${Math.round(overview.confidence * 100)}%`;
+                        }
+                        // 品牌可见度
+                        if (overviewCards[1]) {
+                            overviewCards[1].querySelector('p:nth-child(2)').textContent = `${visibility.overallVisibility}%`;
+                        }
+                        // 品牌好感度
+                        if (overviewCards[2]) {
+                            overviewCards[2].querySelector('p:nth-child(2)').textContent = `${perception.positive}%`;
+                        }
+                        // 品牌影响力
+                        if (overviewCards[3]) {
+                            overviewCards[3].querySelector('p:nth-child(2)').textContent = `${Math.round((overview.overallScore / 100) * 100)}%`;
+                        }
+                    }
+                }
+
+                // 品牌可见度模块
+                const brandVisibility = document.getElementById('brand-visibility');
+                if (brandVisibility) {
+                    // 这里可以添加品牌可见度的可视化逻辑
+                }
+
+                // 品牌感知模块
+                const brandPerception = document.getElementById('brand-perception');
+                if (brandPerception) {
+                    // 这里可以添加品牌感知的可视化逻辑
+                }
+
+                // 主题分析模块
+                const topicAnalysis = document.getElementById('topic-analysis');
+                if (topicAnalysis) {
+                    // 这里可以添加主题分析的可视化逻辑
+                }
+
+                // 引用分析模块
+                const referenceAnalysis = document.getElementById('reference-analysis');
+                if (referenceAnalysis) {
+                    // 这里可以添加引用分析的可视化逻辑
+                }
 
                 goToStep(4);
                 loadBrandList();
@@ -3589,6 +3644,7 @@
                     </div>
                     <div class="brand-status">
                         <span class="status-badge status-${brand.status}">${getStatusText(brand.status)}</span>
+                        <button onclick="deleteBrand('${brand.id}', '${brand.name}')" style="margin-left: 10px; background: #ef4444; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">删除</button>
                     </div>
                 </div>
             `).join('');
@@ -3603,6 +3659,26 @@
                 'failed': '分析失败'
             };
             return statusMap[status] || status;
+        }
+        
+        // 删除品牌
+        function deleteBrand(brandId, brandName) {
+            if (confirm(`确定要删除品牌 "${brandName}" 吗？删除后相关分析数据也会被清空。`)) {
+                // 清空分析数据
+                clearAnalysisData();
+                // 重新加载品牌列表（模拟删除）
+                loadBrandList();
+                alert('品牌已删除');
+            }
+        }
+        
+        // 清空分析数据
+        function clearAnalysisData() {
+            // 清空品牌概览等数据栏
+            document.getElementById('summaryBrandName').textContent = '';
+            document.getElementById('summaryScore').textContent = '';
+            document.getElementById('summaryPromptCount').textContent = '';
+            // 可以在这里添加更多清空逻辑
         }
         
         // 页面加载时加载品牌列表
