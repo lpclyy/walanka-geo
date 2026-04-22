@@ -192,6 +192,115 @@
             margin: 0;
             color: #856404;
         }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .prompt-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .prompt-checkbox:hover {
+            border-color: var(--primary-color);
+            background: rgba(13, 148, 136, 0.05);
+        }
+        .prompt-checkbox input[type="checkbox"] {
+            margin-top: 4px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .prompt-checkbox-content {
+            flex: 1;
+        }
+        .prompt-checkbox-text {
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .prompt-checkbox-category {
+            color: #666;
+            font-size: 12px;
+        }
+        .custom-prompt-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .custom-prompt-tag button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            line-height: 1;
+        }
+        .brand-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s ease;
+        }
+        .brand-item:hover {
+            background: #f8f9fa;
+        }
+        .brand-item:last-child {
+            border-bottom: none;
+        }
+        .brand-info {
+            flex: 1;
+        }
+        .brand-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .brand-website {
+            color: #666;
+            font-size: 14px;
+        }
+        .brand-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-analyzing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
     </style>
 </head>
 <body>
@@ -240,6 +349,13 @@
                             <a href="#" data-mode="dashboard" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: var(--primary-color); text-decoration: none; border-radius: 6px; background: rgba(13, 148, 136, 0.1); font-weight: 500;">
                                 <span class="nav-icon">📊</span>
                                 <span>数据总览</span>
+                            </a>
+                        </li>
+                        
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" data-mode="brand-management" style="display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <span class="nav-icon">🏷️</span>
+                                <span>品牌管理</span>
                             </a>
                         </li>
                         
@@ -580,6 +696,125 @@
                                     </div>
                                     <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #999;">
                                         <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 品牌管理模式 -->
+                    <div class="workbench-mode" id="brand-management" style="display: none;">
+                        <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h3 style="color: #333; margin-bottom: 20px;">品牌管理</h3>
+                            
+                            <!-- 步骤1: 添加品牌 -->
+                            <div id="brand-step-1" style="display: block;">
+                                <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+                                    <h4 style="color: #333; margin-bottom: 20px;">添加新品牌</h4>
+                                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">品牌名称 <span style="color: #dc2626;">*</span></label>
+                                            <input type="text" id="brandName" placeholder="请输入品牌名称" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">品牌网站 <span style="color: #dc2626;">*</span></label>
+                                            <input type="url" id="brandWebsite" placeholder="https://example.com" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">品牌描述（选填）</label>
+                                            <textarea id="brandDescription" placeholder="请简要描述您的品牌..." rows="3" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; resize: vertical;"></textarea>
+                                        </div>
+                                        <button onclick="generateBrandPrompts()" style="background: var(--primary-color); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500; align-self: flex-start;">下一步: 生成分析提示词</button>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
+                                    <div style="background: #f8f9fa; padding: 15px 20px; border-bottom: 1px solid #e2e8f0;">
+                                        <h4 style="margin: 0; color: #333;">我的品牌列表</h4>
+                                    </div>
+                                    <div id="brandList" style="padding: 0;">
+                                        <div style="padding: 20px; text-align: center; color: #999;">暂无品牌，请添加新品牌</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 步骤2: 选择提示词 -->
+                            <div id="brand-step-2" style="display: none;">
+                                <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+                                    <h4 style="color: #333; margin-bottom: 15px;">选择分析提示词</h4>
+                                    <p style="color: #666; margin-bottom: 20px;">系统已根据品牌信息生成以下提示词建议，请选择需要分析的提示词：</p>
+                                    
+                                    <div id="promptSuggestions" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                                    </div>
+                                    
+                                    <div style="background: white; padding: 15px; border-radius: 8px; border: 1px dashed #e2e8f0; margin-bottom: 20px;">
+                                        <div style="display: flex; gap: 10px;">
+                                            <input type="text" id="customPromptInput" placeholder="自定义提示词..." style="flex: 1; padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                                            <button onclick="addCustomPrompt()" style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500;">添加</button>
+                                        </div>
+                                        <div id="customPromptsList" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="display: flex; gap: 10px;">
+                                        <button onclick="goToStep(1)" style="background: #e2e8f0; color: #333; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500;">上一步</button>
+                                        <button onclick="startBrandAnalysis()" style="background: var(--primary-color); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500;">开始AI分析</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 步骤3: 分析中 -->
+                            <div id="brand-step-3" style="display: none;">
+                                <div style="text-align: center; padding: 60px 20px;">
+                                    <div style="width: 80px; height: 80px; margin: 0 auto 30px; border: 4px solid #e2e8f0; border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                    <h3 style="color: #333; margin-bottom: 15px;">AI分析中...</h3>
+                                    <p style="color: #666; margin-bottom: 20px;">正在调用大模型联网搜索品牌相关信息</p>
+                                    <div style="max-width: 400px; margin: 0 auto; background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                            <span style="color: #666;">分析进度</span>
+                                            <span id="analysisProgress" style="color: var(--primary-color); font-weight: 600;">0%</span>
+                                        </div>
+                                        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                            <div id="progressBar" style="width: 0%; height: 100%; background: var(--primary-color); transition: width 0.3s ease;"></div>
+                                        </div>
+                                        <p id="currentPrompt" style="color: #666; margin-top: 15px; font-size: 14px;">准备开始分析...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 步骤4: 分析完成 -->
+                            <div id="brand-step-4" style="display: none;">
+                                <div style="text-align: center; padding: 40px 20px;">
+                                    <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <span style="font-size: 40px; color: #166534;">✓</span>
+                                    </div>
+                                    <h3 style="color: #333; margin-bottom: 10px;">分析完成！</h3>
+                                    <p style="color: #666; margin-bottom: 30px;">品牌分析已完成，您可以查看详细报告</p>
+                                    
+                                    <div id="analysisSummary" style="max-width: 500px; margin: 0 auto 30px; background: #f8f9fa; padding: 25px; border-radius: 10px; text-align: left;">
+                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                                            <div>
+                                                <div style="color: #666; font-size: 14px;">品牌名称</div>
+                                                <div id="summaryBrandName" style="color: #333; font-weight: 600; font-size: 18px;">-</div>
+                                            </div>
+                                            <div>
+                                                <div style="color: #666; font-size: 14px;">综合评分</div>
+                                                <div id="summaryScore" style="color: var(--primary-color); font-weight: 600; font-size: 24px;">-</div>
+                                            </div>
+                                            <div>
+                                                <div style="color: #666; font-size: 14px;">分析提示词</div>
+                                                <div id="summaryPromptCount" style="color: #333; font-weight: 600; font-size: 18px;">-</div>
+                                            </div>
+                                            <div>
+                                                <div style="color: #666; font-size: 14px;">分析状态</div>
+                                                <div style="color: #16a34a; font-weight: 600; font-size: 18px;">已完成</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="display: flex; gap: 10px; justify-content: center;">
+                                        <button onclick="viewDetailedReport()" style="background: var(--primary-color); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500;">查看详细报告</button>
+                                        <button onclick="goToStep(1)" style="background: #e2e8f0; color: #333; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500;">添加新品牌</button>
                                     </div>
                                 </div>
                             </div>
@@ -3071,7 +3306,286 @@
                 document.getElementById('sendQuestion').click();
             }
         });
-
+        
+        // 品牌管理功能
+        let currentBrandId = null;
+        let selectedPromptIds = [];
+        let customPrompts = [];
+        
+        // 获取用户ID
+        function getUserId() {
+            const user = localStorage.getItem('user');
+            if (user) {
+                const userObj = JSON.parse(user);
+                return userObj.id;
+            }
+            return null;
+        }
+        
+        // 生成品牌提示词
+        async function generateBrandPrompts() {
+            const name = document.getElementById('brandName').value.trim();
+            const website = document.getElementById('brandWebsite').value.trim();
+            const description = document.getElementById('brandDescription').value.trim();
+            
+            if (!name || !website) {
+                alert('请填写品牌名称和网站');
+                return;
+            }
+            
+            const userId = getUserId();
+            if (!userId) {
+                alert('请先登录');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/brands', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        name,
+                        website,
+                        description
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentBrandId = data.brandId;
+                    displayPromptSuggestions(data.suggestedPrompts);
+                    goToStep(2);
+                    loadBrandList();
+                } else {
+                    alert(data.error || '添加品牌失败');
+                }
+            } catch (error) {
+                console.error('生成提示词失败:', error);
+                alert('生成提示词失败，请稍后重试');
+            }
+        }
+        
+        // 显示提示词建议
+        function displayPromptSuggestions(suggestions) {
+            const container = document.getElementById('promptSuggestions');
+            container.innerHTML = '';
+            
+            suggestions.forEach(suggestion => {
+                const checkbox = document.createElement('div');
+                checkbox.className = 'prompt-checkbox';
+                checkbox.innerHTML = `
+                    <input type="checkbox" value="${suggestion.id}" onchange="togglePromptSelection(${suggestion.id})">
+                    <div class="prompt-checkbox-content">
+                        <div class="prompt-checkbox-text">${suggestion.prompt_text}</div>
+                        <div class="prompt-checkbox-category">${suggestion.category}</div>
+                    </div>
+                `;
+                container.appendChild(checkbox);
+            });
+        }
+        
+        // 切换提示词选择
+        function togglePromptSelection(promptId) {
+            const index = selectedPromptIds.indexOf(promptId);
+            if (index > -1) {
+                selectedPromptIds.splice(index, 1);
+            } else {
+                selectedPromptIds.push(promptId);
+            }
+        }
+        
+        // 添加自定义提示词
+        function addCustomPrompt() {
+            const input = document.getElementById('customPromptInput');
+            const promptText = input.value.trim();
+            
+            if (!promptText) {
+                alert('请输入提示词内容');
+                return;
+            }
+            
+            customPrompts.push(promptText);
+            
+            const container = document.getElementById('customPromptsList');
+            const tag = document.createElement('span');
+            tag.className = 'custom-prompt-tag';
+            tag.innerHTML = `
+                ${promptText}
+                <button onclick="removeCustomPrompt('${promptText}', this)">×</button>
+            `;
+            container.appendChild(tag);
+            
+            input.value = '';
+        }
+        
+        // 移除自定义提示词
+        function removeCustomPrompt(promptText, button) {
+            const index = customPrompts.indexOf(promptText);
+            if (index > -1) {
+                customPrompts.splice(index, 1);
+            }
+            button.parentElement.remove();
+        }
+        
+        // 开始品牌分析
+        async function startBrandAnalysis() {
+            if (selectedPromptIds.length === 0 && customPrompts.length === 0) {
+                alert('请至少选择一个提示词');
+                return;
+            }
+            
+            goToStep(3);
+            
+            try {
+                const response = await fetch(`/api/brands/${currentBrandId}/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        selectedPromptIds,
+                        customPrompts
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    pollAnalysisProgress();
+                } else {
+                    alert(data.error || '开始分析失败');
+                    goToStep(1);
+                }
+            } catch (error) {
+                console.error('开始分析失败:', error);
+                alert('开始分析失败，请稍后重试');
+                goToStep(1);
+            }
+        }
+        
+        // 轮询分析进度
+        function pollAnalysisProgress() {
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/brands/${currentBrandId}/analysis-status`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        document.getElementById('analysisProgress').textContent = `${data.progress}%`;
+                        document.getElementById('progressBar').style.width = `${data.progress}%`;
+                        document.getElementById('currentPrompt').textContent = data.currentPrompt || '分析中...';
+                        
+                        if (data.status === 'completed') {
+                            clearInterval(interval);
+                            showAnalysisResult();
+                        } else if (data.status === 'failed') {
+                            clearInterval(interval);
+                            alert('分析失败，请稍后重试');
+                            goToStep(1);
+                        }
+                    }
+                } catch (error) {
+                    console.error('获取分析进度失败:', error);
+                }
+            }, 1000);
+        }
+        
+        // 显示分析结果
+        async function showAnalysisResult() {
+            try {
+                const response = await fetch(`/api/brands/${currentBrandId}/analysis`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const analysis = data.analysis;
+                    const overview = JSON.parse(analysis.overview);
+                    
+                    document.getElementById('summaryBrandName').textContent = overview.brandName;
+                    document.getElementById('summaryScore').textContent = `${overview.overallScore}/100`;
+                    document.getElementById('summaryPromptCount').textContent = `${selectedPromptIds.length + customPrompts.length}个`;
+                    
+                    goToStep(4);
+                    loadBrandList();
+                } else {
+                    alert(data.error || '获取分析结果失败');
+                }
+            } catch (error) {
+                console.error('获取分析结果失败:', error);
+                alert('获取分析结果失败，请稍后重试');
+            }
+        }
+        
+        // 切换步骤
+        function goToStep(step) {
+            for (let i = 1; i <= 4; i++) {
+                const stepElement = document.getElementById(`brand-step-${i}`);
+                if (stepElement) {
+                    stepElement.style.display = i === step ? 'block' : 'none';
+                }
+            }
+        }
+        
+        // 查看详细报告
+        function viewDetailedReport() {
+            alert('详细报告功能开发中...');
+        }
+        
+        // 加载品牌列表
+        async function loadBrandList() {
+            const userId = getUserId();
+            if (!userId) return;
+            
+            try {
+                const response = await fetch(`/api/brands?userId=${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayBrandList(data.brands);
+                }
+            } catch (error) {
+                console.error('加载品牌列表失败:', error);
+            }
+        }
+        
+        // 显示品牌列表
+        function displayBrandList(brands) {
+            const container = document.getElementById('brandList');
+            
+            if (brands.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">暂无品牌，请添加新品牌</div>';
+                return;
+            }
+            
+            container.innerHTML = brands.map(brand => `
+                <div class="brand-item">
+                    <div class="brand-info">
+                        <div class="brand-name">${brand.name}</div>
+                        <div class="brand-website">${brand.website}</div>
+                    </div>
+                    <div class="brand-status">
+                        <span class="status-badge status-${brand.status}">${getStatusText(brand.status)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 获取状态文本
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '待分析',
+                'analyzing': '分析中',
+                'completed': '已完成',
+                'failed': '分析失败'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // 页面加载时加载品牌列表
+        loadBrandList();
     </script>
 </body>
 </html>
