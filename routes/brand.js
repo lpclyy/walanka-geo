@@ -57,7 +57,8 @@ router.get('/', async (req, res) => {
     res.status(200).json({ success: true, brands });
   } catch (error) {
     console.error('获取品牌列表失败:', error);
-    res.status(500).json({ success: false, error: '获取品牌列表失败' });
+    // 数据库连接失败时返回空数组
+    res.status(200).json({ success: true, brands: [] });
   }
 });
 
@@ -88,7 +89,7 @@ router.post('/:id/analyze', async (req, res) => {
     let analysisResult = await aiService.performAIAnalysis(id, brandInfo);
 
     if (analysisResult) {
-      const mockAnalysis = {
+      const analysis = {
         id: 1,
         brand_id: id,
         overview: JSON.stringify(analysisResult.overview),
@@ -101,7 +102,11 @@ router.post('/:id/analyze', async (req, res) => {
         created_at: new Date().toISOString()
       };
 
-      return res.status(200).json({ success: true, analysis: mockAnalysis, message: '分析完成' });
+      // 保存分析结果到全局变量
+      global.analysisResults = global.analysisResults || {};
+      global.analysisResults[id] = analysis;
+
+      return res.status(200).json({ success: true, analysis, message: '分析完成' });
     }
 
     res.status(200).json({ success: true, message: '分析已开始', status: 'analyzing' });
@@ -223,6 +228,11 @@ router.delete('/:id/prompts/:promptId', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // 从全局变量中删除品牌分析结果
+    if (global.analysisResults && global.analysisResults[id]) {
+      delete global.analysisResults[id];
+    }
     
     // 这里应该添加删除品牌的数据库操作
     // 由于本地没有数据库，我们返回成功

@@ -795,15 +795,15 @@
                                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                                             <div>
                                                 <div style="color: #666; font-size: 14px;">品牌名称</div>
-                                                <div id="summaryBrandName" style="color: #333; font-weight: 600; font-size: 18px;">-</div>
+                                                <div id="summaryBrandName" style="color: #333; font-weight: 600; font-size: 18px;"></div>
                                             </div>
                                             <div>
                                                 <div style="color: #666; font-size: 14px;">综合评分</div>
-                                                <div id="summaryScore" style="color: var(--primary-color); font-weight: 600; font-size: 24px;">-</div>
+                                                <div id="summaryScore" style="color: var(--primary-color); font-weight: 600; font-size: 24px;">0/100</div>
                                             </div>
                                             <div>
                                                 <div style="color: #666; font-size: 14px;">分析提示词</div>
-                                                <div id="summaryPromptCount" style="color: #333; font-weight: 600; font-size: 18px;">-</div>
+                                                <div id="summaryPromptCount" style="color: #333; font-weight: 600; font-size: 18px;">0个</div>
                                             </div>
                                             <div>
                                                 <div style="color: #666; font-size: 14px;">分析状态</div>
@@ -3537,6 +3537,44 @@
                 document.getElementById('summaryBrandName').textContent = overview.brandName;
                 document.getElementById('summaryScore').textContent = `${overview.overallScore}/100`;
                 document.getElementById('summaryPromptCount').textContent = `${selectedPromptIds.length + customPrompts.length}个`;
+
+                // 显示分析总结
+                const analysisSummary = document.getElementById('analysisSummary');
+                if (analysisSummary) {
+                    const summaryText = `品牌分析总结：
+
+品牌名称：${overview.brandName}
+所属行业：${overview.industry}
+综合评分：${overview.overallScore}/100
+置信度：${Math.round(overview.confidence * 100)}%
+
+品牌概览：
+${overview.summary}
+
+可见度分析：
+- 整体可见度：${visibility.overallVisibility}%
+- 提及次数：${visibility.mentionCount}
+- 环比变化：${visibility.weeklyChange}
+- 行业排名：${visibility.industryRank}
+
+平台分布：
+${visibility.platforms.map(p => `- ${p.name}: ${p.visibility}%`).join('\n')}
+
+情感分析：
+- 正面评价：${perception.positive}%
+- 中性评价：${perception.neutral}%
+- 负面评价：${perception.negative}%
+
+热门主题：
+${topics.map(t => `- ${t.name}：${t.count}次 (${t.trend})`).join('\n')}
+
+引用来源：
+${citations.map(c => `- ${c.source}：${c.count}次`).join('\n')}
+
+优化建议：
+${suggestions.map(s => `- [${s.priority}] ${s.title}：${s.description}`).join('\n')}`;
+                    analysisSummary.textContent = summaryText;
+                }
 
                 // 品牌概览模块
                 const brandOverview = document.querySelector('#brand-overview .brand-overview-container');
