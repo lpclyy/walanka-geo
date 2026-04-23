@@ -693,10 +693,6 @@ app.post('/api/ai/chat', async (req, res) => {
 });
 
 
-      
-      
-
-
 app.get('*', (req, res) => {
   const filePath = path.join(__dirname, req.path);
   if (fs.existsSync(filePath) && !fs.statSync(filePath).isDirectory()) {
