@@ -32,8 +32,8 @@ async function getRecentActivities(limit = 10) {
     }
     
     const [activities] = await db.execute(
-      'SELECT user_name, action_type, action_description, created_at FROM activity_logs ORDER BY created_at DESC LIMIT ?',
-      [limit]
+      'SELECT user_name, action_type, action_description, created_at FROM activity_logs ORDER BY created_at DESC LIMIT ' + parseInt(limit),
+      []
     );
     
     if (activities.length === 0) {

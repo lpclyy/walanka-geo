@@ -292,7 +292,8 @@ app.get('/api/admin/stats/visits', async (req, res) => {
     res.status(200).json({ success: true, visits });
   } catch (error) {
     console.error('获取访问量失败:', error);
-    res.status(500).json({ success: false, error: '获取访问量失败' });
+    // 当表不存在时，返回0
+    res.status(200).json({ success: true, visits: 0 });
   }
 });
 

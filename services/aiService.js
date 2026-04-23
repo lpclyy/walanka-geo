@@ -1,3 +1,4 @@
+require('dotenv').config();
 const brandModel = require('../models/brand');
 
 async function performAIAnalysis(brandId, brandInfo) {
