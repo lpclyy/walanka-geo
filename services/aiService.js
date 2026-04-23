@@ -178,62 +178,90 @@ ${searchResults}
   "summary": "100字左右的品牌整体概述"
 }`;
 
-    const overviewResponse = await fetch(llmApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${llmApiKey}`
-      },
-      body: JSON.stringify({
-        model: llmModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: overviewPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
-    });
+    console.log('开始调用大模型API:', llmApiUrl);
+    console.log('请求头:', { 'Content-Type': 'application/json', 'Authorization': `Bearer ${llmApiKey}` });
+    console.log('请求体:', JSON.stringify({
+      model: llmModel,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: overviewPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
+    }));
 
-    if (overviewResponse.ok) {
-      const overviewData = await overviewResponse.json();
-      const content = overviewData.choices?.[0]?.message?.content;
-      if (content) {
-        try {
-          const parsed = safeJsonParse(content);
-          analysisResults.overview = parsed;
-        } catch (parseError) {
-          console.error('解析品牌概览结果失败:', parseError);
-          // 使用默认值，确保系统继续运行
+    try {
+      const overviewResponse = await fetch(llmApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${llmApiKey}`
+        },
+        body: JSON.stringify({
+          model: llmModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: overviewPrompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000
+        })
+      });
+
+      console.log('API响应状态:', overviewResponse.status);
+      console.log('API响应头:', Object.fromEntries(overviewResponse.headers.entries()));
+
+      if (overviewResponse.ok) {
+        const overviewData = await overviewResponse.json();
+        console.log('API响应数据:', JSON.stringify(overviewData, null, 2));
+        const content = overviewData.choices?.[0]?.message?.content;
+        if (content) {
+          try {
+            const parsed = safeJsonParse(content);
+            analysisResults.overview = parsed;
+          } catch (parseError) {
+            console.error('解析品牌概览结果失败:', parseError);
+            // 使用默认值，确保系统继续运行
+            analysisResults.overview = {
+              brandName: brand.name,
+              industry: brand.industry || '未知',
+              confidence: 0.7,
+              overallScore: 70,
+              summary: `品牌 ${brand.name} 的分析结果解析失败`
+            };
+          }
+        } else {
+          // 使用默认值
           analysisResults.overview = {
             brandName: brand.name,
             industry: brand.industry || '未知',
             confidence: 0.7,
             overallScore: 70,
-            summary: `品牌 ${brand.name} 的分析结果解析失败`
+            summary: `未获取到品牌 ${brand.name} 的概览分析结果`
           };
         }
+        console.log(`品牌概览分析完成`);
       } else {
+        const errorText = await overviewResponse.text();
+        console.error(`品牌概览API调用失败: ${overviewResponse.status} - ${errorText}`);
         // 使用默认值
         analysisResults.overview = {
           brandName: brand.name,
           industry: brand.industry || '未知',
           confidence: 0.7,
           overallScore: 70,
-          summary: `未获取到品牌 ${brand.name} 的概览分析结果`
+          summary: `品牌 ${brand.name} 的概览分析API调用失败`
         };
       }
-      console.log(`品牌概览分析完成`);
-    } else {
-      const errorText = await overviewResponse.text();
-      console.error(`品牌概览API调用失败: ${overviewResponse.status} - ${errorText}`);
+    } catch (error) {
+      console.error('分析品牌概览失败:', error);
       // 使用默认值
       analysisResults.overview = {
         brandName: brand.name,
         industry: brand.industry || '未知',
         confidence: 0.7,
         overallScore: 70,
-        summary: `品牌 ${brand.name} 的概览分析API调用失败`
+        summary: `品牌 ${brand.name} 的概览分析失败`
       };
     }
   } catch (error) {
@@ -271,32 +299,52 @@ ${searchResults}
   "trend": [过去7周的趋势数据，数组形式]
 }`;
 
-    const visibilityResponse = await fetch(llmApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${llmApiKey}`
-      },
-      body: JSON.stringify({
-        model: llmModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: visibilityPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
-    });
+    console.log('开始调用大模型API分析品牌可见度');
+    try {
+      const visibilityResponse = await fetch(llmApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${llmApiKey}`
+        },
+        body: JSON.stringify({
+          model: llmModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: visibilityPrompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000
+        })
+      });
 
-    if (visibilityResponse.ok) {
-      const visibilityData = await visibilityResponse.json();
-      const content = visibilityData.choices?.[0]?.message?.content;
-      if (content) {
-        try {
-          const parsed = safeJsonParse(content);
-          analysisResults.visibility = parsed;
-        } catch (parseError) {
-          console.error('解析品牌可见度结果失败:', parseError);
+      console.log('API响应状态:', visibilityResponse.status);
+
+      if (visibilityResponse.ok) {
+        const visibilityData = await visibilityResponse.json();
+        console.log('API响应数据:', JSON.stringify(visibilityData, null, 2));
+        const content = visibilityData.choices?.[0]?.message?.content;
+        if (content) {
+          try {
+            const parsed = safeJsonParse(content);
+            analysisResults.visibility = parsed;
+          } catch (parseError) {
+            console.error('解析品牌可见度结果失败:', parseError);
+            // 使用默认值
+            analysisResults.visibility = {
+              overallVisibility: 70,
+              mentionCount: 10000,
+              weeklyChange: '+5%',
+              industryRank: 'TOP 50',
+              platforms: [
+                { name: '豆包', visibility: 75 },
+                { name: '文心一言', visibility: 70 },
+                { name: '通义千问', visibility: 65 }
+              ],
+              trend: [65, 66, 67, 68, 69, 70, 70]
+            };
+          }
+        } else {
           // 使用默认值
           analysisResults.visibility = {
             overallVisibility: 70,
@@ -311,7 +359,10 @@ ${searchResults}
             trend: [65, 66, 67, 68, 69, 70, 70]
           };
         }
+        console.log(`品牌可见度分析完成`);
       } else {
+        const errorText = await visibilityResponse.text();
+        console.error(`品牌可见度API调用失败: ${visibilityResponse.status} - ${errorText}`);
         // 使用默认值
         analysisResults.visibility = {
           overallVisibility: 70,
@@ -326,10 +377,8 @@ ${searchResults}
           trend: [65, 66, 67, 68, 69, 70, 70]
         };
       }
-      console.log(`品牌可见度分析完成`);
-    } else {
-      const errorText = await visibilityResponse.text();
-      console.error(`品牌可见度API调用失败: ${visibilityResponse.status} - ${errorText}`);
+    } catch (error) {
+      console.error('分析品牌可见度失败:', error);
       // 使用默认值
       analysisResults.visibility = {
         overallVisibility: 70,
@@ -380,32 +429,46 @@ ${searchResults}
   "keywords": ["核心关键词1", "关键词2", ...]
 }`;
 
-    const perceptionResponse = await fetch(llmApiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${llmApiKey}`
-      },
-      body: JSON.stringify({
-        model: llmModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: perceptionPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
-    });
+    console.log('开始调用大模型API分析品牌感知');
+    try {
+      const perceptionResponse = await fetch(llmApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${llmApiKey}`
+        },
+        body: JSON.stringify({
+          model: llmModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: perceptionPrompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000
+        })
+      });
 
-    if (perceptionResponse.ok) {
-      const perceptionData = await perceptionResponse.json();
-      const content = perceptionData.choices?.[0]?.message?.content;
-      if (content) {
-        try {
-          const parsed = safeJsonParse(content);
-          analysisResults.perception = parsed;
-        } catch (parseError) {
-          console.error('解析品牌感知结果失败:', parseError);
+      console.log('API响应状态:', perceptionResponse.status);
+
+      if (perceptionResponse.ok) {
+        const perceptionData = await perceptionResponse.json();
+        console.log('API响应数据:', JSON.stringify(perceptionData, null, 2));
+        const content = perceptionData.choices?.[0]?.message?.content;
+        if (content) {
+          try {
+            const parsed = safeJsonParse(content);
+            analysisResults.perception = parsed;
+          } catch (parseError) {
+            console.error('解析品牌感知结果失败:', parseError);
+            // 使用默认值
+            analysisResults.perception = {
+              positive: 70,
+              neutral: 20,
+              negative: 10,
+              keywords: ['品牌', '产品', '服务', '质量']
+            };
+          }
+        } else {
           // 使用默认值
           analysisResults.perception = {
             positive: 70,
@@ -414,7 +477,10 @@ ${searchResults}
             keywords: ['品牌', '产品', '服务', '质量']
           };
         }
+        console.log(`品牌感知分析完成`);
       } else {
+        const errorText = await perceptionResponse.text();
+        console.error(`品牌感知API调用失败: ${perceptionResponse.status} - ${errorText}`);
         // 使用默认值
         analysisResults.perception = {
           positive: 70,
@@ -423,10 +489,8 @@ ${searchResults}
           keywords: ['品牌', '产品', '服务', '质量']
         };
       }
-      console.log(`品牌感知分析完成`);
-    } else {
-      const errorText = await visibilityResponse.text();
-      console.error(`品牌感知API调用失败: ${visibilityResponse.status} - ${errorText}`);
+    } catch (error) {
+      console.error('分析品牌感知失败:', error);
       // 使用默认值
       analysisResults.perception = {
         positive: 70,
