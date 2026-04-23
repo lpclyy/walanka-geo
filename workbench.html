@@ -3526,12 +3526,12 @@
         // 显示分析结果
         function displayAnalysisResult(analysis) {
             try {
-                const overview = JSON.parse(analysis.overview);
-                const visibility = JSON.parse(analysis.visibility);
-                const perception = JSON.parse(analysis.perception);
-                const topics = JSON.parse(analysis.topics);
-                const citations = JSON.parse(analysis.citations);
-                const suggestions = JSON.parse(analysis.suggestions);
+                const overview = typeof analysis.overview === 'string' ? JSON.parse(analysis.overview) : analysis.overview;
+                const visibility = typeof analysis.visibility === 'string' ? JSON.parse(analysis.visibility) : analysis.visibility;
+                const perception = typeof analysis.perception === 'string' ? JSON.parse(analysis.perception) : analysis.perception;
+                const topics = typeof analysis.topics === 'string' ? JSON.parse(analysis.topics) : analysis.topics;
+                const citations = typeof analysis.citations === 'string' ? JSON.parse(analysis.citations) : analysis.citations;
+                const suggestions = typeof analysis.suggestions === 'string' ? JSON.parse(analysis.suggestions) : analysis.suggestions;
 
                 // 显示总结信息
                 document.getElementById('summaryBrandName').textContent = overview.brandName;
