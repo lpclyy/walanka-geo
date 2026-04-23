@@ -169,25 +169,29 @@ async function deletePromptFromList(promptId, brandId) {
 }
 
 async function deleteBrand(brandId) {
-  const db = database.getDB();
-  
-  // 开始事务
-  await db.beginTransaction();
+  const pool = database.getDB();
+  const connection = await pool.getConnection();
   
   try {
+    // 开始事务
+    await connection.beginTransaction();
+    
     // 删除品牌相关的所有数据
-    await db.execute('DELETE FROM brand_analysis WHERE brand_id = ?', [brandId]);
-    await db.execute('DELETE FROM brand_selected_prompts WHERE brand_id = ?', [brandId]);
-    await db.execute('DELETE FROM brand_prompt_suggestions WHERE brand_id = ?', [brandId]);
-    await db.execute('DELETE FROM brand_prompt_list WHERE brand_id = ?', [brandId]);
-    await db.execute('DELETE FROM brands WHERE id = ?', [brandId]);
+    await connection.execute('DELETE FROM brand_analysis WHERE brand_id = ?', [brandId]);
+    await connection.execute('DELETE FROM brand_selected_prompts WHERE brand_id = ?', [brandId]);
+    await connection.execute('DELETE FROM brand_prompt_suggestions WHERE brand_id = ?', [brandId]);
+    await connection.execute('DELETE FROM brand_prompt_list WHERE brand_id = ?', [brandId]);
+    await connection.execute('DELETE FROM brands WHERE id = ?', [brandId]);
     
     // 提交事务
-    await db.commit();
+    await connection.commit();
   } catch (error) {
     // 回滚事务
-    await db.rollback();
+    await connection.rollback();
     throw error;
+  } finally {
+    // 释放连接
+    connection.release();
   }
 }
 
