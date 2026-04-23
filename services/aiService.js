@@ -11,8 +11,8 @@ function safeJsonParse(content) {
     try {
       // 移除开头和结尾的空白字符
       let cleaned = content.trim();
-      // 移除可能的代码块标记
-      cleaned = cleaned.replace(/^```json|^```|```$/g, '').trim();
+      // 移除可能的代码块标记（包括```json、```和``json）
+      cleaned = cleaned.replace(/^```json|^```|^``json|```$|``$/g, '').trim();
       // 尝试再次解析
       return JSON.parse(cleaned);
     } catch (e2) {
