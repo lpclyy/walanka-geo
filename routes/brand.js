@@ -14,20 +14,12 @@ router.post('/', async (req, res) => {
     
     const industry = promptService.extractIndustry(description);
     
-    // 生成一个模拟的品牌ID
-    const brandId = Math.floor(Math.random() * 1000000).toString();
+    // 保存品牌到数据库
+    const brandId = await brandModel.createBrand(userId, name, website, description, industry);
     
-    // 生成提示词建议
+    // 生成提示词建议并保存
     const suggestions = promptService.generatePromptSuggestions(name, industry);
-    
-    // 尝试保存品牌到数据库
-    try {
-      await brandModel.createBrand(userId, name, website, description, industry);
-      await brandModel.savePromptSuggestions(brandId, suggestions);
-    } catch (dbError) {
-      console.error('保存品牌到数据库失败:', dbError);
-      // 数据库保存失败不影响返回结果，继续执行
-    }
+    await brandModel.savePromptSuggestions(brandId, suggestions);
     
     res.status(200).json({
       success: true,
@@ -37,19 +29,7 @@ router.post('/', async (req, res) => {
     });
   } catch (error) {
     console.error('添加品牌失败:', error);
-    
-    // 如果发生任何错误，返回模拟的成功响应
-    const { userId, name, website, description } = req.body;
-    const industry = promptService.extractIndustry(description);
-    const brandId = Math.floor(Math.random() * 1000000).toString();
-    const suggestions = promptService.generatePromptSuggestions(name, industry);
-    
-    res.status(200).json({
-      success: true,
-      brandId,
-      brand: { id: brandId, name, website, description, industry, status: 'pending' },
-      suggestedPrompts: suggestions
-    });
+    res.status(500).json({ success: false, error: '添加品牌失败' });
   }
 });
 
@@ -66,8 +46,7 @@ router.get('/', async (req, res) => {
     res.status(200).json({ success: true, brands });
   } catch (error) {
     console.error('获取品牌列表失败:', error);
-    // 数据库连接失败时返回空数组
-    res.status(200).json({ success: true, brands: [] });
+    res.status(500).json({ success: false, error: '获取品牌列表失败' });
   }
 });
 
@@ -94,33 +73,14 @@ router.post('/:id/analyze', async (req, res) => {
     const { selectedPromptIds, customPrompts, brandInfo } = req.body;
 
     // 保存用户选择的提示词
-    try {
-      await brandModel.saveSelectedPrompts(id, selectedPromptIds, customPrompts);
-    } catch (dbError) {
-      console.error('保存选择的提示词失败:', dbError);
-      // 数据库保存失败不影响分析流程，继续执行
-    }
+    await brandModel.saveSelectedPrompts(id, selectedPromptIds, customPrompts);
 
-    let analysisResult = await aiService.performAIAnalysis(id, brandInfo);
+    // 执行AI分析
+    const analysisResult = await aiService.performAIAnalysis(id, brandInfo);
 
     if (analysisResult) {
-      const analysis = {
-        id: 1,
-        brand_id: id,
-        overview: JSON.stringify(analysisResult.overview),
-        visibility: JSON.stringify(analysisResult.visibility),
-        perception: JSON.stringify(analysisResult.perception),
-        topics: JSON.stringify(analysisResult.topics),
-        citations: JSON.stringify(analysisResult.citations),
-        snapshots: JSON.stringify(analysisResult.snapshots),
-        suggestions: JSON.stringify(analysisResult.suggestions),
-        created_at: new Date().toISOString()
-      };
-
-      // 保存分析结果到全局变量
-      global.analysisResults = global.analysisResults || {};
-      global.analysisResults[id] = analysis;
-
+      // 从数据库获取最新分析结果
+      const analysis = await brandModel.getAnalysisByBrandId(id);
       return res.status(200).json({ success: true, analysis, message: '分析完成' });
     }
 
@@ -135,21 +95,39 @@ router.get('/:id/analysis-status', async (req, res) => {
   try {
     const { id } = req.params;
     
-    // 直接返回模拟的分析状态，避免数据库操作
-    const status = 'completed';
-    const progress = 100;
-    const currentPrompt = '分析完成';
+    // 从数据库获取品牌状态
+    const brand = await brandModel.getBrandById(id);
+    if (!brand) {
+      return res.status(404).json({ success: false, error: '品牌不存在' });
+    }
+    
+    let status = brand.status;
+    let progress = 0;
+    let currentPrompt = '准备分析';
+    
+    switch (status) {
+      case 'pending':
+        progress = 0;
+        currentPrompt = '准备分析';
+        break;
+      case 'analyzing':
+        progress = 50;
+        currentPrompt = '正在分析';
+        break;
+      case 'completed':
+        progress = 100;
+        currentPrompt = '分析完成';
+        break;
+      case 'failed':
+        progress = 100;
+        currentPrompt = '分析失败';
+        break;
+    }
     
     res.status(200).json({ success: true, status, progress, currentPrompt });
   } catch (error) {
     console.error('获取分析进度失败:', error);
-    
-    // 如果发生任何错误，返回模拟的成功响应
-    const status = 'completed';
-    const progress = 100;
-    const currentPrompt = '分析完成';
-    
-    res.status(200).json({ success: true, status, progress, currentPrompt });
+    res.status(500).json({ success: false, error: '获取分析进度失败' });
   }
 });
 
@@ -157,38 +135,22 @@ router.get('/:id/analysis', async (req, res) => {
   try {
     const { id } = req.params;
     
-    // 检查是否有已保存的分析结果
-    if (global.analysisResults && global.analysisResults[id]) {
-      return res.status(200).json({ success: true, analysis: global.analysisResults[id] });
+    // 从数据库获取分析结果
+    const analysis = await brandModel.getAnalysisByBrandId(id);
+    
+    if (!analysis) {
+      // 如果没有分析结果，执行新的分析
+      const analysisResult = await aiService.performAIAnalysis(id);
+      if (analysisResult) {
+        const newAnalysis = await brandModel.getAnalysisByBrandId(id);
+        if (newAnalysis) {
+          return res.status(200).json({ success: true, analysis: newAnalysis });
+        }
+      }
+      return res.status(404).json({ success: false, error: '分析结果不存在' });
     }
     
-    // 如果没有保存的结果，执行新的分析
-    const aiService = require('../services/aiService');
-    const analysisResult = await aiService.performAIAnalysis(id);
-    
-    if (analysisResult) {
-      const analysis = {
-        id: 1,
-        brand_id: id,
-        overview: JSON.stringify(analysisResult.overview),
-        visibility: JSON.stringify(analysisResult.visibility),
-        perception: JSON.stringify(analysisResult.perception),
-        topics: JSON.stringify(analysisResult.topics),
-        citations: JSON.stringify(analysisResult.citations),
-        snapshots: JSON.stringify(analysisResult.snapshots),
-        suggestions: JSON.stringify(analysisResult.suggestions),
-        created_at: new Date().toISOString()
-      };
-      
-      // 保存分析结果
-      global.analysisResults = global.analysisResults || {};
-      global.analysisResults[id] = analysis;
-      
-      return res.status(200).json({ success: true, analysis });
-    }
-    
-    // 如果分析失败，返回错误
-    res.status(404).json({ success: false, error: '分析结果不存在' });
+    return res.status(200).json({ success: true, analysis });
   } catch (error) {
     console.error('获取分析结果失败:', error);
     res.status(500).json({ success: false, error: '获取分析结果失败' });
@@ -244,13 +206,8 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
-    // 从全局变量中删除品牌分析结果
-    if (global.analysisResults && global.analysisResults[id]) {
-      delete global.analysisResults[id];
-    }
-    
-    // 这里应该添加删除品牌的数据库操作
-    // 由于本地没有数据库，我们返回成功
+    // 执行数据库删除操作
+    await brandModel.deleteBrand(id);
     
     res.status(200).json({ success: true, message: '品牌删除成功' });
   } catch (error) {
@@ -265,18 +222,8 @@ router.get('/:id/export', async (req, res) => {
     const { id } = req.params;
     const { format } = req.query;
     
-    // 获取分析结果
-    let analysis;
-    if (global.analysisResults && global.analysisResults[id]) {
-      analysis = global.analysisResults[id];
-    } else {
-      try {
-        analysis = await brandModel.getAnalysisByBrandId(id);
-      } catch (dbError) {
-        console.error('获取分析结果失败:', dbError);
-        return res.status(404).json({ success: false, error: '分析结果不存在' });
-      }
-    }
+    // 从数据库获取分析结果
+    const analysis = await brandModel.getAnalysisByBrandId(id);
     
     if (!analysis) {
       return res.status(404).json({ success: false, error: '分析结果不存在' });

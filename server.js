@@ -286,7 +286,10 @@ app.get('/api/admin/articles/:id', async (req, res) => {
 
 app.get('/api/admin/stats/visits', async (req, res) => {
   try {
-    res.status(200).json({ success: true, visits: 42 });
+    // 从数据库获取实际访问量数据
+    const [result] = await db.execute('SELECT COUNT(*) as visits FROM page_views');
+    const visits = result[0].visits || 0;
+    res.status(200).json({ success: true, visits });
   } catch (error) {
     console.error('获取访问量失败:', error);
     res.status(500).json({ success: false, error: '获取访问量失败' });
@@ -295,7 +298,10 @@ app.get('/api/admin/stats/visits', async (req, res) => {
 
 app.get('/api/admin/stats/active-users', async (req, res) => {
   try {
-    res.status(200).json({ success: true, activeUsers: 1 });
+    // 从数据库获取实际活跃用户数
+    const [result] = await db.execute('SELECT COUNT(*) as activeUsers FROM users');
+    const activeUsers = result[0].activeUsers || 0;
+    res.status(200).json({ success: true, activeUsers });
   } catch (error) {
     console.error('获取活跃用户数失败:', error);
     res.status(500).json({ success: false, error: '获取活跃用户数失败' });
@@ -626,16 +632,16 @@ app.post('/api/ai/chat', async (req, res) => {
     }
     
     // 从环境变量获取配置
-    const apiKey = process.env.DOUBAO_API_KEY;
-    const apiUrl = process.env.DOUBAO_API_URL;
-    const model = process.env.DOUBAO_MODEL;
+    const apiKey = process.env.LLM_API_KEY;
+    const apiUrl = process.env.LLM_API_URL;
+    const model = process.env.LLM_MODEL;
     
     if (!apiKey || !apiUrl || !model) {
       return res.status(500).json({ success: false, error: 'API配置未设置' });
     }
     
-    // 调用豆包大模型API
-    console.log('调用豆包API:', {
+    // 调用大模型API
+    console.log('调用大模型API:', {
       apiUrl,
       model,
       question: question.substring(0, 50) + '...'

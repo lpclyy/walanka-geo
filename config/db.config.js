@@ -1,8 +1,8 @@
 module.exports = {
   dbConfig: {
     host: 'localhost',
-    user: 'walanka',
-    password: '123456',
+    user: 'root',
+    password: '',
     database: 'walanka_geo',
     waitForConnections: true,
     connectionLimit: 10,
