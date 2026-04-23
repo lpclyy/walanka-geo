@@ -70,10 +70,9 @@ async function performAIAnalysis(brandId, brandInfo) {
     return null;
   }
 
-  if (!searchApiKey) {
-    console.error('搜索引擎API配置未完成，请检查.env文件中的SEARCH_API_KEY配置');
-    return null;
-  }
+  // 不再需要搜索API配置
+  console.log('使用前端提供的品牌信息进行分析，不需要搜索API');
+
 
   let brand;
   if (brandInfo) {
@@ -107,43 +106,10 @@ async function performAIAnalysis(brandId, brandInfo) {
   console.log(`大模型API配置: URL=${llmApiUrl}, Model=${llmModel}`);
   console.log(`搜索引擎API配置: SerpApi, Engine=${searchEngine}`);
 
-  // 使用SerpApi联网搜索品牌信息
-  let searchResults = '';
-  try {
-    console.log('开始联网搜索品牌信息...');
-
-    const searchQuery = encodeURIComponent(`${brand.name} 品牌 最新信息 官方`);
-    const serpApiUrl = `https://serpapi.com/search?q=${searchQuery}&api_key=${searchApiKey}&num=10`;
-
-    const searchResponse = await fetch(serpApiUrl);
-
-    if (searchResponse.ok) {
-      const searchData = await searchResponse.json();
-      console.log('SerpApi搜索完成');
-
-      // 解析搜索结果
-      const organicResults = searchData.organic_results || [];
-      if (organicResults.length > 0) {
-        const summaryParts = [];
-        organicResults.slice(0, 5).forEach((result, index) => {
-          summaryParts.push(`${index + 1}. ${result.title}: ${result.snippet}`);
-        });
-        searchResults = summaryParts.join('\n');
-        console.log(`获取到 ${organicResults.length} 条搜索结果`);
-      } else {
-        searchResults = '未找到相关搜索结果';
-      }
-    } else {
-      const errorText = await searchResponse.text();
-      console.error(`搜索API调用失败: ${searchResponse.status} - ${errorText}`);
-      // 使用默认搜索结果，继续执行分析
-      searchResults = '搜索API调用失败，使用默认数据进行分析';
-    }
-  } catch (error) {
-    console.error('联网搜索失败:', error);
-    // 使用默认搜索结果，继续执行分析
-    searchResults = '联网搜索失败，使用默认数据进行分析';
-  }
+  // 直接使用前端提供的品牌信息，不使用搜索API
+  let searchResults = '使用前端提供的品牌信息进行分析';
+  console.log('使用前端提供的品牌信息进行分析');
+  console.log('品牌信息:', brand);
 
   const analysisResults = {};
 
