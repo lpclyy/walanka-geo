@@ -4,30 +4,46 @@ const brandModel = require('../models/brand');
 // 安全的JSON解析函数
 function safeJsonParse(content) {
   try {
+    console.log('开始解析JSON:', content.substring(0, 50) + '...');
+    
     // 尝试直接解析
-    return JSON.parse(content);
-  } catch (e) {
-    // 尝试清理内容后解析
     try {
+      return JSON.parse(content);
+    } catch (e) {
+      console.log('直接解析失败，尝试清理内容:', e.message);
+      
       // 移除开头和结尾的空白字符
       let cleaned = content.trim();
-      // 移除可能的代码块标记（包括```json、```和``json）
+      console.log('清理后内容:', cleaned.substring(0, 50) + '...');
+      
+      // 移除可能的代码块标记
       cleaned = cleaned.replace(/^```json|^```|^``json|```$|``$/g, '').trim();
+      console.log('移除代码块标记后:', cleaned.substring(0, 50) + '...');
+      
       // 尝试再次解析
-      return JSON.parse(cleaned);
-    } catch (e2) {
-      // 尝试提取JSON部分
       try {
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          return JSON.parse(jsonMatch[0]);
+        return JSON.parse(cleaned);
+      } catch (e2) {
+        console.log('清理后解析失败，尝试提取JSON部分:', e2.message);
+        
+        // 尝试提取JSON部分
+        try {
+          const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            console.log('提取到JSON部分:', jsonMatch[0].substring(0, 50) + '...');
+            return JSON.parse(jsonMatch[0]);
+          }
+          throw e2;
+        } catch (e3) {
+          console.log('提取JSON部分失败:', e3.message);
+          // 所有尝试都失败，返回错误
+          throw new Error(`无效的JSON格式: ${content.substring(0, 100)}...`);
         }
-        throw e2;
-      } catch (e3) {
-        // 所有尝试都失败，返回错误
-        throw new Error(`无效的JSON格式: ${content.substring(0, 100)}...`);
       }
     }
+  } catch (error) {
+    console.error('JSON解析完全失败:', error);
+    throw error;
   }
 }
 
