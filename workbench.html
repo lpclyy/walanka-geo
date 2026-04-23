@@ -3443,6 +3443,10 @@
             goToStep(3);
 
             try {
+                // 添加超时设置
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 120000); // 2分钟超时
+
                 const response = await fetch(`/api/brands/${currentBrandId}/analyze`, {
                     method: 'POST',
                     headers: {
@@ -3452,8 +3456,15 @@
                         selectedPromptIds,
                         customPrompts,
                         brandInfo: currentBrandInfo
-                    })
+                    }),
+                    signal: controller.signal
                 });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
                 const data = await response.json();
 
@@ -3469,7 +3480,11 @@
                 }
             } catch (error) {
                 console.error('开始分析失败:', error);
-                alert('开始分析失败，请稍后重试');
+                if (error.name === 'AbortError') {
+                    alert('分析请求超时，请稍后重试');
+                } else {
+                    alert('开始分析失败，请稍后重试');
+                }
                 goToStep(1);
             }
         }
