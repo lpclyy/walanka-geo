@@ -2,12 +2,19 @@ require('dotenv').config();
 const brandModel = require('../models/brand');
 
 async function performAIAnalysis(brandId, brandInfo) {
-  const apiKey = process.env.LLM_API_KEY;
-  const apiUrl = process.env.LLM_API_URL;
-  const model = process.env.LLM_MODEL;
+  const llmApiKey = process.env.LLM_API_KEY;
+  const llmApiUrl = process.env.LLM_API_URL;
+  const llmModel = process.env.LLM_MODEL;
+  const searchApiKey = process.env.SEARCH_API_KEY;
+  const searchEngine = process.env.SEARCH_ENGINE || 'google';
 
-  if (!apiKey || !apiUrl || !model) {
-    console.error('大模型API配置未完成，无法进行真实分析');
+  if (!llmApiKey || !llmApiUrl || !llmModel) {
+    console.error('大模型API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置');
+    return null;
+  }
+
+  if (!searchApiKey) {
+    console.error('搜索引擎API配置未完成，请检查.env文件中的SEARCH_API_KEY配置');
     return null;
   }
 
@@ -28,43 +35,35 @@ async function performAIAnalysis(brandId, brandInfo) {
   }
 
   console.log(`开始分析品牌: ${brand.name}`);
-  console.log(`API配置: URL=${apiUrl}, Model=${model}`);
+  console.log(`大模型API配置: URL=${llmApiUrl}, Model=${llmModel}`);
+  console.log(`搜索引擎API配置: SerpApi, Engine=${searchEngine}`);
 
-  // 联网搜索品牌信息
+  // 使用SerpApi联网搜索品牌信息
   let searchResults = '';
   try {
     console.log('开始联网搜索品牌信息...');
-    const searchPrompt = `请搜索并总结"${brand.name}"品牌的最新信息，包括：
-1. 品牌基本信息
-2. 最近的市场表现
-3. 产品或服务特点
-4. 行业地位
-5. 用户评价
-6. 最近的新闻或动态
 
-请用中文总结，不要超过500字。`;
-    
-    const searchResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: 'system', content: '你是一个专业的品牌信息搜索专家，能够快速准确地收集和总结品牌相关信息。' },
-          { role: 'user', content: searchPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
-    });
-    
+    const searchQuery = encodeURIComponent(`${brand.name} 品牌 最新信息 官方`);
+    const serpApiUrl = `https://serpapi.com/search?q=${searchQuery}&api_key=${searchApiKey}&num=10`;
+
+    const searchResponse = await fetch(serpApiUrl);
+
     if (searchResponse.ok) {
       const searchData = await searchResponse.json();
-      searchResults = searchData.choices?.[0]?.message?.content || '';
-      console.log('联网搜索完成，获取到品牌信息');
+      console.log('SerpApi搜索完成');
+
+      // 解析搜索结果
+      const organicResults = searchData.organic_results || [];
+      if (organicResults.length > 0) {
+        const summaryParts = [];
+        organicResults.slice(0, 5).forEach((result, index) => {
+          summaryParts.push(`${index + 1}. ${result.title}: ${result.snippet}`);
+        });
+        searchResults = summaryParts.join('\n');
+        console.log(`获取到 ${organicResults.length} 条搜索结果`);
+      } else {
+        searchResults = '未找到相关搜索结果';
+      }
     } else {
       const errorText = await searchResponse.text();
       console.error(`搜索API调用失败: ${searchResponse.status} - ${errorText}`);
@@ -100,14 +99,14 @@ ${searchResults}
   "summary": "100字左右的品牌整体概述"
 }`;
 
-    const overviewResponse = await fetch(apiUrl, {
+    const overviewResponse = await fetch(llmApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${llmApiKey}`
       },
       body: JSON.stringify({
-        model: model,
+        model: llmModel,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: overviewPrompt }
@@ -164,14 +163,14 @@ ${searchResults}
   "trend": [过去7周的趋势数据，数组形式]
 }`;
 
-    const visibilityResponse = await fetch(apiUrl, {
+    const visibilityResponse = await fetch(llmApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${llmApiKey}`
       },
       body: JSON.stringify({
-        model: model,
+        model: llmModel,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: visibilityPrompt }
@@ -224,14 +223,14 @@ ${searchResults}
   "keywords": ["核心关键词1", "关键词2", ...]
 }`;
 
-    const perceptionResponse = await fetch(apiUrl, {
+    const perceptionResponse = await fetch(llmApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${llmApiKey}`
       },
       body: JSON.stringify({
-        model: model,
+        model: llmModel,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: perceptionPrompt }
