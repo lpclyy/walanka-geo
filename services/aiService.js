@@ -1,6 +1,36 @@
 require('dotenv').config();
 const brandModel = require('../models/brand');
 
+// 安全的JSON解析函数
+function safeJsonParse(content) {
+  try {
+    // 尝试直接解析
+    return JSON.parse(content);
+  } catch (e) {
+    // 尝试清理内容后解析
+    try {
+      // 移除开头和结尾的空白字符
+      let cleaned = content.trim();
+      // 移除可能的代码块标记
+      cleaned = cleaned.replace(/^```json|^```|```$/g, '').trim();
+      // 尝试再次解析
+      return JSON.parse(cleaned);
+    } catch (e2) {
+      // 尝试提取JSON部分
+      try {
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          return JSON.parse(jsonMatch[0]);
+        }
+        throw e2;
+      } catch (e3) {
+        // 所有尝试都失败，返回错误
+        throw new Error(`无效的JSON格式: ${content.substring(0, 100)}...`);
+      }
+    }
+  }
+}
+
 async function performAIAnalysis(brandId, brandInfo) {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
@@ -121,7 +151,7 @@ ${searchResults}
       const content = overviewData.choices?.[0]?.message?.content;
       if (content) {
         try {
-          const parsed = JSON.parse(content);
+          const parsed = safeJsonParse(content);
           analysisResults.overview = parsed;
         } catch (parseError) {
           console.error('解析品牌概览结果失败:', parseError);
@@ -185,7 +215,7 @@ ${searchResults}
       const content = visibilityData.choices?.[0]?.message?.content;
       if (content) {
         try {
-          const parsed = JSON.parse(content);
+          const parsed = safeJsonParse(content);
           analysisResults.visibility = parsed;
         } catch (parseError) {
           console.error('解析品牌可见度结果失败:', parseError);
@@ -245,7 +275,7 @@ ${searchResults}
       const content = perceptionData.choices?.[0]?.message?.content;
       if (content) {
         try {
-          const parsed = JSON.parse(content);
+          const parsed = safeJsonParse(content);
           analysisResults.perception = parsed;
         } catch (parseError) {
           console.error('解析品牌感知结果失败:', parseError);
