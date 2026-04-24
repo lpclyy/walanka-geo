@@ -1,11 +1,11 @@
 const database = require('./database');
 
-async function createBrand(userId, name, website, description, industry) {
+async function createBrand(userId, name, website, description, industry, positioning) {
   const db = database.getDB();
   
   const [result] = await db.execute(
-    'INSERT INTO brands (user_id, name, website, description, industry, status) VALUES (?, ?, ?, ?, ?, ?)',
-    [userId, name, website, description, industry, 'pending']
+    'INSERT INTO brands (user_id, name, website, description, industry, positioning, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [userId, name, website, description, industry, positioning, 'pending']
   );
   
   return result.insertId;
@@ -116,12 +116,16 @@ async function saveAnalysisResult(brandId, analysisData) {
   const db = database.getDB();
   
   await db.execute(
-    'INSERT INTO brand_analysis (brand_id, overview, visibility, perception, topics, citations, snapshots, suggestions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO brand_analysis (brand_id, overview, visibility, perception, strengths, opportunities, competition, risks, topics, citations, snapshots, suggestions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [
       brandId,
       JSON.stringify(analysisData.overview),
       JSON.stringify(analysisData.visibility),
       JSON.stringify(analysisData.perception),
+      JSON.stringify(analysisData.strengths || []),
+      JSON.stringify(analysisData.opportunities || []),
+      JSON.stringify(analysisData.competition || {}),
+      JSON.stringify(analysisData.risks || []),
       JSON.stringify(analysisData.topics),
       JSON.stringify(analysisData.citations),
       JSON.stringify(analysisData.snapshots),

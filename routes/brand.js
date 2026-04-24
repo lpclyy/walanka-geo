@@ -6,16 +6,14 @@ const aiService = require('../services/aiService');
 
 router.post('/', async (req, res) => {
   try {
-    const { userId, name, website, description } = req.body;
+    const { userId, name, website, description, industry, positioning } = req.body;
     
-    if (!userId || !name || !website) {
+    if (!userId || !name || !website || !industry || !positioning) {
       return res.status(400).json({ success: false, error: '请填写必填信息' });
     }
     
-    const industry = promptService.extractIndustry(description);
-    
     // 保存品牌到数据库
-    const brandId = await brandModel.createBrand(userId, name, website, description, industry);
+    const brandId = await brandModel.createBrand(userId, name, website, description, industry, positioning);
     
     // 生成提示词建议并保存
     const suggestions = promptService.generatePromptSuggestions(name, industry);
@@ -24,7 +22,7 @@ router.post('/', async (req, res) => {
     res.status(200).json({
       success: true,
       brandId,
-      brand: { id: brandId, name, website, description, industry, status: 'pending' },
+      brand: { id: brandId, name, website, description, industry, positioning, status: 'pending' },
       suggestedPrompts: suggestions
     });
   } catch (error) {
@@ -262,6 +260,10 @@ router.get('/:id/export', async (req, res) => {
       overview: typeof analysis.overview === 'string' ? JSON.parse(analysis.overview) : analysis.overview,
       visibility: typeof analysis.visibility === 'string' ? JSON.parse(analysis.visibility) : analysis.visibility,
       perception: typeof analysis.perception === 'string' ? JSON.parse(analysis.perception) : analysis.perception,
+      strengths: typeof analysis.strengths === 'string' ? JSON.parse(analysis.strengths) : analysis.strengths,
+      opportunities: typeof analysis.opportunities === 'string' ? JSON.parse(analysis.opportunities) : analysis.opportunities,
+      competition: typeof analysis.competition === 'string' ? JSON.parse(analysis.competition) : analysis.competition,
+      risks: typeof analysis.risks === 'string' ? JSON.parse(analysis.risks) : analysis.risks,
       topics: typeof analysis.topics === 'string' ? JSON.parse(analysis.topics) : analysis.topics,
       citations: typeof analysis.citations === 'string' ? JSON.parse(analysis.citations) : analysis.citations,
       snapshots: typeof analysis.snapshots === 'string' ? JSON.parse(analysis.snapshots) : analysis.snapshots,
@@ -310,10 +312,57 @@ router.get('/:id/export', async (req, res) => {
         txtContent += `  中性评价: ${parsedAnalysis.perception.neutral}%\n`;
         txtContent += `  负面评价: ${parsedAnalysis.perception.negative}%\n`;
         txtContent += `  核心关键词: ${parsedAnalysis.perception.keywords.join(', ')}\n\n`;
+        txtContent += `品牌优势:\n`;
+        if (parsedAnalysis.strengths && parsedAnalysis.strengths.length > 0) {
+          parsedAnalysis.strengths.forEach((strength, index) => {
+            txtContent += `  ${index + 1}. [${strength.impact}] ${strength.title}: ${strength.description}\n`;
+          });
+        } else {
+          txtContent += `  暂无数据\n`;
+        }
+        txtContent += `\n`;
+        txtContent += `市场机会:\n`;
+        if (parsedAnalysis.opportunities && parsedAnalysis.opportunities.length > 0) {
+          parsedAnalysis.opportunities.forEach((opportunity, index) => {
+            txtContent += `  ${index + 1}. [${opportunity.potential}] ${opportunity.title}: ${opportunity.description}\n`;
+          });
+        } else {
+          txtContent += `  暂无数据\n`;
+        }
+        txtContent += `\n`;
+        txtContent += `竞争分析:\n`;
+        if (parsedAnalysis.competition) {
+          txtContent += `  竞争优势: ${parsedAnalysis.competition.competitiveAdvantage || '暂无数据'}\n`;
+          if (parsedAnalysis.competition.competitors && parsedAnalysis.competition.competitors.length > 0) {
+            txtContent += `  竞争对手:\n`;
+            parsedAnalysis.competition.competitors.forEach((competitor, index) => {
+              txtContent += `    ${index + 1}. ${competitor.name}\n`;
+              txtContent += `      优势: ${competitor.strengths}\n`;
+              txtContent += `      劣势: ${competitor.weaknesses}\n`;
+            });
+          }
+        } else {
+          txtContent += `  暂无数据\n`;
+        }
+        txtContent += `\n`;
+        txtContent += `风险评估:\n`;
+        if (parsedAnalysis.risks && parsedAnalysis.risks.length > 0) {
+          parsedAnalysis.risks.forEach((risk, index) => {
+            txtContent += `  ${index + 1}. [${risk.severity}] ${risk.title}: ${risk.description}\n`;
+            txtContent += `    缓解措施: ${risk.mitigation}\n`;
+          });
+        } else {
+          txtContent += `  暂无数据\n`;
+        }
+        txtContent += `\n`;
         txtContent += `建议:\n`;
-        parsedAnalysis.suggestions.forEach((suggestion, index) => {
-          txtContent += `  ${index + 1}. [${suggestion.priority}] ${suggestion.title}: ${suggestion.description}\n`;
-        });
+        if (parsedAnalysis.suggestions && parsedAnalysis.suggestions.length > 0) {
+          parsedAnalysis.suggestions.forEach((suggestion, index) => {
+            txtContent += `  ${index + 1}. [${suggestion.priority}] ${suggestion.title}: ${suggestion.description}\n`;
+          });
+        } else {
+          txtContent += `  暂无数据\n`;
+        }
         
         res.setHeader('Content-Type', 'text/plain');
         res.setHeader('Content-Disposition', `attachment; filename="brand-analysis-${id}.txt"`);
