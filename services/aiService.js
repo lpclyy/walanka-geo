@@ -145,7 +145,6 @@ ${searchResults}
 }`;
 
     console.log('开始调用大模型API:', llmApiUrl);
-    console.log('请求头:', { 'Content-Type': 'application/json', 'Authorization': `Bearer ${llmApiKey}` });
     console.log('请求体:', JSON.stringify({
       model: llmModel,
       messages: [
@@ -160,8 +159,7 @@ ${searchResults}
       const overviewResponse = await fetch(llmApiUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${llmApiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           model: llmModel,
