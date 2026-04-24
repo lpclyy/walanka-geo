@@ -63,26 +63,26 @@ function parseGeoTemplate(content, brandName) {
   try {
     console.log('开始解析geo模板数据:', content.substring(0, 100) + '...');
     
-    // 初始化结果对象
+    // 初始化结果对象，不使用默认值
     const result = {
       overview: {
         brandName: brandName,
         summary: '',
-        overallScore: 70,
-        confidence: 0.7
+        overallScore: 0,
+        confidence: 0
       },
       visibility: {
-        overallVisibility: 70,
-        mentionCount: 10000,
-        weeklyChange: '+5%',
-        industryRank: 'TOP 50',
+        overallVisibility: 0,
+        mentionCount: 0,
+        weeklyChange: '',
+        industryRank: '',
         platforms: [],
-        trend: [65, 66, 67, 68, 69, 70, 70]
+        trend: []
       },
       perception: {
-        positive: 70,
-        neutral: 20,
-        negative: 10,
+        positive: 0,
+        neutral: 0,
+        negative: 0,
         keywords: []
       },
       topics: [],
@@ -107,14 +107,17 @@ function parseGeoTemplate(content, brandName) {
       if (positiveCount) result.perception.positive = parseInt(positiveCount[1]);
       if (neutralCount) result.perception.neutral = parseInt(neutralCount[1]);
       if (negativeCount) result.perception.negative = parseInt(negativeCount[1]);
+    } else {
+      throw new Error('未找到数据总览部分');
     }
     
     // 解析品牌概览
     const brandOverviewMatch = content.match(/## 📖 品牌概览[\s\S]*?(?=## 📈|$)/);
     if (brandOverviewMatch) {
       const brandOverview = brandOverviewMatch[0];
-      const summary = brandOverviewMatch[0];
-      result.overview.summary = summary.substring(0, 100) + '...';
+      result.overview.summary = brandOverview.substring(0, 100) + '...';
+    } else {
+      throw new Error('未找到品牌概览部分');
     }
     
     // 解析品牌可见度
@@ -136,6 +139,8 @@ function parseGeoTemplate(content, brandName) {
           }
         });
       }
+    } else {
+      throw new Error('未找到品牌可见度部分');
     }
     
     // 解析品牌感知
@@ -152,6 +157,8 @@ function parseGeoTemplate(content, brandName) {
           }
         });
       }
+    } else {
+      throw new Error('未找到品牌感知部分');
     }
     
     // 解析主题分析
@@ -167,11 +174,13 @@ function parseGeoTemplate(content, brandName) {
             result.topics.push({
               name: topic[2],
               count: parseInt(topic[3]),
-              trend: `+${Math.floor(Math.random() * 20) + 1}%`
+              trend: ''
             });
           }
         });
       }
+    } else {
+      throw new Error('未找到主题分析部分');
     }
     
     // 解析引用分析
@@ -192,6 +201,8 @@ function parseGeoTemplate(content, brandName) {
           }
         });
       }
+    } else {
+      throw new Error('未找到引用分析部分');
     }
     
     // 解析改进建议
@@ -219,6 +230,8 @@ function parseGeoTemplate(content, brandName) {
           }
         });
       }
+    } else {
+      throw new Error('未找到改进建议部分');
     }
     
     // 解析竞品品牌分析
@@ -239,60 +252,32 @@ function parseGeoTemplate(content, brandName) {
           }
         });
       }
+    } else {
+      throw new Error('未找到竞品品牌分析部分');
+    }
+    
+    // 验证解析结果
+    if (!result.overview.summary || 
+        result.visibility.overallVisibility === 0 || 
+        result.perception.keywords.length === 0 || 
+        result.topics.length === 0 || 
+        result.citations.length === 0 || 
+        result.suggestions.length === 0 || 
+        result.competition.competitors.length === 0) {
+      throw new Error('解析结果不完整，缺少必要字段');
     }
     
     console.log('geo模板解析完成:', JSON.stringify(result, null, 2));
     return result;
   } catch (error) {
     console.error('解析geo模板失败:', error);
-    // 返回默认值
+    // 返回错误信息，不返回默认值
     return {
-      overview: {
-        brandName: brandName,
-        summary: '解析失败',
-        overallScore: 70,
-        confidence: 0.7
-      },
-      visibility: {
-        overallVisibility: 70,
-        mentionCount: 10000,
-        weeklyChange: '+5%',
-        industryRank: 'TOP 50',
-        platforms: [
-          { name: '豆包', visibility: 75 },
-          { name: '文心一言', visibility: 70 },
-          { name: '通义千问', visibility: 65 }
-        ],
-        trend: [65, 66, 67, 68, 69, 70, 70]
-      },
-      perception: {
-        positive: 70,
-        neutral: 20,
-        negative: 10,
-        keywords: ['品牌', '产品', '服务', '质量']
-      },
-      topics: [
-        { name: '品牌', count: 50, trend: '+10%' },
-        { name: '产品', count: 45, trend: '+8%' },
-        { name: '服务', count: 40, trend: '+5%' },
-        { name: '质量', count: 35, trend: '+3%' }
-      ],
-      citations: [
-        { source: '豆包', count: 30, url: 'https://doubao.com' },
-        { source: '文心一言', count: 25, url: 'https://ernie.com' },
-        { source: '通义千问', count: 20, url: 'https://tongyi.com' }
-      ],
-      suggestions: [
-        { priority: 'high', title: '增加品牌在AI平台的曝光', description: '通过优化品牌内容，提高在AI平台被提及的频率' },
-        { priority: 'medium', title: '优化品牌描述', description: '更新品牌描述，突出核心竞争优势和品牌特色' },
-        { priority: 'low', title: '收集用户评价', description: '鼓励用户分享真实使用体验，增加正面评价数量' }
-      ],
-      competition: {
-        competitors: [
-          { name: '竞争对手A', strengths: '市场份额大', weaknesses: '产品创新不足' },
-          { name: '竞争对手B', strengths: '价格优势', weaknesses: '品牌知名度低' }
-        ],
-        competitiveAdvantage: '品牌在产品质量和用户体验方面具有优势'
+      error: {
+        module: 'aiService.parseGeoTemplate',
+        function: 'parseGeoTemplate',
+        message: '解析geo模板失败',
+        details: error.message
       }
     };
   }
@@ -545,6 +530,12 @@ async function performAIAnalysis(brandId, brandInfo) {
           // 尝试解析为geo模板格式
           console.log('JSON解析失败，尝试解析为geo模板格式');
           const parsedGeo = parseGeoTemplate(content, brand.name);
+          
+          // 检查解析结果是否包含错误
+          if (parsedGeo.error) {
+            console.error('geo模板解析失败:', parsedGeo.error);
+            return parsedGeo;
+          }
           
           // 验证解析结果
           if (!parsedGeo.overview || !parsedGeo.visibility || !parsedGeo.perception) {
