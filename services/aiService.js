@@ -302,18 +302,27 @@ async function performAIAnalysis(brandId, brandInfo) {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
-  const searchApiKey = process.env.SEARCH_API_KEY;
-  const searchEngine = process.env.SEARCH_ENGINE || 'google';
 
+  console.log('=== 开始品牌分析流程 ===');
+  console.log(`品牌ID: ${brandId}`);
+  console.log(`品牌信息: ${JSON.stringify(brandInfo)}`);
+  console.log(`大模型API配置: URL=${llmApiUrl}, Model=${llmModel}`);
+
+  // 验证API配置
   if (!llmApiKey || !llmApiUrl || !llmModel) {
-    console.error('大模型API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置');
-    return null;
+    const error = '大模型API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置';
+    console.error('错误:', error);
+    return {
+      error: {
+        module: 'aiService.performAIAnalysis',
+        function: 'performAIAnalysis',
+        message: error,
+        details: 'API配置缺失'
+      }
+    };
   }
 
-  // 不再需要搜索API配置
-  console.log('使用前端提供的品牌信息进行分析，不需要搜索API');
-
-
+  // 验证品牌信息
   let brand;
   if (brandInfo) {
     brand = brandInfo;
@@ -321,46 +330,31 @@ async function performAIAnalysis(brandId, brandInfo) {
     try {
       brand = await brandModel.getBrandById(brandId);
       if (!brand) {
-        console.log(`品牌 ${brandId} 不存在，使用默认品牌信息`);
-        // 使用默认品牌信息
-        brand = {
-          id: brandId,
-          name: `品牌${brandId}`,
-          industry: '未知行业',
-          website: 'https://example.com',
-          description: '品牌描述'        };
+        const error = `品牌 ${brandId} 不存在`;
+        console.error('错误:', error);
+        return {
+          error: {
+            module: 'aiService.performAIAnalysis',
+            function: 'getBrandById',
+            message: error,
+            details: '品牌不存在'
+          }
+        };
       }
     } catch (error) {
-      console.error('获取品牌信息失败，使用默认品牌信息:', error);
-      // 使用默认品牌信息
-      brand = {
-        id: brandId,
-        name: `品牌${brandId}`,
-        industry: '未知行业',
-        website: 'https://example.com',
-        description: '品牌描述'      };
+      console.error('获取品牌信息失败:', error);
+      return {
+        error: {
+          module: 'aiService.performAIAnalysis',
+          function: 'getBrandById',
+          message: '获取品牌信息失败',
+          details: error.message
+        }
+      };
     }
   }
 
   console.log(`开始分析品牌: ${brand.name}`);
-  console.log(`大模型API配置: URL=${llmApiUrl}, Model=${llmModel}`);
-  console.log(`搜索引擎API配置: SerpApi, Engine=${searchEngine}`);
-
-  // 直接使用前端提供的品牌信息，不使用搜索API
-  let searchResults = '使用前端提供的品牌信息进行分析';
-  console.log('使用前端提供的品牌信息进行分析');
-  console.log('品牌信息:', brand);
-
-  const analysisResults = {};
-
-  // 改进提示词，明确要求返回纯JSON格式
-  const systemPrompt = `你是品牌分析专家，专注于分析品牌的整体表现。请根据用户提供的品牌信息，进行全面的品牌分析，包括品牌优势、市场机会、竞争分析、风险评估等方面。
-
-**重要要求：**
-1. 只返回纯JSON格式，不要包含任何代码块标记（如\`\`\`json或\`\`\`）
-2. 确保JSON格式正确，使用双引号，不要有多余的逗号
-3. 严格按照用户要求的JSON结构返回结果
-4. 不要在JSON外部添加任何额外内容`;
 
   // 分析品牌概览（使用geo模板格式）
   try {
@@ -464,24 +458,12 @@ async function performAIAnalysis(brandId, brandInfo) {
 - 品牌名称：${brand.name}
 - 所属行业：${brand.industry || '未知'}
 - 品牌网站：${brand.website || '未知'}
-- 品牌描述：${brand.description || '暂无描述'}
-
-搜索结果：
-${searchResults}`;
+- 品牌描述：${brand.description || '暂无描述'}`;
 
     console.log('开始调用大模型API:', llmApiUrl);
-    console.log('请求体:', JSON.stringify({
-      model: llmModel,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: overviewPrompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 4000
-    }));
-
+    
     try {
-      const overviewResponse = await fetch(llmApiUrl, {
+      const response = await fetch(llmApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -490,320 +472,133 @@ ${searchResults}`;
         body: JSON.stringify({
           model: llmModel,
           messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: overviewPrompt }
+            {
+              role: 'system',
+              content: '你是品牌分析专家，专注于分析品牌的整体表现。请根据用户提供的品牌信息，进行全面的品牌分析，包括品牌优势、市场机会、竞争分析、风险评估等方面。'
+            },
+            {
+              role: 'user',
+              content: overviewPrompt
+            }
           ],
           temperature: 0.7,
           max_tokens: 4000
         })
       });
 
-      console.log('API响应状态:', overviewResponse.status);
-      console.log('API响应头:', Object.fromEntries(overviewResponse.headers.entries()));
-
-      if (overviewResponse.ok) {
-        const overviewData = await overviewResponse.json();
-        console.log('API响应数据:', JSON.stringify(overviewData, null, 2));
-        const content = overviewData.choices?.[0]?.message?.content;
-        if (content) {
-          try {
-            // 尝试解析为JSON
-            const parsedJson = safeJsonParse(content);
-            if (!parsedJson.error) {
-              analysisResults = parsedJson;
-            } else {
-              // 尝试解析为geo模板格式
-              const parsedGeo = parseGeoTemplate(content, brand.name);
-              analysisResults = parsedGeo;
-            }
-          } catch (parseError) {
-            console.error('解析品牌概览结果失败，尝试解析为geo模板格式:', parseError);
-            // 尝试解析为geo模板格式
-            const parsedGeo = parseGeoTemplate(content, brand.name);
-            analysisResults = parsedGeo;
+      console.log('API响应状态:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        const error = `品牌概览API调用失败: ${response.status} - ${errorText}`;
+        console.error('错误:', error);
+        return {
+          error: {
+            module: 'aiService.performAIAnalysis',
+            function: 'fetch',
+            message: error,
+            details: `HTTP状态码: ${response.status}`
           }
+        };
+      }
+
+      const responseData = await response.json();
+      console.log('API响应数据:', JSON.stringify(responseData, null, 2));
+      
+      const content = responseData.choices?.[0]?.message?.content;
+      if (!content) {
+        const error = '大模型返回内容为空';
+        console.error('错误:', error);
+        return {
+          error: {
+            module: 'aiService.performAIAnalysis',
+            function: 'response processing',
+            message: error,
+            details: '大模型未返回任何内容'
+          }
+        };
+      }
+
+      // 解析返回内容
+      try {
+        // 尝试解析为JSON
+        const parsedJson = safeJsonParse(content);
+        if (!parsedJson.error) {
+          console.log('成功解析为JSON格式');
+          
+          // 验证解析结果
+          if (!parsedJson.overview || !parsedJson.visibility || !parsedJson.perception) {
+            const error = '解析结果缺少必要字段';
+            console.error('错误:', error);
+            return {
+              error: {
+                module: 'aiService.performAIAnalysis',
+                function: 'JSON parsing',
+                message: error,
+                details: '解析结果结构不完整'
+              }
+            };
+          }
+          
+          return parsedJson;
         } else {
-          // 使用默认值
-          analysisResults = {
-            overview: {
-              brandName: brand.name,
-              industry: brand.industry || '未知',
-              confidence: 0.7,
-              overallScore: 70,
-              summary: `未获取到品牌 ${brand.name} 的概览分析结果`
-            },
-            visibility: {
-              overallVisibility: 70,
-              mentionCount: 10000,
-              weeklyChange: '+5%',
-              industryRank: 'TOP 50',
-              platforms: [
-                { name: '豆包', visibility: 75 },
-                { name: '文心一言', visibility: 70 },
-                { name: '通义千问', visibility: 65 }
-              ],
-              trend: [65, 66, 67, 68, 69, 70, 70]
-            },
-            perception: {
-              positive: 70,
-              neutral: 20,
-              negative: 10,
-              keywords: ['品牌', '产品', '服务', '质量']
-            },
-            topics: [
-              { name: '品牌', count: 50, trend: '+10%' },
-              { name: '产品', count: 45, trend: '+8%' },
-              { name: '服务', count: 40, trend: '+5%' },
-              { name: '质量', count: 35, trend: '+3%' }
-            ],
-            citations: [
-              { source: '豆包', count: 30, url: 'https://doubao.com' },
-              { source: '文心一言', count: 25, url: 'https://ernie.com' },
-              { source: '通义千问', count: 20, url: 'https://tongyi.com' }
-            ],
-            suggestions: [
-              { priority: 'high', title: '增加品牌在AI平台的曝光', description: '通过优化品牌内容，提高在AI平台被提及的频率' },
-              { priority: 'medium', title: '优化品牌描述', description: '更新品牌描述，突出核心竞争优势和品牌特色' },
-              { priority: 'low', title: '收集用户评价', description: '鼓励用户分享真实使用体验，增加正面评价数量' }
-            ],
-            competition: {
-              competitors: [
-                { name: '竞争对手A', strengths: '市场份额大', weaknesses: '产品创新不足' },
-                { name: '竞争对手B', strengths: '价格优势', weaknesses: '品牌知名度低' }
-              ],
-              competitiveAdvantage: '品牌在产品质量和用户体验方面具有优势'
-            }
-          };
+          // 尝试解析为geo模板格式
+          console.log('JSON解析失败，尝试解析为geo模板格式');
+          const parsedGeo = parseGeoTemplate(content, brand.name);
+          
+          // 验证解析结果
+          if (!parsedGeo.overview || !parsedGeo.visibility || !parsedGeo.perception) {
+            const error = 'geo模板解析结果缺少必要字段';
+            console.error('错误:', error);
+            return {
+              error: {
+                module: 'aiService.performAIAnalysis',
+                function: 'geo template parsing',
+                message: error,
+                details: '解析结果结构不完整'
+              }
+            };
+          }
+          
+          console.log('成功解析为geo模板格式');
+          return parsedGeo;
         }
-        console.log(`品牌概览分析完成`);
-      } else {
-        const errorText = await overviewResponse.text();
-        console.error(`品牌概览API调用失败: ${overviewResponse.status} - ${errorText}`);
-        // 使用默认值
-        analysisResults = {
-          overview: {
-            brandName: brand.name,
-            industry: brand.industry || '未知',
-            confidence: 0.7,
-            overallScore: 70,
-            summary: `品牌 ${brand.name} 的概览分析API调用失败`
-          },
-          visibility: {
-            overallVisibility: 70,
-            mentionCount: 10000,
-            weeklyChange: '+5%',
-            industryRank: 'TOP 50',
-            platforms: [
-              { name: '豆包', visibility: 75 },
-              { name: '文心一言', visibility: 70 },
-              { name: '通义千问', visibility: 65 }
-            ],
-            trend: [65, 66, 67, 68, 69, 70, 70]
-          },
-          perception: {
-            positive: 70,
-            neutral: 20,
-            negative: 10,
-            keywords: ['品牌', '产品', '服务', '质量']
-          },
-          topics: [
-            { name: '品牌', count: 50, trend: '+10%' },
-            { name: '产品', count: 45, trend: '+8%' },
-            { name: '服务', count: 40, trend: '+5%' },
-            { name: '质量', count: 35, trend: '+3%' }
-          ],
-          citations: [
-            { source: '豆包', count: 30, url: 'https://doubao.com' },
-            { source: '文心一言', count: 25, url: 'https://ernie.com' },
-            { source: '通义千问', count: 20, url: 'https://tongyi.com' }
-          ],
-          suggestions: [
-            { priority: 'high', title: '增加品牌在AI平台的曝光', description: '通过优化品牌内容，提高在AI平台被提及的频率' },
-            { priority: 'medium', title: '优化品牌描述', description: '更新品牌描述，突出核心竞争优势和品牌特色' },
-            { priority: 'low', title: '收集用户评价', description: '鼓励用户分享真实使用体验，增加正面评价数量' }
-          ],
-          competition: {
-            competitors: [
-              { name: '竞争对手A', strengths: '市场份额大', weaknesses: '产品创新不足' },
-              { name: '竞争对手B', strengths: '价格优势', weaknesses: '品牌知名度低' }
-            ],
-            competitiveAdvantage: '品牌在产品质量和用户体验方面具有优势'
+      } catch (parseError) {
+        const error = '解析品牌概览结果失败';
+        console.error('错误:', error, parseError);
+        return {
+          error: {
+            module: 'aiService.performAIAnalysis',
+            function: 'parsing',
+            message: error,
+            details: parseError.message
           }
         };
       }
     } catch (error) {
       console.error('分析品牌概览失败:', error);
-      // 使用默认值
-      analysisResults = {
-        overview: {
-          brandName: brand.name,
-          industry: brand.industry || '未知',
-          confidence: 0.7,
-          overallScore: 70,
-          summary: `品牌 ${brand.name} 的概览分析失败`
-        },
-        visibility: {
-          overallVisibility: 70,
-          mentionCount: 10000,
-          weeklyChange: '+5%',
-          industryRank: 'TOP 50',
-          platforms: [
-            { name: '豆包', visibility: 75 },
-            { name: '文心一言', visibility: 70 },
-            { name: '通义千问', visibility: 65 }
-          ],
-          trend: [65, 66, 67, 68, 69, 70, 70]
-        },
-        perception: {
-          positive: 70,
-          neutral: 20,
-          negative: 10,
-          keywords: ['品牌', '产品', '服务', '质量']
-        },
-        topics: [
-          { name: '品牌', count: 50, trend: '+10%' },
-          { name: '产品', count: 45, trend: '+8%' },
-          { name: '服务', count: 40, trend: '+5%' },
-          { name: '质量', count: 35, trend: '+3%' }
-        ],
-        citations: [
-          { source: '豆包', count: 30, url: 'https://doubao.com' },
-          { source: '文心一言', count: 25, url: 'https://ernie.com' },
-          { source: '通义千问', count: 20, url: 'https://tongyi.com' }
-        ],
-        suggestions: [
-          { priority: 'high', title: '增加品牌在AI平台的曝光', description: '通过优化品牌内容，提高在AI平台被提及的频率' },
-          { priority: 'medium', title: '优化品牌描述', description: '更新品牌描述，突出核心竞争优势和品牌特色' },
-          { priority: 'low', title: '收集用户评价', description: '鼓励用户分享真实使用体验，增加正面评价数量' }
-        ],
-        competition: {
-          competitors: [
-            { name: '竞争对手A', strengths: '市场份额大', weaknesses: '产品创新不足' },
-            { name: '竞争对手B', strengths: '价格优势', weaknesses: '品牌知名度低' }
-          ],
-          competitiveAdvantage: '品牌在产品质量和用户体验方面具有优势'
+      return {
+        error: {
+          module: 'aiService.performAIAnalysis',
+          function: 'API call',
+          message: '分析品牌概览失败',
+          details: error.message
         }
       };
     }
   } catch (error) {
     console.error('分析品牌概览失败:', error);
-    // 使用默认值
-    analysisResults = {
-      overview: {
-        brandName: brand.name,
-        industry: brand.industry || '未知',
-        confidence: 0.7,
-        overallScore: 70,
-        summary: `品牌 ${brand.name} 的概览分析失败`
-      },
-      visibility: {
-        overallVisibility: 70,
-        mentionCount: 10000,
-        weeklyChange: '+5%',
-        industryRank: 'TOP 50',
-        platforms: [
-          { name: '豆包', visibility: 75 },
-          { name: '文心一言', visibility: 70 },
-          { name: '通义千问', visibility: 65 }
-        ],
-        trend: [65, 66, 67, 68, 69, 70, 70]
-      },
-      perception: {
-        positive: 70,
-        neutral: 20,
-        negative: 10,
-        keywords: ['品牌', '产品', '服务', '质量']
-      },
-      topics: [
-        { name: '品牌', count: 50, trend: '+10%' },
-        { name: '产品', count: 45, trend: '+8%' },
-        { name: '服务', count: 40, trend: '+5%' },
-        { name: '质量', count: 35, trend: '+3%' }
-      ],
-      citations: [
-        { source: '豆包', count: 30, url: 'https://doubao.com' },
-        { source: '文心一言', count: 25, url: 'https://ernie.com' },
-        { source: '通义千问', count: 20, url: 'https://tongyi.com' }
-      ],
-      suggestions: [
-        { priority: 'high', title: '增加品牌在AI平台的曝光', description: '通过优化品牌内容，提高在AI平台被提及的频率' },
-        { priority: 'medium', title: '优化品牌描述', description: '更新品牌描述，突出核心竞争优势和品牌特色' },
-        { priority: 'low', title: '收集用户评价', description: '鼓励用户分享真实使用体验，增加正面评价数量' }
-      ],
-      competition: {
-        competitors: [
-          { name: '竞争对手A', strengths: '市场份额大', weaknesses: '产品创新不足' },
-          { name: '竞争对手B', strengths: '价格优势', weaknesses: '品牌知名度低' }
-        ],
-        competitiveAdvantage: '品牌在产品质量和用户体验方面具有优势'
+    return {
+      error: {
+        module: 'aiService.performAIAnalysis',
+        function: 'main',
+        message: '分析品牌概览失败',
+        details: error.message
       }
     };
   }
-
-  // 跳过其他分析，因为geo模板已经包含了所有需要的分析数据
-  console.log('geo模板分析已完成，跳过其他单独分析');
-
-
-  // 构建最终分析结果（使用geo模板解析的结果）
-  const finalAnalysis = {
-    overview: analysisResults.overview || {
-      brandName: brand.name,
-      industry: brand.industry || '未知',
-      confidence: 0.7,
-      overallScore: 70,
-      summary: `品牌 ${brand.name} 的分析结果`
-    },
-    visibility: analysisResults.visibility || {
-      overallVisibility: 70,
-      mentionCount: 10000,
-      weeklyChange: '+5%',
-      industryRank: 'TOP 50',
-      platforms: [
-        { name: '豆包', visibility: 75 },
-        { name: '文心一言', visibility: 70 },
-        { name: '通义千问', visibility: 65 }
-      ],
-      trend: [65, 66, 67, 68, 69, 70, 70]
-    },
-    perception: analysisResults.perception || {
-      positive: 70,
-      neutral: 20,
-      negative: 10,
-      keywords: ['品牌', '产品', '服务', '质量']
-    },
-    strengths: analysisResults.strengths || [],
-    opportunities: analysisResults.opportunities || [],
-    competition: analysisResults.competition || {
-      competitors: [],
-      competitiveAdvantage: ''
-    },
-    risks: analysisResults.risks || [],
-    topics: analysisResults.topics || [],
-    citations: analysisResults.citations || [],
-    snapshots: analysisResults.snapshots || [],
-    suggestions: analysisResults.suggestions || []
-  };
-
-  if (!brandInfo) {
-    try {
-      await brandModel.saveAnalysisResult(brandId, finalAnalysis);
-    } catch (dbError) {
-      console.error('保存分析结果失败:', dbError);
-      // 继续执行，不中断分析流程
-    }
-
-    try {
-      await brandModel.updateBrandStatus(brandId, 'completed');
-    } catch (dbError) {
-      console.error('更新品牌状态失败:', dbError);
-      // 继续执行，不中断分析流程
-    }
-  }
-
-  console.log(`品牌 ${brandId} 分析完成`);
-
-  return finalAnalysis;
 }
+
 
 module.exports = {
   performAIAnalysis

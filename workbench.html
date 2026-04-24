@@ -3475,6 +3475,8 @@
 
                 const data = await response.json();
 
+                console.log('分析响应数据:', data);
+
                 if (data.success) {
                     if (data.analysis) {
                         showAnalysisResultDirectly(data.analysis);
@@ -3482,7 +3484,12 @@
                         pollAnalysisProgress();
                     }
                 } else {
-                    alert(data.error || '开始分析失败');
+                    // 显示详细的错误信息
+                    let errorMessage = data.error || '开始分析失败';
+                    if (data.errorDetails) {
+                        errorMessage += `\n\n错误详情:\n模块: ${data.errorDetails.module}\n函数: ${data.errorDetails.function}\n原因: ${data.errorDetails.details}`;
+                    }
+                    alert(errorMessage);
                     goToStep(1);
                 }
             } catch (error) {
@@ -3490,7 +3497,7 @@
                 if (error.name === 'AbortError') {
                     alert('分析请求超时，请稍后重试');
                 } else {
-                    alert('开始分析失败，请稍后重试');
+                    alert('开始分析失败，请稍后重试\n\n错误信息: ' + error.message);
                 }
                 goToStep(1);
             }

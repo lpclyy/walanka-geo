@@ -70,50 +70,47 @@ router.post('/:id/analyze', async (req, res) => {
     const { id } = req.params;
     const { selectedPromptIds, customPrompts, brandInfo } = req.body;
 
+    console.log('=== 开始品牌分析请求 ===');
+    console.log(`品牌ID: ${id}`);
+    console.log(`选择的提示词ID: ${selectedPromptIds}`);
+    console.log(`自定义提示词: ${customPrompts}`);
+    console.log(`品牌信息: ${JSON.stringify(brandInfo)}`);
+
     // 执行AI分析，不依赖于数据库操作
     const analysisResult = await aiService.performAIAnalysis(id, brandInfo);
 
+    console.log('分析结果:', JSON.stringify(analysisResult, null, 2));
+
+    // 检查分析结果是否包含错误
+    if (analysisResult.error) {
+      console.error('分析失败:', analysisResult.error);
+      return res.status(500).json({
+        success: false,
+        error: analysisResult.error.message,
+        errorDetails: analysisResult.error
+      });
+    }
+
     if (analysisResult) {
       // 直接返回分析结果，不依赖于数据库
+      console.log('分析成功，返回结果');
       return res.status(200).json({ success: true, analysis: analysisResult, message: '分析完成' });
     }
 
     res.status(200).json({ success: true, message: '分析已开始', status: 'analyzing' });
   } catch (error) {
     console.error('开始分析失败:', error);
-    // 即使出错，也返回一个默认的分析结果，确保前端能够正常显示
-    const defaultAnalysis = {
-      overview: {
-        brandName: `品牌${req.params.id}`,
-        industry: '未知行业',
-        confidence: 0.7,
-        overallScore: 70,
-        summary: '品牌分析完成'
-      },
-      visibility: {
-        overallVisibility: 70,
-        mentionCount: 10000,
-        weeklyChange: '+5%',
-        industryRank: 'TOP 50',
-        platforms: [
-          { name: '豆包', visibility: 75 },
-          { name: '文心一言', visibility: 70 },
-          { name: '通义千问', visibility: 65 }
-        ],
-        trend: [65, 66, 67, 68, 69, 70, 70]
-      },
-      perception: {
-        positive: 70,
-        neutral: 20,
-        negative: 10,
-        keywords: ['品牌', '产品', '服务', '质量']
-      },
-      topics: [],
-      citations: [],
-      snapshots: [],
-      suggestions: []
-    };
-    res.status(200).json({ success: true, analysis: defaultAnalysis, message: '分析完成（使用默认数据）' });
+    // 返回错误信息，确保前端能够正确显示错误
+    res.status(500).json({
+      success: false,
+      error: '分析失败',
+      errorDetails: {
+        module: 'routes.brand',
+        function: 'analyze',
+        message: error.message,
+        details: error.stack
+      }
+    });
   }
 });
 
