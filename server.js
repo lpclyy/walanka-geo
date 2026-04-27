@@ -699,6 +699,23 @@ app.post('/api/ai/chat', async (req, res) => {
   }
 });
 
+// 获取品牌列表
+app.get('/api/brands', async (req, res) => {
+  try {
+    // 模拟品牌数据
+    const brands = [
+      { id: 1, name: '品牌A', website: 'https://brand-a.com' },
+      { id: 2, name: '品牌B', website: 'https://brand-b.com' },
+      { id: 3, name: '品牌C', website: 'https://brand-c.com' }
+    ];
+    
+    res.status(200).json({ success: true, brands });
+  } catch (error) {
+    console.error('获取品牌列表失败:', error);
+    res.status(500).json({ success: false, error: '获取品牌列表失败' });
+  }
+});
+
 // 支付相关API
 app.post('/api/payment/create', async (req, res) => {
   try {
@@ -717,17 +734,43 @@ app.post('/api/payment/create', async (req, res) => {
     const price = planPrices[plan] || 999;
     
     // 生成支付数据
-    const paymentData = {
+    let paymentData = {
       orderId,
       plan,
       amount: price,
       paymentMethod,
-      qrCodeUrl: paymentMethod === 'wechat' 
-        ? 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wechat%20pay%20qr%20code&image_size=square' 
-        : 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=alipay%20qr%20code&image_size=square',
-      payUrl: `https://payment.example.com/pay?orderId=${orderId}&amount=${price}&method=${paymentMethod}`,
       createdAt: new Date().toISOString()
     };
+    
+    // 根据支付方式配置不同的支付参数
+    if (paymentMethod === 'wechat') {
+      // 微信支付配置
+      const wechatAppId = process.env.WECHAT_PAY_APPID;
+      const wechatMchId = process.env.WECHAT_PAY_MCHID;
+      const wechatApiKey = process.env.WECHAT_PAY_API_KEY;
+      const wechatNotifyUrl = process.env.WECHAT_PAY_NOTIFY_URL;
+      
+      paymentData.qrCodeUrl = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wechat%20pay%20qr%20code&image_size=square';
+      paymentData.payUrl = `https://api.mch.weixin.qq.com/v3/pay/transactions/native`;
+      paymentData.wechatConfig = {
+        appId: wechatAppId,
+        mchId: wechatMchId,
+        notifyUrl: wechatNotifyUrl
+      };
+    } else if (paymentMethod === 'alipay') {
+      // 支付宝支付配置
+      const alipayAppId = process.env.ALIPAY_APPID;
+      const alipayPrivateKey = process.env.ALIPAY_PRIVATE_KEY;
+      const alipayPublicKey = process.env.ALIPAY_PUBLIC_KEY;
+      const alipayNotifyUrl = process.env.ALIPAY_NOTIFY_URL;
+      
+      paymentData.qrCodeUrl = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=alipay%20qr%20code&image_size=square';
+      paymentData.payUrl = `https://openapi.alipay.com/gateway.do`;
+      paymentData.alipayConfig = {
+        appId: alipayAppId,
+        notifyUrl: alipayNotifyUrl
+      };
+    }
     
     // 这里可以添加订单存储逻辑
     console.log('创建支付订单:', paymentData);
@@ -804,6 +847,22 @@ async function startServer() {
   }
   db = database.getDB();
   redisClient = database.getRedisClient();
+  // 页面管理API
+  app.get('/api/admin/pages', async (req, res) => {
+    try {
+      // 模拟页面数据
+      const pages = [
+        { id: 1, title: '首页', path: '/', status: 'published', updated_at: '2026-04-27 10:00:00' },
+        { id: 2, title: '关于我们', path: '/about', status: 'published', updated_at: '2026-04-26 15:30:00' },
+        { id: 3, title: '服务', path: '/services', status: 'draft', updated_at: '2026-04-25 09:15:00' }
+      ];
+      res.status(200).json({ success: true, pages });
+    } catch (error) {
+      console.error('获取页面列表失败:', error);
+      res.status(500).json({ success: false, error: '获取页面列表失败' });
+    }
+  });
+
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });

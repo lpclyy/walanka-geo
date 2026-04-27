@@ -184,42 +184,121 @@
             <ul>
                 <li><a href="#" class="active" data-section="articles">文章管理</a></li>
                 <li><a href="#" data-section="users">用户管理</a></li>
+                <li><a href="#" data-section="pages">页面管理</a></li>
                 <li><a href="#" data-section="settings">系统设置</a></li>
             </ul>
         </div>
 
         <!-- 内容区域 -->
         <div class="admin-content">
-            <div class="admin-header">
-                <h1>文章管理</h1>
-                <button class="btn btn-primary" onclick="openAddArticleModal()">添加文章</button>
+            <!-- 文章管理 -->
+            <div id="articles-section" class="section-content">
+                <div class="admin-header">
+                    <h1>文章管理</h1>
+                    <button class="btn btn-primary" onclick="openAddArticleModal()">添加文章</button>
+                </div>
+
+                <!-- 消息提示 -->
+                <div id="message" class="alert" style="display: none;"></div>
+
+                <!-- 文章列表 -->
+                <table class="article-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>标题</th>
+                            <th>作者</th>
+                            <th>分类</th>
+                            <th>发布日期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="article-list">
+                        <!-- 文章列表将通过JavaScript动态加载 -->
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 50px;">
+                                加载文章中...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <!-- 消息提示 -->
-            <div id="message" class="alert" style="display: none;"></div>
+            <!-- 用户管理 -->
+            <div id="users-section" class="section-content" style="display: none;">
+                <div class="admin-header">
+                    <h1>用户管理</h1>
+                </div>
 
-            <!-- 文章列表 -->
-            <table class="article-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>标题</th>
-                        <th>作者</th>
-                        <th>分类</th>
-                        <th>浏览次数</th>
-                        <th>发布日期</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="article-list">
-                    <!-- 文章列表将通过JavaScript动态加载 -->
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 50px;">
-                            加载文章中...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                <!-- 消息提示 -->
+                <div id="user-message" class="alert" style="display: none;"></div>
+
+                <!-- 用户列表 -->
+                <table class="article-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>手机号</th>
+                            <th>姓名</th>
+                            <th>邮箱</th>
+                            <th>角色</th>
+                            <th>注册时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list">
+                        <!-- 用户列表将通过JavaScript动态加载 -->
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 50px;">
+                                加载用户中...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 页面管理 -->
+            <div id="pages-section" class="section-content" style="display: none;">
+                <div class="admin-header">
+                    <h1>页面管理</h1>
+                    <button class="btn btn-primary" onclick="openAddPageModal()">添加页面</button>
+                </div>
+
+                <!-- 消息提示 -->
+                <div id="page-message" class="alert" style="display: none;"></div>
+
+                <!-- 页面列表 -->
+                <table class="article-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>标题</th>
+                            <th>路径</th>
+                            <th>状态</th>
+                            <th>更新时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="page-list">
+                        <!-- 页面列表将通过JavaScript动态加载 -->
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 50px;">
+                                加载页面中...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 系统设置 -->
+            <div id="settings-section" class="section-content" style="display: none;">
+                <div class="admin-header">
+                    <h1>系统设置</h1>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <p>系统设置功能正在开发中...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -261,10 +340,54 @@
         </div>
     </div>
 
+    <!-- 添加/编辑页面模态框 -->
+    <div id="pageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="pageModalTitle">添加页面</h2>
+                <span class="close" onclick="closePageModal()">&times;</span>
+            </div>
+            <form id="pageForm">
+                <input type="hidden" id="pageId">
+                <div class="form-group">
+                    <label for="pageTitle">标题</label>
+                    <input type="text" id="pageTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="pagePath">路径</label>
+                    <input type="text" id="pagePath" required>
+                </div>
+                <div class="form-group">
+                    <label for="pageStatus">状态</label>
+                    <select id="pageStatus" required>
+                        <option value="published">已发布</option>
+                        <option value="draft">草稿</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="pageContent">内容</label>
+                    <textarea id="pageContent" required></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closePageModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // 页面加载时加载文章列表
         window.onload = function() {
             loadArticles();
+        };
+
+        // 分类映射
+        const categoryMap = {
+            'industry-news': 'GEO行业动态',
+            'technical-articles': 'GEO技术干货',
+            'product-updates': '产品更新',
+            'tutorials': '使用教程'
         };
 
         // 加载文章列表
@@ -276,13 +399,13 @@
                     const articleList = document.getElementById('article-list');
                     articleList.innerHTML = '';
                     data.articles.forEach(article => {
+                        const categoryName = categoryMap[article.category] || article.category;
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${article.id}</td>
                             <td>${article.title}</td>
                             <td>${article.author}</td>
-                            <td>${article.category}</td>
-                            <td>${article.views}</td>
+                            <td>${categoryName}</td>
                             <td>${article.date}</td>
                             <td>
                                 <button class="btn btn-primary" onclick="editArticle(${article.id})">编辑</button>
@@ -297,6 +420,71 @@
             } catch (error) {
                 console.error('加载文章失败:', error);
                 showMessage('加载文章失败', 'error');
+            }
+        }
+
+        // 加载用户列表
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+                if (data.success) {
+                    const userList = document.getElementById('user-list');
+                    userList.innerHTML = '';
+                    data.users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.id}</td>
+                            <td>${user.phone}</td>
+                            <td>${user.name || '未设置'}</td>
+                            <td>${user.email || '未设置'}</td>
+                            <td>${user.role}</td>
+                            <td>${user.created_at}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editUser(${user.id})">编辑</button>
+                                <button class="btn btn-danger" onclick="deleteUser(${user.id}, '${user.name || user.phone}')">删除</button>
+                            </td>
+                        `;
+                        userList.appendChild(row);
+                    });
+                } else {
+                    showUserMessage('加载用户失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载用户失败:', error);
+                showUserMessage('加载用户失败', 'error');
+            }
+        }
+
+        // 加载页面列表
+        async function loadPages() {
+            try {
+                const response = await fetch('/api/admin/pages');
+                const data = await response.json();
+                if (data.success) {
+                    const pageList = document.getElementById('page-list');
+                    pageList.innerHTML = '';
+                    data.pages.forEach(page => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${page.id}</td>
+                            <td>${page.title}</td>
+                            <td>${page.path}</td>
+                            <td>${page.status === 'published' ? '已发布' : '草稿'}</td>
+                            <td>${page.updated_at}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editPage(${page.id})">编辑</button>
+                                <button class="btn btn-danger" onclick="deletePage(${page.id}, '${page.title}')">删除</button>
+                            </td>
+                        `;
+                        pageList.appendChild(row);
+                    });
+                } else {
+                    showPageMessage('加载页面失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载页面失败:', error);
+                showPageMessage('加载页面失败', 'error');
             }
         }
 
@@ -356,9 +544,60 @@
             }
         }
 
-        // 关闭模态框
+        // 打开添加页面模态框
+        function openAddPageModal() {
+            document.getElementById('pageModalTitle').textContent = '添加页面';
+            document.getElementById('pageId').value = '';
+            document.getElementById('pageTitle').value = '';
+            document.getElementById('pagePath').value = '';
+            document.getElementById('pageStatus').value = 'published';
+            document.getElementById('pageContent').value = '';
+            document.getElementById('pageModal').style.display = 'block';
+        }
+
+        // 编辑页面
+        async function editPage(id) {
+            try {
+                // 模拟获取页面详情
+                const page = {
+                    id: id,
+                    title: '页面标题',
+                    path: '/page/' + id,
+                    status: 'published',
+                    content: '页面内容'
+                };
+                document.getElementById('pageModalTitle').textContent = '编辑页面';
+                document.getElementById('pageId').value = page.id;
+                document.getElementById('pageTitle').value = page.title;
+                document.getElementById('pagePath').value = page.path;
+                document.getElementById('pageStatus').value = page.status;
+                document.getElementById('pageContent').value = page.content;
+                document.getElementById('pageModal').style.display = 'block';
+            } catch (error) {
+                console.error('获取页面详情失败:', error);
+                showPageMessage('获取页面详情失败', 'error');
+            }
+        }
+
+        // 删除页面
+        function deletePage(id, title) {
+            if (confirm(`确定要删除页面《${title}》吗？`)) {
+                // 模拟删除页面
+                setTimeout(() => {
+                    showPageMessage('页面删除成功', 'success');
+                    loadPages();
+                }, 500);
+            }
+        }
+
+        // 关闭文章模态框
         function closeModal() {
             document.getElementById('articleModal').style.display = 'none';
+        }
+
+        // 关闭页面模态框
+        function closePageModal() {
+            document.getElementById('pageModal').style.display = 'none';
         }
 
         // 提交文章表单
@@ -396,7 +635,24 @@
             });
         });
 
-        // 显示消息
+        // 提交页面表单
+        document.getElementById('pageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('pageId').value;
+            const title = document.getElementById('pageTitle').value;
+            const path = document.getElementById('pagePath').value;
+            const status = document.getElementById('pageStatus').value;
+            const content = document.getElementById('pageContent').value;
+
+            // 模拟保存页面
+            setTimeout(() => {
+                showPageMessage(id ? '页面更新成功' : '页面添加成功', 'success');
+                closePageModal();
+                loadPages();
+            }, 500);
+        });
+
+        // 显示文章消息
         function showMessage(message, type) {
             const messageElement = document.getElementById('message');
             messageElement.textContent = message;
@@ -407,11 +663,37 @@
             }, 3000);
         }
 
+        // 显示用户消息
+        function showUserMessage(message, type) {
+            const messageElement = document.getElementById('user-message');
+            messageElement.textContent = message;
+            messageElement.className = `alert alert-${type}`;
+            messageElement.style.display = 'block';
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 3000);
+        }
+
+        // 显示页面消息
+        function showPageMessage(message, type) {
+            const messageElement = document.getElementById('page-message');
+            messageElement.textContent = message;
+            messageElement.className = `alert alert-${type}`;
+            messageElement.style.display = 'block';
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 3000);
+        }
+
         // 点击模态框外部关闭
         window.onclick = function(event) {
-            const modal = document.getElementById('articleModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
+            const articleModal = document.getElementById('articleModal');
+            const pageModal = document.getElementById('pageModal');
+            if (event.target == articleModal) {
+                articleModal.style.display = 'none';
+            }
+            if (event.target == pageModal) {
+                pageModal.style.display = 'none';
             }
         };
 
@@ -422,7 +704,26 @@
                 document.querySelectorAll('.admin-sidebar a').forEach(a => a.classList.remove('active'));
                 this.classList.add('active');
                 const section = this.getAttribute('data-section');
-                // 这里可以添加切换不同管理模块的逻辑
+                
+                // 隐藏所有内容区域
+                document.querySelectorAll('.section-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // 显示选中的内容区域
+                const sectionContent = document.getElementById(`${section}-section`);
+                if (sectionContent) {
+                    sectionContent.style.display = 'block';
+                }
+                
+                // 加载对应的数据
+                if (section === 'articles') {
+                    loadArticles();
+                } else if (section === 'users') {
+                    loadUsers();
+                } else if (section === 'pages') {
+                    loadPages();
+                }
             });
         });
     </script>

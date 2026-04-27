@@ -153,14 +153,19 @@
                         data.articles.forEach(article => {
                             const articleItem = document.createElement('div');
                             articleItem.className = 'article-item';
-                            const contentPreview = article.content ? article.content.substring(0, 150) + '...' : '暂无内容';
+                            // 提取内容的第一句话作为预览
+                            let firstSentence = '暂无内容';
+                            if (article.content) {
+                                const plainText = article.content.replace(/<[^>]*>/g, '');
+                                const sentences = plainText.split(/[.。!！?？]/);
+                                firstSentence = sentences[0] ? sentences[0].substring(0, 100) + '...' : plainText.substring(0, 100) + '...';
+                            }
                             articleItem.innerHTML = `
-                                <h3><a href="article-detail.html?id=${article.id}">${article.title}</a></h3>
-                                <p>${contentPreview}</p>
+                                <h3><a href="article-detail.html?id=${article.id}" style="text-decoration: none; color: inherit;">${article.title}</a></h3>
+                                <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">${firstSentence}</p>
                                 <div class="article-meta">
                                     <span class="author">${article.author}</span>
                                     <span class="date">${article.date}</span>
-                                    <span class="views">${article.views}</span>
                                 </div>
                             `;
                             container.appendChild(articleItem);
