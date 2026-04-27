@@ -1,6 +1,6 @@
 const database = require('./database');
 
-async function createBrand(userId, name, website, description, industry, positioning) {
+async function createBrand(userId, name, website, description = '', industry = '', positioning = '') {
   const db = database.getDB();
   
   const [result] = await db.execute(

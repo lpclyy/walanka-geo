@@ -283,14 +283,16 @@ function parseGeoTemplate(content, brandName) {
   }
 }
 
-async function performAIAnalysis(brandId, brandInfo) {
+async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
+  const agentId = customAgentId || process.env.LLM_AGENT || '';
 
   console.log('=== 开始品牌分析流程 ===');
   console.log(`品牌ID: ${brandId}`);
   console.log(`品牌信息: ${JSON.stringify(brandInfo)}`);
+  console.log(`Agent ID: ${agentId}`);
   console.log(`大模型API配置: URL=${llmApiUrl}, Model=${llmModel}`);
 
   // 验证API配置
@@ -441,9 +443,7 @@ async function performAIAnalysis(brandId, brandInfo) {
 
 品牌信息：
 - 品牌名称：${brand.name}
-- 所属行业：${brand.industry || '未知'}
-- 品牌网站：${brand.website || '未知'}
-- 品牌描述：${brand.description || '暂无描述'}`;
+- 品牌网站：${brand.website || '未知'}`;
 
     console.log('开始调用大模型API:', llmApiUrl);
     
@@ -456,6 +456,7 @@ async function performAIAnalysis(brandId, brandInfo) {
         },
         body: JSON.stringify({
           model: llmModel,
+          agent: agentId || '',
           messages: [
             {
               role: 'system',
@@ -590,7 +591,466 @@ async function performAIAnalysis(brandId, brandInfo) {
   }
 }
 
+async function performPromptAnalysis(brandId, brandInfo, prompts, customAgentId = '') {
+  const llmApiKey = process.env.LLM_API_KEY;
+  const llmApiUrl = process.env.LLM_API_URL;
+  const llmModel = process.env.LLM_MODEL;
+  const agentId = customAgentId || process.env.LLM_AGENT || '';
+
+  console.log('=== 开始提示词分析流程 ===');
+  console.log(`品牌ID: ${brandId}`);
+  console.log(`提示词列表: ${JSON.stringify(prompts)}`);
+  console.log(`Agent ID: ${agentId}`);
+  console.log(`大模型API配置: URL=${llmApiUrl}, Model=${llmModel}`);
+
+  if (!llmApiKey || !llmApiUrl || !llmModel) {
+    const error = '大模型API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置';
+    console.error('错误:', error);
+    return {
+      error: {
+        module: 'aiService.performPromptAnalysis',
+        function: 'performPromptAnalysis',
+        message: error,
+        details: 'API配置缺失'
+      }
+    };
+  }
+
+  let brand;
+  if (brandInfo) {
+    brand = brandInfo;
+  } else {
+    try {
+      brand = await brandModel.getBrandById(brandId);
+      if (!brand) {
+        const error = `品牌 ${brandId} 不存在`;
+        console.error('错误:', error);
+        return {
+          error: {
+            module: 'aiService.performPromptAnalysis',
+            function: 'getBrandById',
+            message: error,
+            details: '品牌不存在'
+          }
+        };
+      }
+    } catch (error) {
+      console.error('获取品牌信息失败:', error);
+      return {
+        error: {
+          module: 'aiService.performPromptAnalysis',
+          function: 'getBrandById',
+          message: '获取品牌信息失败',
+          details: error.message
+        }
+      };
+    }
+  }
+
+  console.log(`开始分析提示词，品牌: ${brand.name}`);
+
+  try {
+    const promptList = prompts.map((p, i) => `${i + 1}. ${p}`).join('\n');
+    const promptAnalysisRequest = `请分析"${brand.name}"品牌在以下提示词下的表现：
+
+品牌信息：
+- 品牌名称：${brand.name}
+- 品牌网站：${brand.website || '未知'}
+
+提示词列表：
+${promptList}
+
+请对每个提示词进行详细分析，包括：
+1. 提示词的预期用途
+2. 品牌在该提示词下的表现评估
+3. 相关的优化建议
+
+请按照以下JSON格式返回结果：
+{
+  "promptAnalysis": [
+    {
+      "prompt": "提示词文本",
+      "analysis": "分析结果",
+      "suggestions": ["建议1", "建议2"]
+    }
+  ]
+}`;
+
+    console.log('开始调用大模型API进行提示词分析:', llmApiUrl);
+
+    const response = await fetch(llmApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${llmApiKey}`
+      },
+      body: JSON.stringify({
+        model: llmModel,
+        agent: agentId || '',
+        messages: [
+          {
+            role: 'system',
+            content: '你是品牌分析专家，专注于分析品牌在不同提示词下的表现。'
+          },
+          {
+            role: 'user',
+            content: promptAnalysisRequest
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 4000
+      })
+    });
+
+    console.log('API响应状态:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      const error = `提示词分析API调用失败: ${response.status} - ${errorText}`;
+      console.error('错误:', error);
+      return {
+        error: {
+          module: 'aiService.performPromptAnalysis',
+          function: 'fetch',
+          message: error,
+          details: `HTTP状态码: ${response.status}`
+        }
+      };
+    }
+
+    const responseData = await response.json();
+    console.log('API响应数据:', JSON.stringify(responseData, null, 2));
+
+    const content = responseData.choices?.[0]?.message?.content;
+    if (!content) {
+      const error = '大模型返回内容为空';
+      console.error('错误:', error);
+      return {
+        error: {
+          module: 'aiService.performPromptAnalysis',
+          function: 'response processing',
+          message: error,
+          details: '大模型未返回任何内容'
+        }
+      };
+    }
+
+    try {
+      const parsedJson = safeJsonParse(content);
+      if (!parsedJson.error) {
+        console.log('提示词分析完成');
+        return parsedJson;
+      } else {
+        const error = '解析提示词分析结果失败';
+        console.error('错误:', error);
+        return {
+          error: {
+            module: 'aiService.performPromptAnalysis',
+            function: 'parsing',
+            message: error,
+            details: parsedJson.error
+          }
+        };
+      }
+    } catch (parseError) {
+      const error = '解析提示词分析结果失败';
+      console.error('错误:', error, parseError);
+      return {
+        error: {
+          module: 'aiService.performPromptAnalysis',
+          function: 'parsing',
+          message: error,
+          details: parseError.message
+        }
+      };
+    }
+  } catch (error) {
+    console.error('提示词分析失败:', error);
+    return {
+      error: {
+        module: 'aiService.performPromptAnalysis',
+        function: 'main',
+        message: '提示词分析失败',
+        details: error.message
+      }
+    };
+  }
+}
+
+async function generateArticle(brandId, brandInfo, articleRequirements, customAgentId = '') {
+  const llmApiKey = process.env.LLM_API_KEY;
+  const llmApiUrl = process.env.LLM_API_URL;
+  const llmModel = process.env.LLM_MODEL;
+  const agentId = customAgentId || process.env.LLM_AGENT || '';
+
+  console.log('=== 开始文章生成流程 ===');
+  console.log(`品牌ID: ${brandId}`);
+  console.log(`文章需求: ${JSON.stringify(articleRequirements)}`);
+  console.log(`Agent ID: ${agentId}`);
+  console.log(`大模型API配置: URL=${llmApiUrl}, Model=${llmModel}`);
+
+  if (!llmApiKey || !llmApiUrl || !llmModel) {
+    const error = '大模型API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置';
+    console.error('错误:', error);
+    return {
+      error: {
+        module: 'aiService.generateArticle',
+        function: 'generateArticle',
+        message: error,
+        details: 'API配置缺失'
+      }
+    };
+  }
+
+  let brand;
+  if (brandInfo) {
+    brand = brandInfo;
+  } else {
+    try {
+      brand = await brandModel.getBrandById(brandId);
+      if (!brand) {
+        const error = `品牌 ${brandId} 不存在`;
+        console.error('错误:', error);
+        return {
+          error: {
+            module: 'aiService.generateArticle',
+            function: 'getBrandById',
+            message: error,
+            details: '品牌不存在'
+          }
+        };
+      }
+    } catch (error) {
+      console.error('获取品牌信息失败:', error);
+      return {
+        error: {
+          module: 'aiService.generateArticle',
+          function: 'getBrandById',
+          message: '获取品牌信息失败',
+          details: error.message
+        }
+      };
+    }
+  }
+
+  console.log(`开始生成文章，品牌: ${brand.name}`);
+
+  try {
+    const { title, topic, style, length } = articleRequirements;
+    const articleRequest = `请为"${brand.name}"品牌生成一篇SEO优化的文章。
+
+品牌信息：
+- 品牌名称：${brand.name}
+- 品牌网站：${brand.website || '未知'}
+
+文章要求：
+- 标题：${title || '未指定'}
+- 主题：${topic || '品牌介绍'}
+- 风格：${style || '专业'}
+- 长度：${length || '中等'}
+
+请生成一篇结构清晰、SEO友好的文章，包含：
+1. 吸引人的标题
+2. 介绍部分
+3. 主体内容（至少3个段落）
+4. 总结部分
+
+请直接返回文章内容，不需要额外的格式标记。`;
+
+    console.log('开始调用大模型API生成文章:', llmApiUrl);
+
+    const response = await fetch(llmApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${llmApiKey}`
+      },
+      body: JSON.stringify({
+        model: llmModel,
+        agent: agentId || '',
+        messages: [
+          {
+            role: 'system',
+            content: '你是一位专业的SEO内容撰写专家，擅长创作高质量、品牌友好的文章。'
+          },
+          {
+            role: 'user',
+            content: articleRequest
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 4000
+      })
+    });
+
+    console.log('API响应状态:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      const error = `文章生成API调用失败: ${response.status} - ${errorText}`;
+      console.error('错误:', error);
+      return {
+        error: {
+          module: 'aiService.generateArticle',
+          function: 'fetch',
+          message: error,
+          details: `HTTP状态码: ${response.status}`
+        }
+      };
+    }
+
+    const responseData = await response.json();
+    console.log('API响应数据:', JSON.stringify(responseData, null, 2));
+
+    const content = responseData.choices?.[0]?.message?.content;
+    if (!content) {
+      const error = '大模型返回内容为空';
+      console.error('错误:', error);
+      return {
+        error: {
+          module: 'aiService.generateArticle',
+          function: 'response processing',
+          message: error,
+          details: '大模型未返回任何内容'
+        }
+      };
+    }
+
+    console.log('文章生成完成');
+    return {
+      article: content,
+      title: title || '未命名文章',
+      brand: brand.name,
+      createdAt: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('文章生成失败:', error);
+    return {
+      error: {
+        module: 'aiService.generateArticle',
+        function: 'main',
+        message: '文章生成失败',
+        details: error.message
+      }
+    };
+  }
+}
+
+async function aiChat(question, context = {}, customAgentId = '') {
+  const llmApiKey = process.env.LLM_API_KEY;
+  const llmApiUrl = process.env.LLM_API_URL;
+  const llmModel = process.env.LLM_MODEL;
+  const agentId = customAgentId || process.env.LLM_AGENT || '';
+
+  console.log('=== 开始AI对话 ===');
+  console.log(`问题: ${question}`);
+  console.log(`上下文: ${JSON.stringify(context)}`);
+  console.log(`Agent ID: ${agentId}`);
+  console.log(`大模型API配置: URL=${llmApiUrl}, Model=${llmModel}`);
+
+  if (!llmApiKey || !llmApiUrl || !llmModel) {
+    const error = '大模型API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置';
+    console.error('错误:', error);
+    return {
+      error: {
+        module: 'aiService.aiChat',
+        function: 'aiChat',
+        message: error,
+        details: 'API配置缺失'
+      }
+    };
+  }
+
+  try {
+    const contextInfo = Object.keys(context).length > 0
+      ? `\n上下文信息：\n${Object.entries(context).map(([k, v]) => `- ${k}: ${v}`).join('\n')}`
+      : '';
+
+    const chatRequest = `${question}${contextInfo}`;
+
+    console.log('开始调用大模型API进行对话:', llmApiUrl);
+
+    const response = await fetch(llmApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${llmApiKey}`
+      },
+      body: JSON.stringify({
+        model: llmModel,
+        agent: agentId || '',
+        messages: [
+          {
+            role: 'system',
+            content: '你是一位专业的AI助手，可以回答用户的问题并提供有用的建议。'
+          },
+          {
+            role: 'user',
+            content: chatRequest
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    });
+
+    console.log('API响应状态:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      const error = `AI对话API调用失败: ${response.status} - ${errorText}`;
+      console.error('错误:', error);
+      return {
+        error: {
+          module: 'aiService.aiChat',
+          function: 'fetch',
+          message: error,
+          details: `HTTP状态码: ${response.status}`
+        }
+      };
+    }
+
+    const responseData = await response.json();
+    console.log('API响应数据:', JSON.stringify(responseData, null, 2));
+
+    const content = responseData.choices?.[0]?.message?.content;
+    if (!content) {
+      const error = '大模型返回内容为空';
+      console.error('错误:', error);
+      return {
+        error: {
+          module: 'aiService.aiChat',
+          function: 'response processing',
+          message: error,
+          details: '大模型未返回任何内容'
+        }
+      };
+    }
+
+    console.log('AI对话完成');
+    return {
+      answer: content,
+      question: question,
+      context: context,
+      createdAt: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('AI对话失败:', error);
+    return {
+      error: {
+        module: 'aiService.aiChat',
+        function: 'main',
+        message: 'AI对话失败',
+        details: error.message
+      }
+    };
+  }
+}
+
 
 module.exports = {
-  performAIAnalysis
+  performAIAnalysis,
+  performPromptAnalysis,
+  generateArticle,
+  aiChat
 };

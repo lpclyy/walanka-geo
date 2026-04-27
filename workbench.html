@@ -414,22 +414,61 @@
                                         <span>改进建议</span>
                                     </a>
                                 </li>
+                            </ul>
+                        </li>
+                        
+                        <!-- 竞品分析下拉菜单 -->
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" class="nav-dropdown-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="nav-icon">⚔️</span>
+                                    <span>竞品分析</span>
+                                </div>
+                                <span class="dropdown-arrow">▼</span>
+                            </a>
+                            <ul class="nav-dropdown" style="list-style: none; padding: 0; margin: 5px 0 0 0; display: none;">
                                 <li>
-                                    <a href="#" data-mode="competitor-prompt-analysis" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                    <a href="#" data-mode="competitor-brand-analysis" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
                                         <span>竞品品牌分析</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" data-mode="competitor-settings" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                    <a href="#" data-mode="competitor-prompt-analysis" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
                                         <span>竞品提示词分析</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" data-mode="export-pdf" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                    <a href="#" data-mode="competitor-settings" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
                                         <span>竞品设置</span>
                                     </a>
                                 </li>
+                            </ul>
+                        </li>
+                        
+                        <!-- AI工具下拉菜单 -->
+                        <li style="margin-bottom: 5px;">
+                            <a href="#" class="nav-dropdown-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 15px; color: #333; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="nav-icon">🤖</span>
+                                    <span>AI工具</span>
+                                </div>
+                                <span class="dropdown-arrow">▼</span>
+                            </a>
+                            <ul class="nav-dropdown" style="list-style: none; padding: 0; margin: 5px 0 0 0; display: none;">
                                 <li>
+                                    <a href="#" data-mode="article-generator" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>文章生成工具</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" data-mode="ai-chat" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
+                                        <span>AI对话</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                        <li>
                                     <a href="#" data-mode="export-pdf" style="display: flex; align-items: center; gap: 10px; padding: 8px 15px 8px 45px; color: #666; text-decoration: none; border-radius: 6px; transition: all 0.3s ease;">
                                         <span>导出PDF报告</span>
                                     </a>
@@ -574,35 +613,6 @@
                                         <div>
                                             <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">品牌网站 <span style="color: #dc2626;">*</span></label>
                                             <input type="url" id="brandWebsite" placeholder="https://example.com" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                        </div>
-                                        <div>
-                                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">行业类别 <span style="color: #dc2626;">*</span></label>
-                                            <select id="brandIndustry" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                                <option value="">请选择行业</option>
-                                                <option value="科技">科技</option>
-                                                <option value="金融">金融</option>
-                                                <option value="教育">教育</option>
-                                                <option value="医疗">医疗</option>
-                                                <option value="零售">零售</option>
-                                                <option value="餐饮">餐饮</option>
-                                                <option value="旅游">旅游</option>
-                                                <option value="其他">其他</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">市场定位 <span style="color: #dc2626;">*</span></label>
-                                            <select id="brandPositioning" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                                <option value="">请选择市场定位</option>
-                                                <option value="高端">高端</option>
-                                                <option value="中端">中端</option>
-                                                <option value="低端">低端</option>
-                                                <option value="大众">大众</option>
-                                                <option value="小众">小众</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500;">品牌描述（选填）</label>
-                                            <textarea id="brandDescription" placeholder="请简要描述您的品牌..." rows="3" style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; resize: vertical;"></textarea>
                                         </div>
                                         <button onclick="generateBrandPrompts()" style="background: var(--primary-color); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500; align-self: flex-start;">下一步: 生成分析提示词</button>
                                     </div>

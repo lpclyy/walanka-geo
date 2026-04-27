@@ -6,24 +6,19 @@ const aiService = require('../services/aiService');
 
 router.post('/', async (req, res) => {
   try {
-    const { userId, name, website, description, industry, positioning } = req.body;
+    const { userId, name, website } = req.body;
     
-    if (!userId || !name || !website || !industry || !positioning) {
-      return res.status(400).json({ success: false, error: '请填写必填信息' });
+    if (!userId || !name || !website) {
+      return res.status(400).json({ success: false, error: '请填写品牌名称和网址' });
     }
     
-    // 保存品牌到数据库
-    const brandId = await brandModel.createBrand(userId, name, website, description, industry, positioning);
-    
-    // 生成提示词建议并保存
-    const suggestions = promptService.generatePromptSuggestions(name, industry);
-    await brandModel.savePromptSuggestions(brandId, suggestions);
+    // 保存品牌到数据库（只需要必填字段）
+    const brandId = await brandModel.createBrand(userId, name, website);
     
     res.status(200).json({
       success: true,
       brandId,
-      brand: { id: brandId, name, website, description, industry, positioning, status: 'pending' },
-      suggestedPrompts: suggestions
+      brand: { id: brandId, name, website, status: 'pending' }
     });
   } catch (error) {
     console.error('添加品牌失败:', error);
