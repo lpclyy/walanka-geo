@@ -87,31 +87,31 @@ async function insertDefaultArticles(db) {
           title: '不限篇数、永久免费！GEO 内容创作，用瓦兰卡免费GEO工具轻松掌握',
           author: '瓦兰卡免费GEO',
           content: '瓦兰卡免费GEO工具是国内首个免费的GEO优化平台，通过AI技术帮助企业提升品牌在AI平台的影响力和转化率。',
-          category: '教程'
+          category: 'tutorials'
         },
         {
           title: '2026年 3-4月国内主流 AI平台核心数据全景报告',
           author: '瓦兰卡免费GEO',
           content: '本报告分析了2026年3-4月国内主流AI平台的核心数据，为企业提供GEO优化的参考。',
-          category: '报告'
+          category: 'industry-news'
         },
         {
           title: '瓦兰卡免费GEO工具更新日志',
           author: '瓦兰卡免费GEO',
           content: '本文档记录了瓦兰卡免费GEO工具的更新历史和功能变化。',
-          category: '公告'
+          category: 'product-updates'
         },
         {
           title: '用瓦兰卡GEO进行GEO优化教程（商家低成本自己操作教程）',
           author: '瓦兰卡免费GEO',
           content: '本教程详细介绍了如何使用瓦兰卡GEO工具进行GEO优化，帮助商家低成本自己操作。',
-          category: '教程'
+          category: 'tutorials'
         },
         {
           title: 'GEO优化技术深度解析',
           author: '瓦兰卡技术团队',
           content: '本文深入解析了GEO优化的技术原理和实践方法，帮助企业更好地理解和应用GEO优化。',
-          category: '技术'
+          category: 'technical-articles'
         }
       ];
 

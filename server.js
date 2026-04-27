@@ -699,6 +699,88 @@ app.post('/api/ai/chat', async (req, res) => {
   }
 });
 
+// 支付相关API
+app.post('/api/payment/create', async (req, res) => {
+  try {
+    const { plan, paymentMethod, orderId } = req.body;
+    
+    if (!plan || !paymentMethod || !orderId) {
+      return res.status(400).json({ success: false, error: '缺少必要参数' });
+    }
+    
+    // 套餐价格配置
+    const planPrices = {
+      'pro': 999,
+      'enterprise': 2999
+    };
+    
+    const price = planPrices[plan] || 999;
+    
+    // 生成支付数据
+    const paymentData = {
+      orderId,
+      plan,
+      amount: price,
+      paymentMethod,
+      qrCodeUrl: paymentMethod === 'wechat' 
+        ? 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wechat%20pay%20qr%20code&image_size=square' 
+        : 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=alipay%20qr%20code&image_size=square',
+      payUrl: `https://payment.example.com/pay?orderId=${orderId}&amount=${price}&method=${paymentMethod}`,
+      createdAt: new Date().toISOString()
+    };
+    
+    // 这里可以添加订单存储逻辑
+    console.log('创建支付订单:', paymentData);
+    
+    res.status(200).json({ success: true, data: paymentData });
+  } catch (error) {
+    console.error('创建支付订单失败:', error);
+    res.status(500).json({ success: false, error: '创建支付订单失败' });
+  }
+});
+
+app.get('/api/payment/status/:orderId', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    if (!orderId) {
+      return res.status(400).json({ success: false, error: '缺少订单编号' });
+    }
+    
+    // 模拟支付状态查询
+    const paymentStatus = {
+      orderId,
+      status: 'success', // 模拟支付成功
+      amount: 999,
+      paidAt: new Date().toISOString(),
+      paymentMethod: 'wechat'
+    };
+    
+    console.log('查询支付状态:', paymentStatus);
+    
+    res.status(200).json({ success: true, data: paymentStatus });
+  } catch (error) {
+    console.error('查询支付状态失败:', error);
+    res.status(500).json({ success: false, error: '查询支付状态失败' });
+  }
+});
+
+app.post('/api/payment/callback', async (req, res) => {
+  try {
+    const callbackData = req.body;
+    
+    console.log('支付回调数据:', callbackData);
+    
+    // 处理支付回调逻辑
+    // 这里可以更新订单状态、用户订阅信息等
+    
+    res.status(200).json({ success: true, message: '回调处理成功' });
+  } catch (error) {
+    console.error('处理支付回调失败:', error);
+    res.status(500).json({ success: false, error: '处理支付回调失败' });
+  }
+});
+
 
 app.get('*', (req, res) => {
   const filePath = path.join(__dirname, req.path);

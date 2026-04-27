@@ -143,7 +143,7 @@
             }
 
             try {
-                const response = await fetch(`/api/article/${articleId}`);
+                const response = await fetch(`/api/articles/${articleId}`);
                 const data = await response.json();
 
                 if (data.success) {

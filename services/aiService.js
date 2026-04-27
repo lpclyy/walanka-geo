@@ -287,7 +287,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
-  const agentId = customAgentId || process.env.LLM_AGENT || '';
+  const agentId = process.env.LLM_AGENT;
 
   console.log('=== 开始品牌分析流程 ===');
   console.log(`品牌ID: ${brandId}`);
