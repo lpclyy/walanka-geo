@@ -13,7 +13,7 @@ require('dotenv').config();
 const config = require('./config');
 const database = require('./models/database');
 const routes = require('./routes');
-const { errorHandler, asyncHandler } = require('./middleware');
+const { errorHandler } = require('./middleware');
 
 const app = express();
 const PORT = config.app.server.port;
@@ -39,52 +39,28 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/auth/login.html'));
-});
+const pageRoutes = [
+  { path: '/login', file: 'public/auth/login.html' },
+  { path: '/register', file: 'public/auth/register.html' },
+  { path: '/admin-login', file: 'public/auth/admin-login.html' },
+  { path: '/admin', file: 'public/admin/admin.html' },
+  { path: '/workbench', file: 'public/features/workbench.html' },
+  { path: '/subscription', file: 'public/features/subscription.html' },
+  { path: '/payment', file: 'public/features/payment.html' },
+  { path: '/geo-school', file: 'public/features/geo-school.html' },
+  { path: '/article-detail', file: 'public/features/article-detail.html' },
+  { path: '/features', file: 'public/features/features.html' },
+  { path: '/faq', file: 'public/features/faq.html' },
+  { path: '/cases', file: 'public/features/cases.html' }
+];
 
-app.get('/register', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/auth/register.html'));
-});
-
-app.get('/admin-login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/auth/admin-login.html'));
-});
-
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/admin/admin.html'));
-});
-
-app.get('/workbench', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/features/workbench.html'));
-});
-
-app.get('/subscription', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/features/subscription.html'));
-});
-
-app.get('/payment', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/features/payment.html'));
-});
-
-app.get('/geo-school', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/features/geo-school.html'));
-});
-
-app.get('/article-detail', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/features/article-detail.html'));
-});
-
-app.get('/features', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/features/features.html'));
-});
-
-app.get('/faq', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/features/faq.html'));
-});
-
-app.get('/cases', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/features/cases.html'));
+pageRoutes.forEach(route => {
+  app.get(route.path, (req, res) => {
+    res.sendFile(path.join(__dirname, route.file));
+  });
+  app.get(`${route.path}.html`, (req, res) => {
+    res.sendFile(path.join(__dirname, route.file));
+  });
 });
 
 app.use(errorHandler);
@@ -104,6 +80,11 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log(`服务器运行中，端口: ${PORT}`);
       console.log(`环境: ${config.app.server.env}`);
+      console.log('已注册的页面路由:');
+      pageRoutes.forEach(route => {
+        console.log(`  - ${route.path}`);
+        console.log(`  - ${route.path}.html`);
+      });
     });
   } catch (error) {
     console.error('服务器启动失败:', error);
