@@ -19,7 +19,6 @@ async function connectDB() {
   try {
     const dbConfig = config.database.db;
     db = await mysql.createPool(dbConfig);
-    console.log('MySQL connected');
     await initializeTables(db);
     return db;
   } catch (error) {
@@ -74,7 +73,6 @@ async function createUserTable(db) {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    console.log('User table created or already exists');
     await createAdminAccount(db);
   } catch (error) {
     console.error('Create user table failed:', error);
@@ -99,9 +97,6 @@ async function createAdminAccount(db) {
         'INSERT INTO users (name, phone, password, role) VALUES (?, ?, ?, ?)',
         [adminName, adminPhone, adminPassword, 'admin']
       );
-      console.log('管理员账号创建成功');
-    } else {
-      console.log('管理员账号已存在');
     }
   } catch (error) {
     console.error('创建管理员账号失败:', error);
@@ -127,7 +122,6 @@ async function createArticleTable(db) {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
-    console.log('Article table created or already exists');
     await insertDefaultArticles(db);
   } catch (error) {
     console.error('Create article table failed:', error);
@@ -182,7 +176,6 @@ async function insertDefaultArticles(db) {
           [article.title, article.author, article.content, article.category]
         );
       }
-      console.log('默认文章插入成功');
     }
   } catch (error) {
     console.error('插入默认文章失败:', error);
@@ -211,7 +204,6 @@ async function createBrandTables(db) {
         INDEX idx_status (status)
       )
     `);
-    console.log('Brands table created or already exists');
 
     await db.execute(`
       CREATE TABLE IF NOT EXISTS brand_prompt_suggestions (
@@ -224,7 +216,6 @@ async function createBrandTables(db) {
         INDEX idx_brand_id (brand_id)
       )
     `);
-    console.log('Brand prompt suggestions table created or already exists');
 
     await db.execute(`
       CREATE TABLE IF NOT EXISTS brand_selected_prompts (
@@ -236,7 +227,6 @@ async function createBrandTables(db) {
         INDEX idx_brand_id (brand_id)
       )
     `);
-    console.log('Brand selected prompts table created or already exists');
 
     await db.execute(`
       CREATE TABLE IF NOT EXISTS brand_prompt_list (
@@ -250,7 +240,6 @@ async function createBrandTables(db) {
         INDEX idx_brand_id (brand_id)
       )
     `);
-    console.log('Brand prompt list table created or already exists');
 
     await db.execute(`
       CREATE TABLE IF NOT EXISTS brand_analysis (
@@ -271,7 +260,6 @@ async function createBrandTables(db) {
         INDEX idx_brand_id (brand_id)
       )
     `);
-    console.log('Brand analysis table created or already exists');
 
   } catch (error) {
     console.error('Create brand tables failed:', error);
@@ -299,7 +287,6 @@ async function createActivityLogTable(db) {
         INDEX idx_created_at (created_at)
       )
     `);
-    console.log('Activity logs table created or already exists');
   } catch (error) {
     console.error('Create activity logs table failed:', error);
   }
@@ -322,7 +309,6 @@ async function createPageContentTable(db) {
         UNIQUE KEY unique_page_section (page_name, section_name)
       )
     `);
-    console.log('Page content table created or already exists');
     await insertDefaultPageContent(db);
   } catch (error) {
     console.error('Create page content table failed:', error);
@@ -356,7 +342,6 @@ async function insertDefaultPageContent(db) {
           [item.page_name, item.section_name, item.content]
         );
       }
-      console.log('默认首页内容插入成功');
     }
   } catch (error) {
     console.error('插入默认首页内容失败:', error);

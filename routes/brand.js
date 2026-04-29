@@ -84,6 +84,9 @@ router.post('/:id/analyze', async (req, res) => {
     const { id } = req.params;
     const { selectedPromptIds, customPrompts, brandInfo } = req.body;
 
+    console.log(`开始品牌分析: ID=${id}`);
+
+    // 调用AI服务进行品牌分析
     const analysisResult = await aiService.performAIAnalysis(id, brandInfo);
 
     if (analysisResult.error) {
@@ -91,8 +94,21 @@ router.post('/:id/analyze', async (req, res) => {
       return sendError(res, analysisResult.error.message || '分析失败');
     }
 
-    if (analysisResult) {
-      console.log(`品牌分析完成: ID=${id}`);
+    // 保存分析结果到数据库
+    if (analysisResult && analysisResult.brandName) {
+      console.log('保存分析结果到数据库...');
+      try {
+        await brandService.saveAnalysisResult(id, analysisResult);
+        console.log('分析结果保存成功');
+        
+        // 更新品牌状态为已完成
+        await brandService.updateBrandStatus(id, 'completed');
+        console.log('品牌状态更新为completed');
+      } catch (saveError) {
+        console.error('保存分析结果失败:', saveError.message);
+        // 保存失败不影响分析结果返回，但需要记录日志
+      }
+
       return sendSuccess(res, { analysis: analysisResult, message: '分析完成' });
     }
 
@@ -134,9 +150,13 @@ router.get('/:id/analysis', async (req, res) => {
     let analysis = await brandService.getAnalysisByBrandId(id);
 
     if (!analysis) {
+      console.log(`未找到品牌 ${id} 的分析记录，执行实时分析...`);
       const analysisResult = await aiService.performAIAnalysis(id);
-      if (analysisResult) {
-        analysis = await brandService.getAnalysisByBrandId(id);
+      if (analysisResult && !analysisResult.error) {
+        // 保存分析结果
+        await brandService.saveAnalysisResult(id, analysisResult);
+        await brandService.updateBrandStatus(id, 'completed');
+        analysis = analysisResult;
       }
     }
 
@@ -144,7 +164,14 @@ router.get('/:id/analysis', async (req, res) => {
       return sendNotFound(res, '分析结果');
     }
 
-    return sendSuccess(res, analysis);
+    // 确保返回的数据结构符合前端期望
+    const result = {
+      analysis: analysis,
+      brandId: id,
+      success: true
+    };
+
+    return sendSuccess(res, result);
   } catch (error) {
     console.error('获取分析结果失败:', error);
     return sendError(res, '获取分析结果失败');

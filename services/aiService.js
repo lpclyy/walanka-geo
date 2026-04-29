@@ -17,17 +17,22 @@ const { parseGEOReport, validateReport } = require('../utils/geoParser');
  * @returns {Promise<Object>} 分析结果
  */
 async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
+  const startTime = new Date();
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
   const agentId = customAgentId || process.env.LLM_AGENT;
 
-  console.log(`品牌分析开始: ID=${brandId}`);
+  console.log('========================================');
+  console.log(`[品牌分析开始] ${startTime.toLocaleString()}`);
+  console.log(`品牌ID: ${brandId}`);
+  console.log(`Agent ID: ${agentId || '默认Agent'}`);
 
   // 验证API配置
   if (!llmApiKey || !llmApiUrl || !llmModel) {
     const error = '大模型API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置';
-    console.error('错误:', error);
+    console.error(`[错误] ${error}`);
+    console.log('========================================');
     return {
       error: {
         module: 'aiService.performAIAnalysis',
@@ -38,16 +43,21 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
     };
   }
 
+  console.log('API配置验证通过');
+
   // 验证品牌信息
   let brand;
   if (brandInfo && brandInfo.name) {
     brand = brandInfo;
+    console.log(`使用传入的品牌信息: ${brand.name}`);
   } else {
     try {
+      console.log('从数据库获取品牌信息...');
       brand = await brandModel.getBrandById(brandId);
       if (!brand) {
         const error = `品牌 ${brandId} 不存在`;
-        console.error('错误:', error);
+        console.error(`[错误] ${error}`);
+        console.log('========================================');
         return {
           error: {
             module: 'aiService.performAIAnalysis',
@@ -57,8 +67,10 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
           }
         };
       }
+      console.log(`数据库获取品牌成功: ${brand.name}`);
     } catch (error) {
-      console.error('获取品牌信息失败:', error);
+      console.error(`[错误] 获取品牌信息失败: ${error.message}`);
+      console.log('========================================');
       return {
         error: {
           module: 'aiService.performAIAnalysis',
@@ -73,7 +85,8 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   // 验证品牌名称存在
   if (!brand.name) {
     const error = '品牌名称不能为空';
-    console.error('错误:', error);
+    console.error(`[错误] ${error}`);
+    console.log('========================================');
     return {
       error: {
         module: 'aiService.performAIAnalysis',
@@ -84,7 +97,8 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
     };
   }
 
-  console.log(`开始分析品牌: ${brand.name}`);
+  console.log(`开始调用智能体分析品牌: ${brand.name}`);
+  console.log(`品牌网站: ${brand.website || '未知'}`);
 
   // 使用用户提供的geo模板格式调用智能体，返回JSON格式
   try {
@@ -223,22 +237,29 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         };
       }
 
-      // 不输出分析内容，只记录分析完成
-console.log('智能体返回内容已接收');
+      console.log('智能体返回内容已接收，开始解析...');
+      console.log(`返回内容长度: ${content.length} 字符`);
 
       // 直接解析JSON格式数据
       let parsedData;
+      let parseMethod = 'JSON';
+      
       try {
         parsedData = JSON.parse(content);
+        console.log('JSON解析成功');
       } catch (error) {
-        console.error('JSON解析失败:', error.message);
+        console.warn(`JSON解析失败: ${error.message}`);
+        console.log('尝试使用geoParser降级解析...');
         // 如果JSON解析失败，尝试使用geoParser作为降级方案
         try {
           const parseResult = parseGEOReport(content);
           if (parseResult.success) {
-            console.log('使用geoParser降级解析成功');
+            console.log('geoParser降级解析成功');
+            parseMethod = 'geoParser';
             parsedData = parseResult.data;
           } else {
+            console.error('geoParser解析也失败');
+            console.log('========================================');
             return {
               error: {
                 module: 'aiService.performAIAnalysis',
@@ -249,6 +270,8 @@ console.log('智能体返回内容已接收');
             };
           }
         } catch (parseError) {
+          console.error(`geoParser解析异常: ${parseError.message}`);
+          console.log('========================================');
           return {
             error: {
               module: 'aiService.performAIAnalysis',
@@ -262,17 +285,36 @@ console.log('智能体返回内容已接收');
 
       // 验证解析结果
       if (!parsedData.brandName) {
+        console.log(`品牌名称为空，使用原始品牌名: ${brand.name}`);
         parsedData.brandName = brand.name;
       }
       
       // 确保所有必要字段存在
+      console.log('确保所有必要字段存在...');
       parsedData = ensureRequiredFields(parsedData);
 
-      console.log('成功解析智能体返回的数据');
+      const endTime = new Date();
+      const duration = Math.round((endTime - startTime) / 1000);
+
+      // 输出分析结果摘要
+      console.log('========================================');
+      console.log(`[分析完成] ${endTime.toLocaleString()}`);
+      console.log(`解析方式: ${parseMethod}`);
+      console.log(`耗时: ${duration} 秒`);
+      console.log(`品牌名称: ${parsedData.brandName}`);
+      console.log(`概览数据: AI平台数=${parsedData.overview.aiPlatformCount}, 查询数=${parsedData.overview.queryCount}`);
+      console.log(`可见度平台数: ${parsedData.aiVisibility?.length || 0}`);
+      console.log(`情感分布: 正面=${parsedData.sentimentDistribution.positive}%, 中性=${parsedData.sentimentDistribution.neutral}%, 负面=${parsedData.sentimentDistribution.negative}%`);
+      console.log(`热门主题数: ${parsedData.topics?.length || 0}`);
+      console.log(`建议数: ${parsedData.suggestions?.length || 0}`);
+      console.log('========================================');
+
       return parsedData;
 
     } catch (error) {
-      console.error('调用OpenClaw智能体失败:', error);
+      console.log('========================================');
+      console.error(`[错误] 调用OpenClaw智能体失败: ${error.message}`);
+      console.log('========================================');
       return {
         error: {
           module: 'aiService.performAIAnalysis',
@@ -283,7 +325,9 @@ console.log('智能体返回内容已接收');
       };
     }
   } catch (error) {
-    console.error('品牌分析流程失败:', error);
+    console.log('========================================');
+    console.error(`[错误] 品牌分析流程失败: ${error.message}`);
+    console.log('========================================');
     return {
       error: {
         module: 'aiService.performAIAnalysis',
@@ -585,7 +629,8 @@ function ensureRequiredFields(data) {
       overallScore: 0,
       confidence: 0,
       summary: '暂无分析数据',
-      industry: '未知'
+      industry: '未知',
+      brandName: ''  // 前端期望的品牌名称字段
     },
     aiVisibility: [],
     visibilityNote: '',
@@ -715,6 +760,11 @@ function ensureRequiredFields(data) {
       title: s.action || s.title,
       description: s.expectedEffect || s.description
     }));
+  }
+
+  // 确保overview.brandName与顶层brandName一致
+  if (merged.brandName && !merged.overview.brandName) {
+    merged.overview.brandName = merged.brandName;
   }
 
   return merged;
