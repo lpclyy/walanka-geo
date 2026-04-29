@@ -86,192 +86,88 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
   console.log(`开始分析品牌: ${brand.name}`);
 
-  // 使用用户提供的geo模板格式调用智能体
+  // 使用用户提供的geo模板格式调用智能体，返回JSON格式
   try {
-    // 构建符合用户模板格式的提示词
-    const analysisPrompt = `请使用您的GEO智能体分析"${brand.name}"品牌，并按照以下指定模板格式返回结果：
+    // 构建JSON格式的提示词
+    const analysisPrompt = `请使用您的GEO智能体分析"${brand.name}"品牌，并按照以下JSON格式返回结果：
 
-# {{${brand.name}}} GEO 品牌分析报告
-数据更新时间：{{YYYY-MM-DD HH:MM:SS}}（GMT+8）
-品牌名称：{{${brand.name}}}
-官方网站：{{${brand.website || '未知'}}}
+{
+  "brandName": "${brand.name}",
+  "officialWebsite": "${brand.website || '未知'}",
+  "updateTime": "${new Date().toISOString().slice(0, 19).replace('T', ' ')}",
+  "overview": {
+    "aiPlatformCount": 0,
+    "queryCount": 0,
+    "brandMentionRate": 0,
+    "positiveSentimentRate": 0,
+    "officialCitationRate": 0,
+    "dataSourceNote": "数据采集进行中，暂未获取到数据"
+  },
+  "aiVisibility": [
+    {"platform": "豆包", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
+    {"platform": "千问", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
+    {"platform": "文心一言", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
+    {"platform": "讯飞星火", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
+    {"platform": "ChatGPT", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
+    {"platform": "Gemini", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"}
+  ],
+  "visibilityNote": "基于搜索引擎实时结果分析",
+  "visibilityCoreFinding": "分析进行中，暂无核心发现",
+  "officialPositioning": {
+    "source": "${brand.website || '未知'}",
+    "mission": "暂无数据",
+    "coreBusiness": "暂无数据",
+    "userScale": "暂无数据",
+    "brandUpgrade": "暂无数据"
+  },
+  "keywords": [
+    {"keyword": "暂无数据", "frequency": 0}
+  ],
+  "perceptionDifferences": ["暂无数据"],
+  "searchAssociations": [
+    {"type": "品牌+服务", "example": "暂无数据"},
+    {"type": "品牌+竞争", "example": "暂无数据"},
+    {"type": "品牌+问题", "example": "暂无数据"},
+    {"type": "品牌+AI", "example": "暂无数据"}
+  ],
+  "brandHomeShare": 0,
+  "serviceHomeShare": 0,
+  "competitionHomeShare": 0,
+  "sentimentDistribution": {
+    "positive": 0,
+    "neutral": 0,
+    "negative": 0,
+    "positiveChange": "0%",
+    "neutralChange": "0%",
+    "negativeChange": "0%"
+  },
+  "typicalKeywords": {},
+  "positiveExample": "暂无数据",
+  "positiveSources": [],
+  "negativeExample": "暂无数据",
+  "negativeSources": [],
+  "topics": [
+    {"rank": 1, "topic": "暂无数据", "coOccurrenceRate": 0}
+  ],
+  "citationSources": [
+    {"type": "官网引用", "percentage": 0, "representative": "暂无数据"}
+  ],
+  "citationHabits": {},
+  "prompts": [],
+  "answerSnapshot": {
+    "question": "暂无数据",
+    "source": "暂无数据",
+    "excerpt": "暂无数据"
+  },
+  "competitors": [],
+  "suggestions": []
+}
 
-## 板块 1：数据总览
-| 指标 | 数值 |
-|------|------|
-| 数据更新时间 | {{YYYY-MM-DD HH:MM:SS}} |
-| 覆盖 AI 平台数 | {{N}} |
-| 执行查询总数 | {{M}} |
-| 平均品牌提及率 | {{X}}% |
-| 平均正面情感占比 | {{Y}}% |
-| 官网引用率 | {{Z}}% |
-| 数据来源说明 | {{基于搜索引擎实时结果，受限于各AI平台无公开搜索API，本报告通过全网搜索间接统计，估算误差±8%}} |
-
-## 板块 2：品牌 AI 可见度
-⚠️ **说明**：{{说明间接统计的方式}}
-
-| AI 平台 | 提及次数 | 提及率 | 备注 |
-|---------|----------|--------|------|
-| 豆包 | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| 千问 | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| DeepSeek | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| 腾讯元宝 | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| Kimi | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| 文心一言 | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| 智谱 GLM | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| 夸克 AI | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| 讯飞星火 | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| 混元 | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| 秘塔 AI | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| 即梦 AI | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| ChatGPT | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| Gemini | {{X}}/{{M}} | {{X}}% | {{备注}} |
-| Claude | {{X}}/{{M}} | {{X}}% | {{备注}} |
-
-**核心发现**：{{一句话总结品牌可见度核心发现}}
-
-## 板块 3：品牌概览
-### 3.1 官方自我定位
-来源：{{${brand.website || '官网域名'}}}
-- 企业使命：{{企业使命描述}}
-- 核心业务：{{核心业务描述}}
-- 用户规模：{{用户规模描述}}
-- 品牌升级：{{品牌升级描述}}
-
-### 3.2 AI 平台视角下的品牌
-| 高频关键词 | 出现频次 |
-|------------|----------|
-| {{关键词1}} | {{N}}次 |
-| {{关键词2}} | {{N}}次 |
-| {{关键词3}} | {{N}}次 |
-| {{关键词4}} | {{N}}次 |
-| {{关键词5}} | {{N}}次 |
-
-### 3.3 AI 与传统品牌认知差异
-1. {{差异点1}}
-2. {{差异点2}}
-3. {{差异点3}}
-
-## 板块 4：品牌可见度
-### 4.1 搜索联想词
-| 联想词类型 | 示例 |
-|------------|------|
-| 品牌+服务 | {{...}} |
-| 品牌+竞争 | {{...}} |
-| 品牌+问题 | {{...}} |
-| 品牌+AI | {{...}} |
-
-### 4.2 搜索首页占有率
-- 品牌词"{{${brand.name}}}"首页占有率：{{X}}%
-- "{{${brand.name}}+服务"相关词：{{X}}%
-- "{{${brand.name}}+竞争"类词：{{X}}%
-
-## 板块 5：品牌感知（情感/立场分析）
-### 5.1 整体情感分布
-| 情感类型 | 占比 | 较上一季度变化 |
-|----------|------|----------------|
-| 正面 | {{X}}% | {{±X}}% |
-| 中立/混合 | {{Y}}% | {{±Y}}% |
-| 负面 | {{Z}}% | {{±Z}}% |
-
-### 5.2 各平台典型关键词
-| 平台类型 | 正面关键词 | 负面关键词 |
-|----------|------------|------------|
-| 官方/权威媒体 | {{...}} | {{...}} |
-| 行业分析 | {{...}} | {{...}} |
-| 社交/用户 | {{...}} | {{...}} |
-| AI平台分析 | {{...}} | {{...}} |
-
-### 5.3 典型正面与负面评价
-**正面代表**（来源：{{来源1}}, {{来源2}}）：
-> {{引用正面内容片段}}
-
-**负面代表**（来源：{{来源3}}, {{来源4}}）：
-> {{引用负面内容片段}}
-
-## 板块 6：主题分析
-**核心关联主题（Top 5）**
-| 排名 | 主题 | 共现率 |
-|------|------|--------|
-| 1 | {{主题1}} | {{X}}% |
-| 2 | {{主题2}} | {{Y}}% |
-| 3 | {{主题3}} | {{Z}}% |
-| 4 | {{主题4}} | {{W}}% |
-| 5 | {{主题5}} | {{V}}% |
-
-## 板块 7：引用分析
-### 7.1 来源分类统计
-| 来源类型 | 占比 | 代表来源 |
-|----------|------|----------|
-| 官网引用 | {{X}}% | {{...}} |
-| 权威媒体 | {{Y}}% | {{...}} |
-| 学术/研报 | {{Z}}% | {{...}} |
-| 社交/论坛 | {{W}}% | {{...}} |
-| 电商评论 | {{V}}% | {{...}} |
-
-### 7.2 引用习惯对比
-| 平台 | 偏好引用来源 | 特点 |
-|------|--------------|------|
-| 国内新闻 | {{...}} | {{...}} |
-| 投资分析 | {{...}} | {{...}} |
-| AI平台 | {{...}} | {{...}} |
-
-## 板块 8：提示词列表
-（按查询类型列出，每个问题一行）
-| 查询类型 | 问题 | 响应摘要 |
-|----------|------|----------|
-| 品牌认知 | 「什么是{{${brand.name}}}？」 | {{摘要}} |
-| 产品评价 | 「{{${brand.name}}}好不好用？」 | {{摘要}} |
-| 竞品对比 | 「{{${brand.name}}}和{{竞品}}哪个好？」 | {{摘要}} |
-| 使用方法 | 「{{${brand.name}}}怎么用？」 | {{摘要}} |
-| 最新动态 | 「{{${brand.name}}}最新消息」 | {{摘要}} |
-| 价格相关 | 「{{${brand.name}}}价格怎么样？」 | {{摘要}} |
-| 官方信息 | 「{{${brand.name}}}官网是什么？」 | {{摘要}} |
-| 口碑与评价 | 「{{${brand.name}}}口碑怎么样？」 | {{摘要}} |
-
-## 板块 9：答案快照
-（针对转化意图最强的问题，摘取代表性回答）
-**问题**：「{{转化问题，如"品牌值得信任吗？"}}」
-**来源**：{{URL}}
-**原文摘录**：
-> {{关键段落}}
-
-## 板块 10：改进建议 + 竞品分析
-### 10.1 竞品设置说明
-| 竞品 | 选择依据 |
-|------|----------|
-| {{竞品A}} | {{依据}} |
-| {{竞品B}} | {{依据}} |
-
-### 10.2 竞品品牌分析表
-| 指标 | {{${brand.name}}} | {{竞品A}} | {{竞品B}} |
-|------|----------|-----------|-----------|
-| 市场份额 | {{X}}% | {{X}}% | {{X}}% |
-| 情感正面率 | {{X}}% | {{X}}% | {{X}}% |
-| AI 提及率 | {{X}}% | {{X}}% | {{X}}% |
-| 官方引用率 | {{X}}% | {{X}}% | {{X}}% |
-
-### 10.3 竞品提示词分析
-**{{竞品A}}**：
-- 核心策略：{{...}}
-- AI 关联：{{...}}
-
-**{{竞品B}}**：
-- 核心策略：{{...}}
-- AI 关联：{{...}}
-
-### 10.4 SEO / GEO 改进建议
-| 行动 | 预期效果 | 优先级 |
-|------|----------|--------|
-| {{行动1}} | {{预期效果}} | P0/P1/P2 |
-| {{行动2}} | {{预期效果}} | P0/P1/P2 |
-| {{行动3}} | {{预期效果}} | P0/P1/P2 |
-
+请将上述JSON模板中的数据替换为实际分析结果。如果某项数据暂无，则保留原有的"暂无数据"或0值。
+请确保返回的是**纯JSON字符串**，不要包含任何其他文本！
 品牌信息：
 - 品牌名称：${brand.name}
-- 品牌网站：${brand.website || '未知'}
-
-请严格按照以上模板格式返回分析结果，将所有{{占位符}}替换为实际数据。`;
+- 品牌网站：${brand.website || '未知'}`;
 
     try {
       const response = await fetch(llmApiUrl, {
@@ -330,29 +226,50 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       // 不输出分析内容，只记录分析完成
 console.log('智能体返回内容已接收');
 
-      // 使用geoParser解析智能体返回的模板格式数据
-      const parseResult = parseGEOReport(content);
-
-      if (!parseResult.success) {
-        console.error('解析失败:', parseResult.errors);
-        return {
-          error: {
-            module: 'aiService.performAIAnalysis',
-            function: 'parseGEOReport',
-            message: '解析智能体返回数据失败',
-            details: parseResult.errors.join('; ')
+      // 直接解析JSON格式数据
+      let parsedData;
+      try {
+        parsedData = JSON.parse(content);
+      } catch (error) {
+        console.error('JSON解析失败:', error.message);
+        // 如果JSON解析失败，尝试使用geoParser作为降级方案
+        try {
+          const parseResult = parseGEOReport(content);
+          if (parseResult.success) {
+            console.log('使用geoParser降级解析成功');
+            parsedData = parseResult.data;
+          } else {
+            return {
+              error: {
+                module: 'aiService.performAIAnalysis',
+                function: 'JSON.parse',
+                message: '解析智能体返回数据失败',
+                details: `JSON解析失败: ${error.message}`
+              }
+            };
           }
-        };
+        } catch (parseError) {
+          return {
+            error: {
+              module: 'aiService.performAIAnalysis',
+              function: 'parseGEOReport',
+              message: '解析智能体返回数据失败',
+              details: `JSON解析失败: ${error.message}; geoParser解析失败: ${parseError.message}`
+            }
+          };
+        }
       }
 
       // 验证解析结果
-      const validation = validateReport(parseResult.data);
-      if (!validation.valid) {
-        console.warn('数据验证警告:', validation.warnings);
+      if (!parsedData.brandName) {
+        parsedData.brandName = brand.name;
       }
+      
+      // 确保所有必要字段存在
+      parsedData = ensureRequiredFields(parsedData);
 
       console.log('成功解析智能体返回的数据');
-      return parseResult.data;
+      return parsedData;
 
     } catch (error) {
       console.error('调用OpenClaw智能体失败:', error);
@@ -647,9 +564,338 @@ async function aiChat(question, context = {}, customAgentId = '') {
   }
 }
 
+/**
+ * 确保解析后的数据包含所有必要字段
+ * @param {Object} data - 解析后的数据
+ * @returns {Object} 包含所有必要字段的数据
+ */
+function ensureRequiredFields(data) {
+  const defaults = {
+    brandName: '',
+    officialWebsite: '',
+    updateTime: new Date().toISOString(),
+    overview: {
+      aiPlatformCount: 0,
+      queryCount: 0,
+      brandMentionRate: 0,
+      positiveSentimentRate: 0,
+      officialCitationRate: 0,
+      dataSourceNote: '暂无数据'
+    },
+    aiVisibility: [],
+    visibilityNote: '',
+    visibilityCoreFinding: '',
+    officialPositioning: {
+      source: '',
+      mission: '暂无数据',
+      coreBusiness: '暂无数据',
+      userScale: '暂无数据',
+      brandUpgrade: '暂无数据'
+    },
+    keywords: [],
+    perceptionDifferences: [],
+    searchAssociations: [],
+    brandHomeShare: 0,
+    serviceHomeShare: 0,
+    competitionHomeShare: 0,
+    sentimentDistribution: {
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      positiveChange: '0%',
+      neutralChange: '0%',
+      negativeChange: '0%'
+    },
+    typicalKeywords: {},
+    positiveExample: '',
+    positiveSources: [],
+    negativeExample: '',
+    negativeSources: [],
+    topics: [],
+    citationSources: [],
+    citationHabits: {},
+    prompts: [],
+    answerSnapshot: {
+      question: '',
+      source: '',
+      excerpt: ''
+    },
+    competitors: [],
+    suggestions: []
+  };
+
+  return Object.assign({}, defaults, data, {
+    overview: Object.assign({}, defaults.overview, data.overview),
+    officialPositioning: Object.assign({}, defaults.officialPositioning, data.officialPositioning),
+    sentimentDistribution: Object.assign({}, defaults.sentimentDistribution, data.sentimentDistribution),
+    answerSnapshot: Object.assign({}, defaults.answerSnapshot, data.answerSnapshot)
+  });
+}
+
+/**
+ * 预设提示词模板列表
+ * @type {Array<Object>}
+ */
+const PRESET_PROMPT_TEMPLATES = [
+  { id: 'brand_intro', type: '品牌认知', template: '什么是{{brand}}？', description: '品牌定义和介绍' },
+  { id: 'brand_history', type: '品牌认知', template: '{{brand}}的发展历程是怎样的？', description: '品牌历史和发展' },
+  { id: 'brand_values', type: '品牌认知', template: '{{brand}}的核心价值观是什么？', description: '品牌价值观' },
+  { id: 'product_review', type: '产品评价', template: '{{brand}}的产品怎么样？', description: '产品质量评价' },
+  { id: 'product_features', type: '产品评价', template: '{{brand}}的主要产品有哪些特点？', description: '产品特性分析' },
+  { id: 'user_experience', type: '产品评价', template: '用户对{{brand}}的评价如何？', description: '用户体验' },
+  { id: 'competitor_compare', type: '竞品对比', template: '{{brand}}和主要竞争对手相比有什么优势？', description: '竞争优势分析' },
+  { id: 'market_position', type: '竞品对比', template: '{{brand}}在市场中的定位是什么？', description: '市场定位' },
+  { id: 'usage_guide', type: '使用方法', template: '如何使用{{brand}}的产品？', description: '使用指南' },
+  { id: 'tips', type: '使用方法', template: '{{brand}}的使用技巧有哪些？', description: '使用技巧' },
+  { id: 'latest_news', type: '最新动态', template: '{{brand}}最近有什么新动态？', description: '最新消息' },
+  { id: 'future_plans', type: '最新动态', template: '{{brand}}未来的发展规划是什么？', description: '未来规划' },
+  { id: 'pricing', type: '价格相关', template: '{{brand}}的产品价格怎么样？', description: '价格分析' },
+  { id: 'promotions', type: '价格相关', template: '{{brand}}有什么优惠活动？', description: '优惠信息' },
+  { id: 'official_site', type: '官方信息', template: '{{brand}}的官方网站是什么？', description: '官网地址' },
+  { id: 'contact_info', type: '官方信息', template: '如何联系{{brand}}的客服？', description: '联系方式' },
+  { id: 'reputation', type: '口碑评价', template: '{{brand}}的口碑怎么样？', description: '品牌口碑' },
+  { id: 'trustworthiness', type: '口碑评价', template: '{{brand}}值得信赖吗？', description: '品牌可信度' }
+];
+
+/**
+ * 生成品牌相关的提示词问题
+ * @param {string} brandName - 品牌名称
+ * @param {number} [count] - 生成数量，默认10个
+ * @param {boolean} [useAI] - 是否调用AI生成，默认false使用预设模板
+ * @returns {Promise<Array<Object>>} 提示词列表
+ */
+async function generateBrandPrompts(brandName, count = 10, useAI = false) {
+  console.log(`生成品牌提示词: ${brandName}, 数量: ${count}, 使用AI: ${useAI}`);
+
+  if (useAI) {
+    return await generatePromptsWithAI(brandName, count);
+  } else {
+    return generatePromptsFromTemplates(brandName, count);
+  }
+}
+
+/**
+ * 从预设模板生成提示词
+ * @param {string} brandName - 品牌名称
+ * @param {number} count - 生成数量
+ * @returns {Array<Object>} 提示词列表
+ */
+function generatePromptsFromTemplates(brandName, count) {
+  // 随机选择模板并替换品牌名
+  const shuffled = [...PRESET_PROMPT_TEMPLATES].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, Math.min(count, shuffled.length));
+
+  return selected.map((template, index) => ({
+    id: `prompt_${Date.now()}_${index}`,
+    type: template.type,
+    question: template.template.replace(/\{\{brand\}\}/g, brandName),
+    description: template.description,
+    status: 'pending' // pending: 待回答, completed: 已回答
+  }));
+}
+
+/**
+ * 使用AI生成提示词（框架代码，暂未实现）
+ * @param {string} brandName - 品牌名称
+ * @param {number} count - 生成数量
+ * @returns {Promise<Array<Object>>} 提示词列表
+ */
+async function generatePromptsWithAI(brandName, count) {
+  const llmApiKey = process.env.LLM_API_KEY;
+  const llmApiUrl = process.env.LLM_API_URL;
+  const llmModel = process.env.LLM_MODEL;
+  const agentId = process.env.LLM_AGENT || '';
+
+  if (!llmApiKey || !llmApiUrl || !llmModel) {
+    console.warn('AI配置未完成，使用预设模板生成提示词');
+    return generatePromptsFromTemplates(brandName, count);
+  }
+
+  try {
+    const promptRequest = `请为品牌"${brandName}"生成${count}个常见的用户问题，涵盖以下类型：
+1. 品牌认知类
+2. 产品评价类
+3. 竞品对比类
+4. 使用方法类
+5. 最新动态类
+6. 价格相关类
+7. 官方信息类
+8. 口碑评价类
+
+请以JSON格式返回，每个问题包含id、type（类型）、question（问题）、description（描述）。`;
+
+    const response = await fetch(llmApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${llmApiKey}`
+      },
+      body: JSON.stringify({
+        model: llmModel,
+        agent: agentId || '',
+        messages: [
+          {
+            role: 'system',
+            content: '你是一位专业的SEO专家，擅长生成用户搜索意图相关的问题。'
+          },
+          {
+            role: 'user',
+            content: promptRequest
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    });
+
+    if (!response.ok) {
+      console.warn('AI生成提示词失败，使用预设模板');
+      return generatePromptsFromTemplates(brandName, count);
+    }
+
+    const responseData = await response.json();
+    const content = responseData.choices?.[0]?.message?.content;
+
+    try {
+      const result = JSON.parse(content);
+      return Array.isArray(result) ? result : generatePromptsFromTemplates(brandName, count);
+    } catch {
+      return generatePromptsFromTemplates(brandName, count);
+    }
+  } catch (error) {
+    console.warn('AI生成提示词失败:', error.message);
+    return generatePromptsFromTemplates(brandName, count);
+  }
+}
+
+/**
+ * 单独调用智能体获取单个提示词的答案
+ * @param {string} question - 问题
+ * @param {Object} context - 上下文信息（包含品牌信息等）
+ * @param {string} [customAgentId] - 自定义Agent ID
+ * @returns {Promise<Object>} 答案结果
+ */
+async function getPromptAnswer(question, context = {}, customAgentId = '') {
+  const llmApiKey = process.env.LLM_API_KEY;
+  const llmApiUrl = process.env.LLM_API_URL;
+  const llmModel = process.env.LLM_MODEL;
+  const agentId = customAgentId || process.env.LLM_AGENT || '';
+
+  console.log(`获取提示词答案: "${question}"`);
+
+  if (!llmApiKey || !llmApiUrl || !llmModel) {
+    return {
+      error: { message: '大模型API配置未完成' }
+    };
+  }
+
+  const brandName = context.brandName || '该品牌';
+  const brandWebsite = context.website || '';
+
+  const answerRequest = `请详细回答以下关于"${brandName}"品牌的问题：
+
+问题：${question}
+
+品牌信息（如需要）：
+- 品牌名称：${brandName}
+- 官方网站：${brandWebsite || '未知'}
+
+请提供详细、准确的回答。`;
+
+  try {
+    const response = await fetch(llmApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${llmApiKey}`
+      },
+      body: JSON.stringify({
+        model: llmModel,
+        agent: agentId || '',
+        messages: [
+          {
+            role: 'system',
+            content: '你是一位专业的品牌信息专家，能够准确回答关于各种品牌的问题。'
+          },
+          {
+            role: 'user',
+            content: answerRequest
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return {
+        error: { message: `获取答案失败: ${response.status} - ${errorText}` }
+      };
+    }
+
+    const responseData = await response.json();
+    const content = responseData.choices?.[0]?.message?.content;
+
+    if (!content) {
+      return {
+        error: { message: '大模型返回内容为空' }
+      };
+    }
+
+    return {
+      question: question,
+      answer: content,
+      brandName: brandName,
+      context: context,
+      answeredAt: new Date().toISOString(),
+      status: 'completed'
+    };
+  } catch (error) {
+    return {
+      error: { message: '获取答案失败', details: error.message }
+    };
+  }
+}
+
+/**
+ * 批量获取提示词答案
+ * @param {Array<Object>} prompts - 提示词列表
+ * @param {Object} context - 上下文信息
+ * @param {string} [customAgentId] - 自定义Agent ID
+ * @returns {Promise<Array<Object>>} 答案列表
+ */
+async function getBatchPromptAnswers(prompts, context = {}, customAgentId = '') {
+  console.log(`批量获取${prompts.length}个提示词答案`);
+
+  // 过滤未回答的提示词
+  const pendingPrompts = prompts.filter(p => p.status === 'pending' || !p.status);
+  
+  const results = [];
+  for (const prompt of pendingPrompts) {
+    const result = await getPromptAnswer(prompt.question, context, customAgentId);
+    results.push({
+      ...prompt,
+      ...result,
+      status: result.error ? 'failed' : 'completed'
+    });
+    
+    // 添加延迟，避免请求过快
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+
+  return results;
+}
+
 module.exports = {
   performAIAnalysis,
   performPromptAnalysis,
   generateArticle,
-  aiChat
+  aiChat,
+  // 新增提示词相关函数
+  generateBrandPrompts,
+  getPromptAnswer,
+  getBatchPromptAnswers,
+  // 暴露预设模板供外部使用
+  PRESET_PROMPT_TEMPLATES
 };

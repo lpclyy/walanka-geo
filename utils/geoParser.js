@@ -168,10 +168,44 @@ function parseGEOReport(rawText) {
 
     const report = {};
     const text = rawText.trim();
+    
+    // 保留原始文本用于调试
+    report._rawText = text.substring(0, 500);
 
     // 1. 解析基本信息：品牌名称、官网
-    report.brandName = extractValue(text, /品牌名称：([^\n]+)/);
-    report.officialWebsite = extractValue(text, /官方网站：([^\n]+)/);
+    // 优先从"品牌名称："提取，如果失败则从报告标题提取
+    let brandName = extractValue(text, /品牌名称：([^\n]+)/);
+    if (!brandName) {
+      // 尝试匹配不同格式的品牌名称
+      brandName = extractValue(text, /品牌名称\s*[：:]\s*([^\n]+)/);
+    }
+    if (!brandName) {
+      // 从标题 "# {{品牌名称}} GEO 品牌分析报告" 提取
+      const titleMatch = text.match(/^#\s*([^\s]+)\s+GEO\s+品牌分析报告/i);
+      if (titleMatch) {
+        brandName = titleMatch[1].trim();
+      }
+    }
+    if (!brandName) {
+      // 尝试从标题提取（更宽松的匹配）
+      const titleMatch2 = text.match(/^#\s*([^\n]+)/);
+      if (titleMatch2) {
+        const title = titleMatch2[1].trim();
+        // 提取第一个词作为品牌名称
+        const firstWord = title.split(/[\s]+/)[0];
+        if (firstWord && firstWord !== 'GEO') {
+          brandName = firstWord;
+        }
+      }
+    }
+    report.brandName = brandName;
+    
+    // 解析官网
+    let officialWebsite = extractValue(text, /官方网站\s*[：:]\s*([^\n]+)/);
+    if (!officialWebsite) {
+      officialWebsite = extractValue(text, /官网\s*[：:]\s*([^\n]+)/);
+    }
+    report.officialWebsite = officialWebsite;
 
     // 2. 解析数据总览
     report.overview = parseDataOverview(text);
@@ -180,6 +214,9 @@ function parseGEOReport(rawText) {
     const visibilityResult = parseAIPlatformVisibility(text);
     report.aiVisibility = visibilityResult.data;
     report.visibilityNote = extractValue(text, /⚠️ \*\*说明\*\*：([^\n]+)/);
+    if (!report.visibilityNote) {
+      report.visibilityNote = extractValue(text, /\*\*说明\*\*：([^\n]+)/);
+    }
     report.visibilityCoreFinding = extractValue(text, /\*\*核心发现\*\*：([^\n]+)/);
 
     // 4. 解析品牌概览
@@ -220,9 +257,9 @@ function parseGEOReport(rawText) {
     report.competitors = parseCompetitors(text);
     report.suggestions = parseSuggestions(text);
 
-    // 验证必要字段
+    // 验证必要字段（不强制要求，增加容错性）
     if (!report.brandName) {
-      result.errors.push('错误：未能解析品牌名称');
+      result.warnings.push('警告：未能解析品牌名称');
     }
 
     result.data = report;
@@ -729,9 +766,9 @@ function validateReport(data) {
     return { valid: false, errors, warnings };
   }
   
-  // 验证必填字段
+  // 验证必填字段（不强制要求品牌名称，增加容错性）
   if (!data.brandName) {
-    errors.push('品牌名称不能为空');
+    warnings.push('品牌名称为空');
   }
   
   if (!data.officialWebsite) {
