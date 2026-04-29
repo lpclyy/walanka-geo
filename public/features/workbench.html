@@ -3291,7 +3291,7 @@
                     // 清空现有选项（保留"所有品牌"）
                     brandSelect.innerHTML = '<option value="all">所有品牌</option>';
                     // 添加品牌选项
-                    data.brands.forEach(brand => {
+                    (data.data || []).forEach(brand => {
                         const option = document.createElement('option');
                         option.value = brand.id;
                         option.textContent = brand.name;
@@ -3763,9 +3763,9 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    currentBrandId = data.brandId;
+                    currentBrandId = data.data?.brandId || data.brandId;
                     currentBrandInfo = { name, website, description, industry, positioning };
-                    displayPromptSuggestions(data.suggestedPrompts);
+                    displayPromptSuggestions(data.data?.suggestedPrompts || []);
                     goToStep(2);
                     loadBrandList();
                 } else {
@@ -3877,8 +3877,8 @@
                 console.log('分析响应数据:', data);
 
                 if (data.success) {
-                    if (data.analysis) {
-                        showAnalysisResultDirectly(data.analysis);
+                    if (data.data?.analysis || data.analysis) {
+                        showAnalysisResultDirectly(data.data?.analysis || data.analysis);
                     } else {
                         pollAnalysisProgress();
                     }
@@ -3910,14 +3910,15 @@
                     const data = await response.json();
                     
                     if (data.success) {
-                        document.getElementById('analysisProgress').textContent = `${data.progress}%`;
-                        document.getElementById('progressBar').style.width = `${data.progress}%`;
-                        document.getElementById('currentPrompt').textContent = data.currentPrompt || '分析中...';
+                        const result = data.data || data;
+                        document.getElementById('analysisProgress').textContent = `${result.progress || 0}%`;
+                        document.getElementById('progressBar').style.width = `${result.progress || 0}%`;
+                        document.getElementById('currentPrompt').textContent = result.currentPrompt || '分析中...';
                         
-                        if (data.status === 'completed') {
+                        if (result.status === 'completed') {
                             clearInterval(interval);
                             showAnalysisResult();
-                        } else if (data.status === 'failed') {
+                        } else if (result.status === 'failed') {
                             clearInterval(interval);
                             alert('分析失败，请稍后重试');
                             goToStep(1);
@@ -3936,7 +3937,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    displayAnalysisResult(data.analysis);
+                    displayAnalysisResult(data.data?.analysis || data.analysis);
                 } else {
                     alert(data.error || '获取分析结果失败');
                 }
@@ -4159,7 +4160,7 @@ ${suggestions.map(s => `- [${s.priority}] ${s.title}：${s.description}`).join('
                 const data = await response.json();
                 
                 if (data.success) {
-                    displayBrandList(data.brands);
+                    displayBrandList(data.data || []);
                 }
             } catch (error) {
                 console.error('加载品牌列表失败:', error);
