@@ -3720,14 +3720,11 @@
         
         // 生成品牌提示词
         async function generateBrandPrompts() {
-            const name = document.getElementById('brandName').value.trim();
-            const website = document.getElementById('brandWebsite').value.trim();
-            const description = document.getElementById('brandDescription').value.trim();
-            const industry = document.getElementById('brandIndustry').value;
-            const positioning = document.getElementById('brandPositioning').value;
+            const name = document.getElementById('brandName')?.value.trim() || '';
+            const website = document.getElementById('brandWebsite')?.value.trim() || '';
             
-            if (!name || !website || !industry || !positioning) {
-                alert('请填写品牌名称、网站、行业类别和市场定位');
+            if (!name || !website) {
+                alert('请填写品牌名称和网站');
                 return;
             }
             
@@ -3753,10 +3750,7 @@
                     body: JSON.stringify({
                         userId,
                         name,
-                        website,
-                        description,
-                        industry,
-                        positioning
+                        website
                     })
                 });
                 
@@ -3764,7 +3758,7 @@
                 
                 if (data.success) {
                     currentBrandId = data.data?.brandId || data.brandId;
-                    currentBrandInfo = { name, website, description, industry, positioning };
+                    currentBrandInfo = { name, website };
                     displayPromptSuggestions(data.data?.suggestedPrompts || []);
                     goToStep(2);
                     loadBrandList();
