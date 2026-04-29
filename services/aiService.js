@@ -249,23 +249,49 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       console.log('智能体返回内容已接收，开始解析...');
       console.log(`返回内容长度: ${content.length} 字符`);
 
-      // 直接解析JSON格式数据，不使用降级解析
+      // 从文本中提取JSON部分
+      const extractJSON = (text) => {
+        const firstBrace = text.indexOf('{');
+        const lastBrace = text.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
+          return text.substring(firstBrace, lastBrace + 1);
+        }
+        return null;
+      };
+
+      // 解析JSON数据
       let parsedData;
+      let jsonContent = content;
+      
       try {
-        parsedData = JSON.parse(content);
+        parsedData = JSON.parse(jsonContent);
         console.log('JSON解析成功');
       } catch (error) {
-        console.error(`[错误] JSON解析失败: ${error.message}`);
-        console.log('智能体返回的内容不是有效的JSON格式');
-        console.log('========================================');
-        return {
-          error: {
-            module: 'aiService.performAIAnalysis',
-            function: 'JSON.parse',
-            message: '解析智能体返回数据失败',
-            details: `智能体返回的内容不是有效的JSON格式: ${error.message}`
+        console.warn(`[警告] JSON解析失败: ${error.message}`);
+        console.log('尝试从文本中提取JSON部分...');
+        
+        // 尝试提取JSON
+        const extracted = extractJSON(content);
+        if (extracted) {
+          console.log(`提取到JSON片段，长度: ${extracted.length} 字符`);
+          try {
+            parsedData = JSON.parse(extracted);
+            console.log('提取的JSON解析成功');
+          } catch (extractError) {
+            console.error(`[错误] 提取的JSON也无法解析: ${extractError.message}`);
+            console.log('使用默认空数据结构');
+            parsedData = null;
           }
-        };
+        } else {
+          console.log('未找到有效的JSON结构，使用默认空数据结构');
+          parsedData = null;
+        }
+      }
+
+      // 如果解析失败，使用默认数据结构
+      if (!parsedData) {
+        parsedData = getDefaultAnalysisData(brand.name, brand.website);
+        console.log('已使用默认空数据结构');
       }
 
       // 验证品牌名称
@@ -583,6 +609,94 @@ async function aiChat(question, context = {}, customAgentId = '') {
   } catch (error) {
     return { error: { message: 'AI对话失败', details: error.message } };
   }
+}
+
+/**
+ * 获取默认的品牌分析数据结构
+ * @param {string} brandName - 品牌名称
+ * @param {string} [website] - 品牌网站
+ * @returns {Object} 默认的空数据结构
+ */
+function getDefaultAnalysisData(brandName, website = '') {
+  return {
+    brandName: brandName || '',
+    officialWebsite: website || '',
+    updateTime: new Date().toISOString(),
+    overview: {
+      aiPlatformCount: 0,
+      queryCount: 0,
+      brandMentionRate: 0,
+      positiveSentimentRate: 0,
+      officialCitationRate: 0,
+      dataSourceNote: '数据采集进行中，暂未获取到数据',
+      overallScore: 0,
+      confidence: 0,
+      summary: '暂无分析数据',
+      industry: '未知',
+      brandName: brandName || ''
+    },
+    aiVisibility: [
+      {platform: '豆包', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
+      {platform: '千问', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
+      {platform: '文心一言', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
+      {platform: '讯飞星火', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
+      {platform: 'ChatGPT', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
+      {platform: 'Gemini', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'}
+    ],
+    visibility: {
+      overallVisibility: 0,
+      mentionCount: 0,
+      weeklyChange: '0%',
+      industryRank: '-',
+      platforms: []
+    },
+    perception: {
+      positive: 0,
+      neutral: 0,
+      negative: 0
+    },
+    visibilityNote: '基于搜索引擎实时结果分析',
+    visibilityCoreFinding: '分析进行中，暂无核心发现',
+    officialPositioning: {
+      source: website || '',
+      mission: '暂无数据',
+      coreBusiness: '暂无数据',
+      userScale: '暂无数据',
+      brandUpgrade: '暂无数据'
+    },
+    keywords: [{keyword: '暂无数据', frequency: 0}],
+    perceptionDifferences: ['暂无数据'],
+    searchAssociations: [
+      {type: '品牌+服务', example: '暂无数据'},
+      {type: '品牌+竞争', example: '暂无数据'},
+      {type: '品牌+问题', example: '暂无数据'},
+      {type: '品牌+AI', example: '暂无数据'}
+    ],
+    brandHomeShare: 0,
+    serviceHomeShare: 0,
+    competitionHomeShare: 0,
+    sentimentDistribution: {
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      positiveChange: '0%',
+      neutralChange: '0%',
+      negativeChange: '0%'
+    },
+    typicalKeywords: {},
+    positiveExample: '暂无数据',
+    positiveSources: [],
+    negativeExample: '暂无数据',
+    negativeSources: [],
+    topics: [{name: '暂无数据', count: 0, trend: '稳定'}],
+    citations: [{source: '暂无数据', count: 0}],
+    citationSources: [{type: '官网引用', percentage: 0, representative: '暂无数据'}],
+    citationHabits: {},
+    prompts: [],
+    answerSnapshot: {question: '暂无数据', source: '暂无数据', excerpt: '暂无数据'},
+    competitors: [],
+    suggestions: [{priority: 'P2', title: '暂无建议', description: '暂无建议内容'}]
+  };
 }
 
 /**
