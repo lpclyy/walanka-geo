@@ -580,11 +580,30 @@ function ensureRequiredFields(data) {
       brandMentionRate: 0,
       positiveSentimentRate: 0,
       officialCitationRate: 0,
-      dataSourceNote: '暂无数据'
+      dataSourceNote: '暂无数据',
+      // 前端期望的字段
+      overallScore: 0,
+      confidence: 0,
+      summary: '暂无分析数据',
+      industry: '未知'
     },
     aiVisibility: [],
     visibilityNote: '',
     visibilityCoreFinding: '',
+    // 前端期望的visibility结构
+    visibility: {
+      overallVisibility: 0,
+      mentionCount: 0,
+      weeklyChange: '0%',
+      industryRank: '-',
+      platforms: []
+    },
+    // 前端期望的perception结构
+    perception: {
+      positive: 0,
+      neutral: 0,
+      negative: 0
+    },
     officialPositioning: {
       source: '',
       mission: '暂无数据',
@@ -611,7 +630,10 @@ function ensureRequiredFields(data) {
     positiveSources: [],
     negativeExample: '',
     negativeSources: [],
+    // 前端期望的topics结构
     topics: [],
+    // 前端期望的citations结构
+    citations: [],
     citationSources: [],
     citationHabits: {},
     prompts: [],
@@ -621,15 +643,81 @@ function ensureRequiredFields(data) {
       excerpt: ''
     },
     competitors: [],
+    // 前端期望的suggestions结构
     suggestions: []
   };
 
-  return Object.assign({}, defaults, data, {
+  const merged = Object.assign({}, defaults, data, {
     overview: Object.assign({}, defaults.overview, data.overview),
+    visibility: Object.assign({}, defaults.visibility, data.visibility),
+    perception: Object.assign({}, defaults.perception, data.perception),
     officialPositioning: Object.assign({}, defaults.officialPositioning, data.officialPositioning),
     sentimentDistribution: Object.assign({}, defaults.sentimentDistribution, data.sentimentDistribution),
     answerSnapshot: Object.assign({}, defaults.answerSnapshot, data.answerSnapshot)
   });
+
+  // 计算前端需要的visibility数据
+  if (merged.aiVisibility && merged.aiVisibility.length > 0) {
+    const rates = merged.aiVisibility.filter(v => v.mentionRate > 0).map(v => v.mentionRate);
+    merged.visibility.overallVisibility = rates.length > 0 
+      ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) 
+      : 0;
+    
+    const mentionCounts = merged.aiVisibility.filter(v => v.mentionCount > 0).map(v => v.mentionCount);
+    merged.visibility.mentionCount = mentionCounts.reduce((a, b) => a + b, 0);
+    
+    merged.visibility.platforms = merged.aiVisibility.map(v => ({
+      name: v.platform,
+      visibility: v.mentionRate || 0
+    }));
+  }
+
+  // 同步perception数据从sentimentDistribution
+  if (merged.sentimentDistribution) {
+    merged.perception.positive = merged.sentimentDistribution.positive || 0;
+    merged.perception.neutral = merged.sentimentDistribution.neutral || 0;
+    merged.perception.negative = merged.sentimentDistribution.negative || 0;
+  }
+
+  // 计算综合评分
+  if (merged.overview) {
+    const { brandMentionRate, positiveSentimentRate, officialCitationRate } = merged.overview;
+    merged.overview.overallScore = Math.round((brandMentionRate + positiveSentimentRate + officialCitationRate) / 3);
+    merged.overview.confidence = merged.overview.queryCount > 0 ? 0.8 : 0.5;
+  }
+
+  // 生成topics和citations结构
+  if (!merged.topics || merged.topics.length === 0) {
+    merged.topics = [];
+  } else {
+    merged.topics = merged.topics.map(t => ({
+      name: t.topic || t.name,
+      count: t.coOccurrenceRate || t.count || 0,
+      trend: '稳定'
+    }));
+  }
+
+  if (!merged.citations || merged.citations.length === 0) {
+    merged.citations = [];
+  } else {
+    merged.citations = merged.citations.map(c => ({
+      source: c.type || c.source,
+      count: c.percentage || c.count || 0
+    }));
+  }
+
+  // 生成suggestions结构
+  if (!merged.suggestions || merged.suggestions.length === 0) {
+    merged.suggestions = [];
+  } else {
+    merged.suggestions = merged.suggestions.map(s => ({
+      priority: s.priority || 'P2',
+      title: s.action || s.title,
+      description: s.expectedEffect || s.description
+    }));
+  }
+
+  return merged;
 }
 
 /**
