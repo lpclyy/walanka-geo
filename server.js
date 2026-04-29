@@ -1,5 +1,5 @@
 /**
- * 瓦兰卡免费GEO工具 - 服务器入口文件
+ * 瓦兰卡免费 GEO 工具 - 服务器入口文件
  * @module server
  * @description 主服务器文件，负责应用初始化和请求处理
  */
@@ -30,6 +30,8 @@ app.use('/api/admin', routes.admin);
 app.use('/api/payment', routes.payment);
 app.use('/api/chat', routes.chat);
 app.use('/api/brands', routes.brand);
+app.use('/api/user-brands', routes.userBrand);
+app.use('/api/analysis', routes.analysis);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -68,23 +70,15 @@ app.use(errorHandler);
 async function startServer() {
   try {
     await database.connectDB();
-    console.log('数据库连接成功');
 
     try {
       await database.connectRedis();
-      console.log('Redis连接成功');
     } catch (redisError) {
-      console.warn('Redis连接失败，应用将继续运行:', redisError.message);
+      console.warn('Redis 连接失败:', redisError.message);
     }
 
     app.listen(PORT, () => {
-      console.log(`服务器运行中，端口: ${PORT}`);
-      console.log(`环境: ${config.app.server.env}`);
-      console.log('已注册的页面路由:');
-      pageRoutes.forEach(route => {
-        console.log(`  - ${route.path}`);
-        console.log(`  - ${route.path}.html`);
-      });
+      console.log(`服务器运行中，端口：${PORT}`);
     });
   } catch (error) {
     console.error('服务器启动失败:', error);

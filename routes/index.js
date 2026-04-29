@@ -10,6 +10,8 @@ const admin = require('./admin');
 const payment = require('./payment');
 const chat = require('./chat');
 const brand = require('./brand');
+const userBrand = require('./userBrand');
+const analysis = require('./analysis');
 
 module.exports = {
   auth,
@@ -17,5 +19,7 @@ module.exports = {
   admin,
   payment,
   chat,
-  brand
+  brand,
+  userBrand,
+  analysis
 };
