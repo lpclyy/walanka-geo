@@ -1,3 +1,15 @@
+/**
+ * 提示词服务模块
+ * @module services/promptService
+ * @description 提供提示词生成和管理功能
+ */
+
+/**
+ * 生成品牌提示词建议
+ * @param {string} brandName - 品牌名称
+ * @param {string} [industry] - 所属行业
+ * @returns {Array<{text: string, category: string}>} 提示词建议列表
+ */
 function generatePromptSuggestions(brandName, industry) {
   const basePrompts = [
     { text: `${brandName}品牌在AI平台的提及情况`, category: '品牌提及' },
@@ -14,19 +26,24 @@ function generatePromptSuggestions(brandName, industry) {
   return basePrompts;
 }
 
+/**
+ * 从描述中提取行业信息
+ * @param {string} [description] - 品牌描述
+ * @returns {string} 行业名称
+ */
 function extractIndustry(description) {
   if (!description) {
     return '未知';
   }
-  
+
   const industryKeywords = ['软件', '电商', '教育', '金融', '医疗', '科技', '互联网', 'AI', 'GEO', '营销', '广告'];
-  
+
   for (const keyword of industryKeywords) {
     if (description.includes(keyword)) {
       return keyword;
     }
   }
-  
+
   return '未知';
 }
 

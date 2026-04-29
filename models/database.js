@@ -1,13 +1,24 @@
+/**
+ * 数据库模块
+ * @module models/database
+ * @description 提供数据库连接、初始化和访问功能
+ */
+
 const mysql = require('mysql2/promise');
 const redis = require('redis');
-const config = require('../config/db.config');
+const config = require('../config');
 
 let db;
 let redisClient;
 
+/**
+ * 连接到MySQL数据库
+ * @returns {Promise<Object>} 数据库连接池
+ */
 async function connectDB() {
   try {
-    db = await mysql.createPool(config.dbConfig);
+    const dbConfig = config.database.db;
+    db = await mysql.createPool(dbConfig);
     console.log('MySQL connected');
     await initializeTables(db);
     return db;
@@ -17,8 +28,13 @@ async function connectDB() {
   }
 }
 
+/**
+ * 连接到Redis数据库
+ * @returns {Promise<Object>} Redis客户端
+ */
 async function connectRedis() {
-  redisClient = redis.createClient(config.redisConfig);
+  const redisConfig = config.database.redis;
+  redisClient = redis.createClient(redisConfig);
 
   redisClient.connect().catch(error => {
     console.error('Redis连接失败:', error);
@@ -28,6 +44,11 @@ async function connectRedis() {
   return redisClient;
 }
 
+/**
+ * 初始化所有数据库表
+ * @param {Object} db - 数据库连接池
+ * @returns {Promise<void>}
+ */
 async function initializeTables(db) {
   await createUserTable(db);
   await createArticleTable(db);
@@ -36,6 +57,11 @@ async function initializeTables(db) {
   await createActivityLogTable(db);
 }
 
+/**
+ * 创建用户表
+ * @param {Object} db - 数据库连接池
+ * @returns {Promise<void>}
+ */
 async function createUserTable(db) {
   try {
     await db.execute(`
@@ -49,13 +75,44 @@ async function createUserTable(db) {
       )
     `);
     console.log('User table created or already exists');
-
     await createAdminAccount(db);
   } catch (error) {
     console.error('Create user table failed:', error);
   }
 }
 
+/**
+ * 创建管理员账号
+ * @param {Object} db - 数据库连接池
+ * @returns {Promise<void>}
+ */
+async function createAdminAccount(db) {
+  try {
+    const adminPhone = '15981241372';
+    const adminName = 'root';
+    const adminPassword = '123456789';
+
+    const [existingUsers] = await db.execute('SELECT * FROM users WHERE phone = ?', [adminPhone]);
+
+    if (existingUsers.length === 0) {
+      await db.execute(
+        'INSERT INTO users (name, phone, password, role) VALUES (?, ?, ?, ?)',
+        [adminName, adminPhone, adminPassword, 'admin']
+      );
+      console.log('管理员账号创建成功');
+    } else {
+      console.log('管理员账号已存在');
+    }
+  } catch (error) {
+    console.error('创建管理员账号失败:', error);
+  }
+}
+
+/**
+ * 创建文章表
+ * @param {Object} db - 数据库连接池
+ * @returns {Promise<void>}
+ */
 async function createArticleTable(db) {
   try {
     await db.execute(`
@@ -71,13 +128,17 @@ async function createArticleTable(db) {
       )
     `);
     console.log('Article table created or already exists');
-
     await insertDefaultArticles(db);
   } catch (error) {
     console.error('Create article table failed:', error);
   }
 }
 
+/**
+ * 插入默认文章
+ * @param {Object} db - 数据库连接池
+ * @returns {Promise<void>}
+ */
 async function insertDefaultArticles(db) {
   try {
     const [existingArticles] = await db.execute('SELECT * FROM articles LIMIT 1');
@@ -128,28 +189,11 @@ async function insertDefaultArticles(db) {
   }
 }
 
-async function createAdminAccount(db) {
-  try {
-    const adminPhone = '15981241372';
-    const adminName = 'root';
-    const adminPassword = '123456789';
-
-    const [existingUsers] = await db.execute('SELECT * FROM users WHERE phone = ?', [adminPhone]);
-
-    if (existingUsers.length === 0) {
-      await db.execute(
-        'INSERT INTO users (name, phone, password, role) VALUES (?, ?, ?, ?)',
-        [adminName, adminPhone, adminPassword, 'admin']
-      );
-      console.log('管理员账号创建成功');
-    } else {
-      console.log('管理员账号已存在');
-    }
-  } catch (error) {
-    console.error('创建管理员账号失败:', error);
-  }
-}
-
+/**
+ * 创建品牌相关表
+ * @param {Object} db - 数据库连接池
+ * @returns {Promise<void>}
+ */
 async function createBrandTables(db) {
   try {
     await db.execute(`
@@ -234,6 +278,11 @@ async function createBrandTables(db) {
   }
 }
 
+/**
+ * 创建活动日志表
+ * @param {Object} db - 数据库连接池
+ * @returns {Promise<void>}
+ */
 async function createActivityLogTable(db) {
   try {
     await db.execute(`
@@ -256,6 +305,11 @@ async function createActivityLogTable(db) {
   }
 }
 
+/**
+ * 创建页面内容表
+ * @param {Object} db - 数据库连接池
+ * @returns {Promise<void>}
+ */
 async function createPageContentTable(db) {
   try {
     await db.execute(`
@@ -269,13 +323,17 @@ async function createPageContentTable(db) {
       )
     `);
     console.log('Page content table created or already exists');
-
     await insertDefaultPageContent(db);
   } catch (error) {
     console.error('Create page content table failed:', error);
   }
 }
 
+/**
+ * 插入默认页面内容
+ * @param {Object} db - 数据库连接池
+ * @returns {Promise<void>}
+ */
 async function insertDefaultPageContent(db) {
   try {
     const [existingContent] = await db.execute('SELECT * FROM page_content WHERE page_name = "home" LIMIT 1');
@@ -305,10 +363,18 @@ async function insertDefaultPageContent(db) {
   }
 }
 
+/**
+ * 获取数据库连接池
+ * @returns {Object} 数据库连接池
+ */
 function getDB() {
   return db;
 }
 
+/**
+ * 获取Redis客户端
+ * @returns {Object} Redis客户端
+ */
 function getRedisClient() {
   return redisClient;
 }

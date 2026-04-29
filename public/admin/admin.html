@@ -194,7 +194,7 @@
             <ul>
                 <li><a href="#" class="active" data-section="articles">文章管理</a></li>
                 <li><a href="#" data-section="users">用户管理</a></li>
-                <li><a href="#" data-section="pages">页面管理</a></li>
+
                 <li><a href="#" data-section="settings">系统设置</a></li>
             </ul>
         </div>
@@ -267,39 +267,6 @@
                 </table>
             </div>
 
-            <!-- 页面管理 -->
-            <div id="pages-section" class="section-content" style="display: none;">
-                <div class="admin-header">
-                    <h1>页面管理</h1>
-                    <button class="btn btn-primary" onclick="openAddPageModal()">添加页面</button>
-                </div>
-
-                <!-- 消息提示 -->
-                <div id="page-message" class="alert" style="display: none;"></div>
-
-                <!-- 页面列表 -->
-                <table class="article-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>标题</th>
-                            <th>路径</th>
-                            <th>状态</th>
-                            <th>更新时间</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="page-list">
-                        <!-- 页面列表将通过JavaScript动态加载 -->
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 50px;">
-                                加载页面中...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
             <!-- 系统设置 -->
             <div id="settings-section" class="section-content" style="display: none;">
                 <div class="admin-header">
@@ -352,41 +319,7 @@
         </div>
     </div>
 
-    <!-- 添加/编辑页面模态框 -->
-    <div id="pageModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="pageModalTitle">添加页面</h2>
-                <span class="close" onclick="closePageModal()">&times;</span>
-            </div>
-            <form id="pageForm">
-                <input type="hidden" id="pageId">
-                <div class="form-group">
-                    <label for="pageTitle">标题</label>
-                    <input type="text" id="pageTitle" required>
-                </div>
-                <div class="form-group">
-                    <label for="pagePath">路径</label>
-                    <input type="text" id="pagePath" required>
-                </div>
-                <div class="form-group">
-                    <label for="pageStatus">状态</label>
-                    <select id="pageStatus" required>
-                        <option value="published">已发布</option>
-                        <option value="draft">草稿</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="pageContent">内容</label>
-                    <textarea id="pageContent" required></textarea>
-                </div>
-                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                    <button type="button" class="btn btn-secondary" onclick="closePageModal()">取消</button>
-                    <button type="submit" class="btn btn-primary">保存</button>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     <script>
         // 页面加载时加载文章列表
@@ -471,38 +404,6 @@
             }
         }
 
-        // 加载页面列表
-        async function loadPages() {
-            try {
-                const response = await fetch('/api/admin/pages');
-                const data = await response.json();
-                if (data.success) {
-                    const pageList = document.getElementById('page-list');
-                    pageList.innerHTML = '';
-                    data.pages.forEach(page => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${page.id}</td>
-                            <td>${page.title}</td>
-                            <td>${page.path}</td>
-                            <td>${page.status === 'published' ? '已发布' : '草稿'}</td>
-                            <td>${page.updated_at}</td>
-                            <td>
-                                <button class="btn btn-primary" onclick="editPage(${page.id})">编辑</button>
-                                <button class="btn btn-danger" onclick="deletePage(${page.id}, '${page.title}')">删除</button>
-                            </td>
-                        `;
-                        pageList.appendChild(row);
-                    });
-                } else {
-                    showPageMessage('加载页面失败', 'error');
-                }
-            } catch (error) {
-                console.error('加载页面失败:', error);
-                showPageMessage('加载页面失败', 'error');
-            }
-        }
-
         // 打开添加文章模态框
         function openAddArticleModal() {
             document.getElementById('modalTitle').textContent = '添加文章';
@@ -559,60 +460,9 @@
             }
         }
 
-        // 打开添加页面模态框
-        function openAddPageModal() {
-            document.getElementById('pageModalTitle').textContent = '添加页面';
-            document.getElementById('pageId').value = '';
-            document.getElementById('pageTitle').value = '';
-            document.getElementById('pagePath').value = '';
-            document.getElementById('pageStatus').value = 'published';
-            document.getElementById('pageContent').value = '';
-            document.getElementById('pageModal').style.display = 'block';
-        }
-
-        // 编辑页面
-        async function editPage(id) {
-            try {
-                // 模拟获取页面详情
-                const page = {
-                    id: id,
-                    title: '页面标题',
-                    path: '/page/' + id,
-                    status: 'published',
-                    content: '页面内容'
-                };
-                document.getElementById('pageModalTitle').textContent = '编辑页面';
-                document.getElementById('pageId').value = page.id;
-                document.getElementById('pageTitle').value = page.title;
-                document.getElementById('pagePath').value = page.path;
-                document.getElementById('pageStatus').value = page.status;
-                document.getElementById('pageContent').value = page.content;
-                document.getElementById('pageModal').style.display = 'block';
-            } catch (error) {
-                console.error('获取页面详情失败:', error);
-                showPageMessage('获取页面详情失败', 'error');
-            }
-        }
-
-        // 删除页面
-        function deletePage(id, title) {
-            if (confirm(`确定要删除页面《${title}》吗？`)) {
-                // 模拟删除页面
-                setTimeout(() => {
-                    showPageMessage('页面删除成功', 'success');
-                    loadPages();
-                }, 500);
-            }
-        }
-
         // 关闭文章模态框
         function closeModal() {
             document.getElementById('articleModal').style.display = 'none';
-        }
-
-        // 关闭页面模态框
-        function closePageModal() {
-            document.getElementById('pageModal').style.display = 'none';
         }
 
         // 提交文章表单
@@ -650,23 +500,6 @@
             });
         });
 
-        // 提交页面表单
-        document.getElementById('pageForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const id = document.getElementById('pageId').value;
-            const title = document.getElementById('pageTitle').value;
-            const path = document.getElementById('pagePath').value;
-            const status = document.getElementById('pageStatus').value;
-            const content = document.getElementById('pageContent').value;
-
-            // 模拟保存页面
-            setTimeout(() => {
-                showPageMessage(id ? '页面更新成功' : '页面添加成功', 'success');
-                closePageModal();
-                loadPages();
-            }, 500);
-        });
-
         // 显示文章消息
         function showMessage(message, type) {
             const messageElement = document.getElementById('message');
@@ -689,26 +522,13 @@
             }, 3000);
         }
 
-        // 显示页面消息
-        function showPageMessage(message, type) {
-            const messageElement = document.getElementById('page-message');
-            messageElement.textContent = message;
-            messageElement.className = `alert alert-${type}`;
-            messageElement.style.display = 'block';
-            setTimeout(() => {
-                messageElement.style.display = 'none';
-            }, 3000);
-        }
+
 
         // 点击模态框外部关闭
         window.onclick = function(event) {
             const articleModal = document.getElementById('articleModal');
-            const pageModal = document.getElementById('pageModal');
             if (event.target == articleModal) {
                 articleModal.style.display = 'none';
-            }
-            if (event.target == pageModal) {
-                pageModal.style.display = 'none';
             }
         };
 
@@ -736,8 +556,6 @@
                     loadArticles();
                 } else if (section === 'users') {
                     loadUsers();
-                } else if (section === 'pages') {
-                    loadPages();
                 }
             });
         });
