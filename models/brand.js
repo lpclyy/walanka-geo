@@ -115,21 +115,32 @@ async function getSelectedPromptsByBrandId(brandId) {
 async function saveAnalysisResult(brandId, analysisData) {
   const db = database.getDB();
   
+  // 处理undefined值，转换为null或默认值
+  const getValue = (value, defaultValue = '{}') => {
+    if (value === undefined || value === null) {
+      return defaultValue;
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return JSON.stringify(value);
+  };
+  
   await db.execute(
     'INSERT INTO brand_analysis (brand_id, overview, visibility, perception, strengths, opportunities, competition, risks, topics, citations, snapshots, suggestions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [
       brandId,
-      JSON.stringify(analysisData.overview),
-      JSON.stringify(analysisData.visibility),
-      JSON.stringify(analysisData.perception),
-      JSON.stringify(analysisData.strengths || []),
-      JSON.stringify(analysisData.opportunities || []),
-      JSON.stringify(analysisData.competition || {}),
-      JSON.stringify(analysisData.risks || []),
-      JSON.stringify(analysisData.topics),
-      JSON.stringify(analysisData.citations),
-      JSON.stringify(analysisData.snapshots),
-      JSON.stringify(analysisData.suggestions)
+      getValue(analysisData.overview),
+      getValue(analysisData.visibility),
+      getValue(analysisData.perception),
+      getValue(analysisData.strengths, '[]'),
+      getValue(analysisData.opportunities, '[]'),
+      getValue(analysisData.competition),
+      getValue(analysisData.risks, '[]'),
+      getValue(analysisData.topics, '[]'),
+      getValue(analysisData.citations, '[]'),
+      getValue(analysisData.snapshots, '[]'),
+      getValue(analysisData.suggestions, '[]')
     ]
   );
 }

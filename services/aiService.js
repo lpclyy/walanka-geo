@@ -7,7 +7,6 @@
 
 require('dotenv').config();
 const brandModel = require('../models/brand');
-const { parseGEOReport, validateReport } = require('../utils/geoParser');
 
 /**
  * 调用OpenClaw智能体进行品牌分析
@@ -102,9 +101,17 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
   // 使用用户提供的geo模板格式调用智能体，返回JSON格式
   try {
-    // 构建JSON格式的提示词
-    const analysisPrompt = `请使用您的GEO智能体分析"${brand.name}"品牌，并按照以下JSON格式返回结果：
+    // 构建强制JSON格式的提示词
+    const analysisPrompt = `## 任务要求
+请使用您的GEO智能体分析"${brand.name}"品牌，并**严格按照以下JSON格式返回结果**。
 
+## 格式要求
+1. 返回必须是**纯JSON字符串**，不包含任何其他文本、解释或说明
+2. 不允许返回Markdown格式、代码块标记或其他格式
+3. 如果某项数据暂无，则保留模板中的"暂无数据"或0值
+4. 必须保证JSON格式有效，可直接被JSON.parse()解析
+
+## 返回模板
 {
   "brandName": "${brand.name}",
   "officialWebsite": "${brand.website || '未知'}",
@@ -115,7 +122,12 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
     "brandMentionRate": 0,
     "positiveSentimentRate": 0,
     "officialCitationRate": 0,
-    "dataSourceNote": "数据采集进行中，暂未获取到数据"
+    "dataSourceNote": "数据采集进行中，暂未获取到数据",
+    "overallScore": 0,
+    "confidence": 0,
+    "summary": "暂无分析数据",
+    "industry": "未知",
+    "brandName": "${brand.name}"
   },
   "aiVisibility": [
     {"platform": "豆包", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
@@ -125,6 +137,18 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
     {"platform": "ChatGPT", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
     {"platform": "Gemini", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"}
   ],
+  "visibility": {
+    "overallVisibility": 0,
+    "mentionCount": 0,
+    "weeklyChange": "0%",
+    "industryRank": "-",
+    "platforms": []
+  },
+  "perception": {
+    "positive": 0,
+    "neutral": 0,
+    "negative": 0
+  },
   "visibilityNote": "基于搜索引擎实时结果分析",
   "visibilityCoreFinding": "分析进行中，暂无核心发现",
   "officialPositioning": {
@@ -134,9 +158,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
     "userScale": "暂无数据",
     "brandUpgrade": "暂无数据"
   },
-  "keywords": [
-    {"keyword": "暂无数据", "frequency": 0}
-  ],
+  "keywords": [{"keyword": "暂无数据", "frequency": 0}],
   "perceptionDifferences": ["暂无数据"],
   "searchAssociations": [
     {"type": "品牌+服务", "example": "暂无数据"},
@@ -160,28 +182,15 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   "positiveSources": [],
   "negativeExample": "暂无数据",
   "negativeSources": [],
-  "topics": [
-    {"rank": 1, "topic": "暂无数据", "coOccurrenceRate": 0}
-  ],
-  "citationSources": [
-    {"type": "官网引用", "percentage": 0, "representative": "暂无数据"}
-  ],
+  "topics": [{"name": "暂无数据", "count": 0, "trend": "稳定"}],
+  "citations": [{"source": "暂无数据", "count": 0}],
+  "citationSources": [{"type": "官网引用", "percentage": 0, "representative": "暂无数据"}],
   "citationHabits": {},
   "prompts": [],
-  "answerSnapshot": {
-    "question": "暂无数据",
-    "source": "暂无数据",
-    "excerpt": "暂无数据"
-  },
+  "answerSnapshot": {"question": "暂无数据", "source": "暂无数据", "excerpt": "暂无数据"},
   "competitors": [],
-  "suggestions": []
-}
-
-请将上述JSON模板中的数据替换为实际分析结果。如果某项数据暂无，则保留原有的"暂无数据"或0值。
-请确保返回的是**纯JSON字符串**，不要包含任何其他文本！
-品牌信息：
-- 品牌名称：${brand.name}
-- 品牌网站：${brand.website || '未知'}`;
+  "suggestions": [{"priority": "P2", "title": "暂无建议", "description": "暂无建议内容"}]
+}`;
 
     try {
       const response = await fetch(llmApiUrl, {
@@ -240,73 +249,41 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       console.log('智能体返回内容已接收，开始解析...');
       console.log(`返回内容长度: ${content.length} 字符`);
 
-      // 直接解析JSON格式数据
+      // 直接解析JSON格式数据，不使用降级解析
       let parsedData;
-      let parseMethod = 'JSON';
-      
       try {
         parsedData = JSON.parse(content);
         console.log('JSON解析成功');
       } catch (error) {
-        console.warn(`JSON解析失败: ${error.message}`);
-        console.log('尝试使用geoParser降级解析...');
-        // 如果JSON解析失败，尝试使用geoParser作为降级方案
-        try {
-          const parseResult = parseGEOReport(content);
-          if (parseResult.success) {
-            console.log('geoParser降级解析成功');
-            parseMethod = 'geoParser';
-            parsedData = parseResult.data;
-          } else {
-            console.error('geoParser解析也失败');
-            console.log('========================================');
-            return {
-              error: {
-                module: 'aiService.performAIAnalysis',
-                function: 'JSON.parse',
-                message: '解析智能体返回数据失败',
-                details: `JSON解析失败: ${error.message}`
-              }
-            };
+        console.error(`[错误] JSON解析失败: ${error.message}`);
+        console.log('智能体返回的内容不是有效的JSON格式');
+        console.log('========================================');
+        return {
+          error: {
+            module: 'aiService.performAIAnalysis',
+            function: 'JSON.parse',
+            message: '解析智能体返回数据失败',
+            details: `智能体返回的内容不是有效的JSON格式: ${error.message}`
           }
-        } catch (parseError) {
-          console.error(`geoParser解析异常: ${parseError.message}`);
-          console.log('========================================');
-          return {
-            error: {
-              module: 'aiService.performAIAnalysis',
-              function: 'parseGEOReport',
-              message: '解析智能体返回数据失败',
-              details: `JSON解析失败: ${error.message}; geoParser解析失败: ${parseError.message}`
-            }
-          };
-        }
+        };
       }
 
-      // 验证解析结果
+      // 验证品牌名称
       if (!parsedData.brandName) {
-        console.log(`品牌名称为空，使用原始品牌名: ${brand.name}`);
         parsedData.brandName = brand.name;
       }
       
       // 确保所有必要字段存在
-      console.log('确保所有必要字段存在...');
       parsedData = ensureRequiredFields(parsedData);
 
       const endTime = new Date();
       const duration = Math.round((endTime - startTime) / 1000);
 
-      // 输出分析结果摘要
       console.log('========================================');
       console.log(`[分析完成] ${endTime.toLocaleString()}`);
-      console.log(`解析方式: ${parseMethod}`);
       console.log(`耗时: ${duration} 秒`);
       console.log(`品牌名称: ${parsedData.brandName}`);
       console.log(`概览数据: AI平台数=${parsedData.overview.aiPlatformCount}, 查询数=${parsedData.overview.queryCount}`);
-      console.log(`可见度平台数: ${parsedData.aiVisibility?.length || 0}`);
-      console.log(`情感分布: 正面=${parsedData.sentimentDistribution.positive}%, 中性=${parsedData.sentimentDistribution.neutral}%, 负面=${parsedData.sentimentDistribution.negative}%`);
-      console.log(`热门主题数: ${parsedData.topics?.length || 0}`);
-      console.log(`建议数: ${parsedData.suggestions?.length || 0}`);
       console.log('========================================');
 
       return parsedData;
