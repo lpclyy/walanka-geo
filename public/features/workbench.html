@@ -3835,6 +3835,18 @@
         
         // 开始品牌分析
         async function startBrandAnalysis() {
+            if (!currentBrandId) {
+                alert('请先添加品牌');
+                goToStep(1);
+                return;
+            }
+            
+            if (!currentBrandInfo || !currentBrandInfo.name) {
+                alert('品牌信息不完整，请重新添加品牌');
+                goToStep(1);
+                return;
+            }
+            
             if (selectedPromptIds.length === 0 && customPrompts.length === 0) {
                 alert('请至少选择一个提示词');
                 return;

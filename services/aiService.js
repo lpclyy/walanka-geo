@@ -44,7 +44,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
   // 验证品牌信息
   let brand;
-  if (brandInfo) {
+  if (brandInfo && brandInfo.name) {
     brand = brandInfo;
   } else {
     try {
@@ -72,6 +72,20 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         }
       };
     }
+  }
+
+  // 验证品牌名称存在
+  if (!brand.name) {
+    const error = '品牌名称不能为空';
+    console.error('错误:', error);
+    return {
+      error: {
+        module: 'aiService.performAIAnalysis',
+        function: 'validateBrand',
+        message: error,
+        details: 'brand.name 为空'
+      }
+    };
   }
 
   console.log(`开始分析品牌: ${brand.name}`);
