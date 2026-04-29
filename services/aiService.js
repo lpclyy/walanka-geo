@@ -22,11 +22,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   const llmModel = process.env.LLM_MODEL;
   const agentId = customAgentId || process.env.LLM_AGENT;
 
-  console.log('=== 开始品牌分析流程 ===');
-  console.log(`品牌ID: ${brandId}`);
-  console.log(`品牌信息: ${JSON.stringify(brandInfo)}`);
-  console.log(`Agent ID: ${agentId}`);
-  console.log(`大模型API配置: URL=${llmApiUrl}, Model=${llmModel}`);
+  console.log(`品牌分析开始: ID=${brandId}`);
 
   // 验证API配置
   if (!llmApiKey || !llmApiUrl || !llmModel) {
@@ -277,8 +273,6 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
 请严格按照以上模板格式返回分析结果，将所有{{占位符}}替换为实际数据。`;
 
-    console.log('开始调用OpenClaw智能体:', llmApiUrl);
-
     try {
       const response = await fetch(llmApiUrl, {
         method: 'POST',
@@ -304,8 +298,6 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         })
       });
 
-      console.log('API响应状态:', response.status);
-
       if (!response.ok) {
         const errorText = await response.text();
         const error = `OpenClaw智能体调用失败: ${response.status} - ${errorText}`;
@@ -321,8 +313,6 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       }
 
       const responseData = await response.json();
-      console.log('API响应数据:', JSON.stringify(responseData, null, 2));
-
       const content = responseData.choices?.[0]?.message?.content;
       if (!content) {
         const error = 'OpenClaw智能体返回内容为空';
@@ -337,7 +327,8 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         };
       }
 
-      console.log('智能体返回内容:', content.substring(0, 500) + '...');
+      // 不输出分析内容，只记录分析完成
+console.log('智能体返回内容已接收');
 
       // 使用geoParser解析智能体返回的模板格式数据
       const parseResult = parseGEOReport(content);

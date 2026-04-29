@@ -84,18 +84,15 @@ router.post('/:id/analyze', async (req, res) => {
     const { id } = req.params;
     const { selectedPromptIds, customPrompts, brandInfo } = req.body;
 
-    console.log('=== 开始品牌分析请求 ===');
-    console.log(`品牌ID: ${id}`);
-
     const analysisResult = await aiService.performAIAnalysis(id, brandInfo);
 
     if (analysisResult.error) {
-      console.error('分析失败:', analysisResult.error);
+      console.error('分析失败:', analysisResult.error.message);
       return sendError(res, analysisResult.error.message || '分析失败');
     }
 
     if (analysisResult) {
-      console.log('分析成功，返回结果');
+      console.log(`品牌分析完成: ID=${id}`);
       return sendSuccess(res, { analysis: analysisResult, message: '分析完成' });
     }
 
