@@ -76,18 +76,83 @@ router.get('/:id', async (req, res) => {
 });
 
 /**
+ * POST /api/brands/:id/generate-prompts
+ * 生成品牌提示词（可选步骤）
+ */
+router.post('/:id/generate-prompts', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { brandInfo, skip } = req.body;
+
+    // 如果用户选择跳过提示词生成
+    if (skip) {
+      console.log(`品牌 ${id}: 用户选择跳过提示词生成`);
+      return sendSuccess(res, { 
+        prompts: [], 
+        message: '已跳过提示词生成',
+        skipped: true 
+      });
+    }
+
+    console.log(`品牌 ${id}: 开始生成提示词`);
+
+    // 获取品牌信息
+    let brand = brandInfo;
+    if (!brand || !brand.name) {
+      brand = await brandService.getBrandById(id);
+      if (!brand) {
+        return sendNotFound(res, '品牌');
+      }
+    }
+
+    // 调用AI服务生成提示词
+    const promptsResult = await aiService.generateBrandPrompts(brand);
+
+    if (promptsResult.error) {
+      console.error('生成提示词失败:', promptsResult.error.message);
+      // 提示词生成失败不影响后续分析，返回空提示词列表
+      return sendSuccess(res, { 
+        prompts: [], 
+        message: '提示词生成失败，将使用默认提示词',
+        error: promptsResult.error.message 
+      });
+    }
+
+    console.log(`品牌 ${id}: 提示词生成成功，共生成 ${promptsResult.length} 个提示词`);
+
+    return sendSuccess(res, { 
+      prompts: promptsResult, 
+      message: '提示词生成完成' 
+    });
+  } catch (error) {
+    console.error('生成提示词失败:', error);
+    // 提示词生成失败不影响后续分析
+    return sendSuccess(res, { 
+      prompts: [], 
+      message: '提示词生成异常，将使用默认提示词' 
+    });
+  }
+});
+
+/**
  * POST /api/brands/:id/analyze
  * 开始品牌分析
  */
 router.post('/:id/analyze', async (req, res) => {
   try {
     const { id } = req.params;
-    const { selectedPromptIds, customPrompts, brandInfo } = req.body;
+    const { selectedPromptIds, customPrompts, brandInfo, skipPrompts } = req.body;
 
     console.log(`开始品牌分析: ID=${id}`);
+    console.log(`跳过提示词: ${skipPrompts}`);
 
-    // 调用AI服务进行品牌分析
-    const analysisResult = await aiService.performAIAnalysis(id, brandInfo);
+    // 调用AI服务进行品牌分析（只传递品牌名称，不传递网址）
+    // 如果有brandInfo，只提取name字段
+    const analysisBrandInfo = brandInfo && brandInfo.name 
+      ? { name: brandInfo.name } 
+      : brandInfo;
+    
+    const analysisResult = await aiService.performAIAnalysis(id, analysisBrandInfo);
 
     if (analysisResult.error) {
       console.error('分析失败:', analysisResult.error.message);

@@ -97,100 +97,12 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   }
 
   console.log(`开始调用智能体分析品牌: ${brand.name}`);
-  console.log(`品牌网站: ${brand.website || '未知'}`);
+  console.log('注意：品牌分析仅使用品牌名称，不传递网址信息');
 
   // 使用用户提供的geo模板格式调用智能体，返回JSON格式
   try {
-    // 构建强制JSON格式的提示词
-    const analysisPrompt = `## 任务要求
-请使用您的GEO智能体分析"${brand.name}"品牌，并**严格按照以下JSON格式返回结果**。
-
-## 格式要求
-1. 返回必须是**纯JSON字符串**，不包含任何其他文本、解释或说明
-2. 不允许返回Markdown格式、代码块标记或其他格式
-3. 如果某项数据暂无，则保留模板中的"暂无数据"或0值
-4. 必须保证JSON格式有效，可直接被JSON.parse()解析
-
-## 返回模板
-{
-  "brandName": "${brand.name}",
-  "officialWebsite": "${brand.website || '未知'}",
-  "updateTime": "${new Date().toISOString().slice(0, 19).replace('T', ' ')}",
-  "overview": {
-    "aiPlatformCount": 0,
-    "queryCount": 0,
-    "brandMentionRate": 0,
-    "positiveSentimentRate": 0,
-    "officialCitationRate": 0,
-    "dataSourceNote": "数据采集进行中，暂未获取到数据",
-    "overallScore": 0,
-    "confidence": 0,
-    "summary": "暂无分析数据",
-    "industry": "未知",
-    "brandName": "${brand.name}"
-  },
-  "aiVisibility": [
-    {"platform": "豆包", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
-    {"platform": "千问", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
-    {"platform": "文心一言", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
-    {"platform": "讯飞星火", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
-    {"platform": "ChatGPT", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"},
-    {"platform": "Gemini", "mentionCount": 0, "totalQueries": 0, "mentionRate": 0, "remark": "暂无数据"}
-  ],
-  "visibility": {
-    "overallVisibility": 0,
-    "mentionCount": 0,
-    "weeklyChange": "0%",
-    "industryRank": "-",
-    "platforms": []
-  },
-  "perception": {
-    "positive": 0,
-    "neutral": 0,
-    "negative": 0
-  },
-  "visibilityNote": "基于搜索引擎实时结果分析",
-  "visibilityCoreFinding": "分析进行中，暂无核心发现",
-  "officialPositioning": {
-    "source": "${brand.website || '未知'}",
-    "mission": "暂无数据",
-    "coreBusiness": "暂无数据",
-    "userScale": "暂无数据",
-    "brandUpgrade": "暂无数据"
-  },
-  "keywords": [{"keyword": "暂无数据", "frequency": 0}],
-  "perceptionDifferences": ["暂无数据"],
-  "searchAssociations": [
-    {"type": "品牌+服务", "example": "暂无数据"},
-    {"type": "品牌+竞争", "example": "暂无数据"},
-    {"type": "品牌+问题", "example": "暂无数据"},
-    {"type": "品牌+AI", "example": "暂无数据"}
-  ],
-  "brandHomeShare": 0,
-  "serviceHomeShare": 0,
-  "competitionHomeShare": 0,
-  "sentimentDistribution": {
-    "positive": 0,
-    "neutral": 0,
-    "negative": 0,
-    "positiveChange": "0%",
-    "neutralChange": "0%",
-    "negativeChange": "0%"
-  },
-  "typicalKeywords": {},
-  "positiveExample": "暂无数据",
-  "positiveSources": [],
-  "negativeExample": "暂无数据",
-  "negativeSources": [],
-  "topics": [{"name": "暂无数据", "count": 0, "trend": "稳定"}],
-  "citations": [{"source": "暂无数据", "count": 0}],
-  "citationSources": [{"type": "官网引用", "percentage": 0, "representative": "暂无数据"}],
-  "citationHabits": {},
-  "prompts": [],
-  "answerSnapshot": {"question": "暂无数据", "source": "暂无数据", "excerpt": "暂无数据"},
-  "competitors": [],
-  "suggestions": [{"priority": "P2", "title": "暂无建议", "description": "暂无建议内容"}]
-}`;
+    // 简化提示词：只传递品牌名称，让智能体按预设模板返回数据
+    const analysisPrompt = `分析品牌"${brand.name}"，请按照您预设的模板格式返回JSON数据。`;
 
     try {
       const response = await fetch(llmApiUrl, {
@@ -303,29 +215,33 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         }
       }
 
-      // 如果解析失败，使用默认数据结构
+      // 如果解析失败，返回错误
       if (!parsedData) {
-        parsedData = getDefaultAnalysisData(brand.name, brand.website);
-        console.log('[数据填充] 已使用默认空数据结构 - 智能体未返回有效数据');
+        const errorMsg = parseError || '智能体返回的数据无效';
+        console.error(`[错误] 解析失败: ${errorMsg}`);
+        console.log('========================================');
+        return {
+          error: {
+            module: 'aiService.performAIAnalysis',
+            function: 'JSON.parse',
+            message: '解析智能体返回数据失败',
+            details: errorMsg
+          }
+        };
       }
 
       // 验证品牌名称
       if (!parsedData.brandName) {
-        console.log(`[数据修正] 品牌名称为空，使用原始品牌名: ${brand.name}`);
         parsedData.brandName = brand.name;
       }
       
       // 确保所有必要字段存在
-      console.log('[数据处理] 确保所有必要字段存在...');
       parsedData = ensureRequiredFields(parsedData);
 
       // 打印最终解析结果摘要
       console.log('----------------------------------------');
       console.log('[最终解析结果摘要]');
       console.log(`解析成功: ${parseSuccess}`);
-      if (parseError) {
-        console.log(`错误信息: ${parseError}`);
-      }
       console.log(`品牌名称: ${parsedData.brandName}`);
       console.log(`概览数据: ${JSON.stringify(parsedData.overview)}`);
       console.log(`AI可见度平台数: ${parsedData.aiVisibility?.length || 0}`);
@@ -340,7 +256,6 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       console.log(`[分析完成] ${endTime.toLocaleString()}`);
       console.log(`耗时: ${duration} 秒`);
       console.log(`品牌名称: ${parsedData.brandName}`);
-      console.log(`解析成功: ${parseSuccess}`);
       console.log('========================================');
 
       return parsedData;
@@ -643,101 +558,13 @@ async function aiChat(question, context = {}, customAgentId = '') {
 }
 
 /**
- * 获取默认的品牌分析数据结构
+ * 获取默认的品牌分析数据结构（空数据）
  * @param {string} brandName - 品牌名称
- * @param {string} [website] - 品牌网站
- * @returns {Object} 默认的空数据结构
+ * @returns {Object} 空数据结构
  */
-function getDefaultAnalysisData(brandName, website = '') {
+function getDefaultAnalysisData(brandName) {
   return {
     brandName: brandName || '',
-    officialWebsite: website || '',
-    updateTime: new Date().toISOString(),
-    overview: {
-      aiPlatformCount: 0,
-      queryCount: 0,
-      brandMentionRate: 0,
-      positiveSentimentRate: 0,
-      officialCitationRate: 0,
-      dataSourceNote: '数据采集进行中，暂未获取到数据',
-      overallScore: 0,
-      confidence: 0,
-      summary: '暂无分析数据',
-      industry: '未知',
-      brandName: brandName || ''
-    },
-    aiVisibility: [
-      {platform: '豆包', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
-      {platform: '千问', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
-      {platform: '文心一言', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
-      {platform: '讯飞星火', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
-      {platform: 'ChatGPT', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'},
-      {platform: 'Gemini', mentionCount: 0, totalQueries: 0, mentionRate: 0, remark: '暂无数据'}
-    ],
-    visibility: {
-      overallVisibility: 0,
-      mentionCount: 0,
-      weeklyChange: '0%',
-      industryRank: '-',
-      platforms: []
-    },
-    perception: {
-      positive: 0,
-      neutral: 0,
-      negative: 0
-    },
-    visibilityNote: '基于搜索引擎实时结果分析',
-    visibilityCoreFinding: '分析进行中，暂无核心发现',
-    officialPositioning: {
-      source: website || '',
-      mission: '暂无数据',
-      coreBusiness: '暂无数据',
-      userScale: '暂无数据',
-      brandUpgrade: '暂无数据'
-    },
-    keywords: [{keyword: '暂无数据', frequency: 0}],
-    perceptionDifferences: ['暂无数据'],
-    searchAssociations: [
-      {type: '品牌+服务', example: '暂无数据'},
-      {type: '品牌+竞争', example: '暂无数据'},
-      {type: '品牌+问题', example: '暂无数据'},
-      {type: '品牌+AI', example: '暂无数据'}
-    ],
-    brandHomeShare: 0,
-    serviceHomeShare: 0,
-    competitionHomeShare: 0,
-    sentimentDistribution: {
-      positive: 0,
-      neutral: 0,
-      negative: 0,
-      positiveChange: '0%',
-      neutralChange: '0%',
-      negativeChange: '0%'
-    },
-    typicalKeywords: {},
-    positiveExample: '暂无数据',
-    positiveSources: [],
-    negativeExample: '暂无数据',
-    negativeSources: [],
-    topics: [{name: '暂无数据', count: 0, trend: '稳定'}],
-    citations: [{source: '暂无数据', count: 0}],
-    citationSources: [{type: '官网引用', percentage: 0, representative: '暂无数据'}],
-    citationHabits: {},
-    prompts: [],
-    answerSnapshot: {question: '暂无数据', source: '暂无数据', excerpt: '暂无数据'},
-    competitors: [],
-    suggestions: [{priority: 'P2', title: '暂无建议', description: '暂无建议内容'}]
-  };
-}
-
-/**
- * 确保解析后的数据包含所有必要字段
- * @param {Object} data - 解析后的数据
- * @returns {Object} 包含所有必要字段的数据
- */
-function ensureRequiredFields(data) {
-  const defaults = {
-    brandName: '',
     officialWebsite: '',
     updateTime: new Date().toISOString(),
     overview: {
@@ -746,18 +573,14 @@ function ensureRequiredFields(data) {
       brandMentionRate: 0,
       positiveSentimentRate: 0,
       officialCitationRate: 0,
-      dataSourceNote: '暂无数据',
-      // 前端期望的字段
+      dataSourceNote: '',
       overallScore: 0,
       confidence: 0,
-      summary: '暂无分析数据',
-      industry: '未知',
-      brandName: ''  // 前端期望的品牌名称字段
+      summary: '',
+      industry: '',
+      brandName: brandName || ''
     },
     aiVisibility: [],
-    visibilityNote: '',
-    visibilityCoreFinding: '',
-    // 前端期望的visibility结构
     visibility: {
       overallVisibility: 0,
       mentionCount: 0,
@@ -765,18 +588,19 @@ function ensureRequiredFields(data) {
       industryRank: '-',
       platforms: []
     },
-    // 前端期望的perception结构
     perception: {
       positive: 0,
       neutral: 0,
       negative: 0
     },
+    visibilityNote: '',
+    visibilityCoreFinding: '',
     officialPositioning: {
       source: '',
-      mission: '暂无数据',
-      coreBusiness: '暂无数据',
-      userScale: '暂无数据',
-      brandUpgrade: '暂无数据'
+      mission: '',
+      coreBusiness: '',
+      userScale: '',
+      brandUpgrade: ''
     },
     keywords: [],
     perceptionDifferences: [],
@@ -797,9 +621,82 @@ function ensureRequiredFields(data) {
     positiveSources: [],
     negativeExample: '',
     negativeSources: [],
-    // 前端期望的topics结构
     topics: [],
-    // 前端期望的citations结构
+    citations: [],
+    citationSources: [],
+    citationHabits: {},
+    prompts: [],
+    answerSnapshot: {question: '', source: '', excerpt: ''},
+    competitors: [],
+    suggestions: []
+  };
+}
+
+/**
+ * 确保解析后的数据包含所有必要字段
+ * @param {Object} data - 解析后的数据
+ * @returns {Object} 包含所有必要字段的数据
+ */
+function ensureRequiredFields(data) {
+  const defaults = {
+    brandName: '',
+    officialWebsite: '',
+    updateTime: new Date().toISOString(),
+    overview: {
+      aiPlatformCount: 0,
+      queryCount: 0,
+      brandMentionRate: 0,
+      positiveSentimentRate: 0,
+      officialCitationRate: 0,
+      dataSourceNote: '',
+      overallScore: 0,
+      confidence: 0,
+      summary: '',
+      industry: '',
+      brandName: ''
+    },
+    aiVisibility: [],
+    visibilityNote: '',
+    visibilityCoreFinding: '',
+    visibility: {
+      overallVisibility: 0,
+      mentionCount: 0,
+      weeklyChange: '0%',
+      industryRank: '-',
+      platforms: []
+    },
+    perception: {
+      positive: 0,
+      neutral: 0,
+      negative: 0
+    },
+    officialPositioning: {
+      source: '',
+      mission: '',
+      coreBusiness: '',
+      userScale: '',
+      brandUpgrade: ''
+    },
+    keywords: [],
+    perceptionDifferences: [],
+    searchAssociations: [],
+    brandHomeShare: 0,
+    serviceHomeShare: 0,
+    competitionHomeShare: 0,
+    sentimentDistribution: {
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      positiveChange: '0%',
+      neutralChange: '0%',
+      negativeChange: '0%'
+    },
+    typicalKeywords: {},
+    positiveExample: '',
+    positiveSources: [],
+    negativeExample: '',
+    negativeSources: [],
+    topics: [],
     citations: [],
     citationSources: [],
     citationHabits: {},
@@ -924,11 +821,22 @@ const PRESET_PROMPT_TEMPLATES = [
  * @param {boolean} [useAI] - 是否调用AI生成，默认false使用预设模板
  * @returns {Promise<Array<Object>>} 提示词列表
  */
-async function generateBrandPrompts(brandName, count = 10, useAI = false) {
-  console.log(`生成品牌提示词: ${brandName}, 数量: ${count}, 使用AI: ${useAI}`);
+/**
+ * 生成品牌提示词
+ * @param {Object|string} brand - 品牌信息对象或品牌名称
+ * @param {number} [count=10] - 生成数量
+ * @param {boolean} [useAI=false] - 是否使用AI生成
+ * @returns {Promise<Array<Object>>} 提示词列表
+ */
+async function generateBrandPrompts(brand, count = 10, useAI = true) {
+  // 支持传入品牌对象或品牌名称字符串
+  const brandName = typeof brand === 'object' ? brand.name : brand;
+  const website = typeof brand === 'object' ? brand.website : '';
+  
+  console.log(`生成品牌提示词: ${brandName}, 网址: ${website || '未提供'}, 数量: ${count}, 使用AI: ${useAI}`);
 
   if (useAI) {
-    return await generatePromptsWithAI(brandName, count);
+    return await generatePromptsWithAI(brandName, website, count);
   } else {
     return generatePromptsFromTemplates(brandName, count);
   }
@@ -955,12 +863,13 @@ function generatePromptsFromTemplates(brandName, count) {
 }
 
 /**
- * 使用AI生成提示词（框架代码，暂未实现）
+ * 使用AI生成提示词
  * @param {string} brandName - 品牌名称
+ * @param {string} [website] - 品牌网站（可选）
  * @param {number} count - 生成数量
  * @returns {Promise<Array<Object>>} 提示词列表
  */
-async function generatePromptsWithAI(brandName, count) {
+async function generatePromptsWithAI(brandName, website = '', count) {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
@@ -972,17 +881,34 @@ async function generatePromptsWithAI(brandName, count) {
   }
 
   try {
-    const promptRequest = `请为品牌"${brandName}"生成${count}个常见的用户问题，涵盖以下类型：
-1. 品牌认知类
-2. 产品评价类
-3. 竞品对比类
-4. 使用方法类
-5. 最新动态类
-6. 价格相关类
-7. 官方信息类
-8. 口碑评价类
+    const websiteInfo = website ? `品牌官网：${website}\n` : '';
+    
+    const promptRequest = `请分析品牌"${brandName}"并生成${count}个常见的用户问题。
 
-请以JSON格式返回，每个问题包含id、type（类型）、question（问题）、description（描述）。`;
+品牌信息：
+品牌名称：${brandName}
+${websiteInfo}
+
+请先搜索了解该品牌的核心业务、产品分类、市场定位等基础信息，然后基于这些信息生成涵盖以下类型的用户问题：
+1. 品牌认知类 - 用户对品牌的基本了解和认知相关问题
+2. 产品评价类 - 用户对产品的评价和使用体验相关问题
+3. 竞品对比类 - 用户比较该品牌与竞争对手的问题
+4. 使用方法类 - 用户询问产品使用方法和技巧的问题
+5. 最新动态类 - 用户关注品牌最新动态和新闻的问题
+6. 价格相关类 - 用户关注产品价格和优惠的问题
+7. 官方信息类 - 用户查询官方渠道和联系方式的问题
+8. 口碑评价类 - 用户了解品牌口碑和信誉的问题
+
+请以纯JSON格式返回，每个问题包含：
+- id: 唯一标识
+- type: 问题类型（上述8类之一）
+- question: 用户问题
+- description: 问题描述或用途说明
+
+返回格式示例：
+[{"id":"prompt_1","type":"品牌认知类","question":"${brandName}是什么品牌？","description":"用户想了解品牌基本信息"},...]
+
+请确保返回纯JSON，不包含其他任何文本！`;
 
     const response = await fetch(llmApiUrl, {
       method: 'POST',
