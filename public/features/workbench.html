@@ -4185,9 +4185,13 @@ ${suggestions.map(s => `- [${s.priority}] ${s.title}：${s.description}`).join('
         // 清空分析数据
         function clearAnalysisData() {
             // 清空品牌概览等数据栏
-            document.getElementById('summaryBrandName').textContent = '';
-            document.getElementById('summaryScore').textContent = '';
-            document.getElementById('summaryPromptCount').textContent = '';
+            const summaryBrandName = document.getElementById('summaryBrandName');
+            const summaryScore = document.getElementById('summaryScore');
+            const summaryUpdateTime = document.getElementById('summaryUpdateTime');
+            
+            if (summaryBrandName) summaryBrandName.textContent = '';
+            if (summaryScore) summaryScore.textContent = '';
+            if (summaryUpdateTime) summaryUpdateTime.textContent = '';
             // 可以在这里添加更多清空逻辑
         }
         
