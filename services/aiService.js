@@ -248,6 +248,13 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
       console.log('智能体返回内容已接收，开始解析...');
       console.log(`返回内容长度: ${content.length} 字符`);
+      
+      // 打印智能体返回的原始内容（前2000字符，避免日志过长）
+      console.log('----------------------------------------');
+      console.log('[智能体原始返回内容]');
+      console.log('----------------------------------------');
+      console.log(content.length > 2000 ? content.substring(0, 2000) + '...(内容已截断)' : content);
+      console.log('----------------------------------------');
 
       // 从文本中提取JSON部分
       const extractJSON = (text) => {
@@ -261,29 +268,37 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
       // 解析JSON数据
       let parsedData;
-      let jsonContent = content;
+      let parseSuccess = false;
+      let parseError = null;
       
       try {
-        parsedData = JSON.parse(jsonContent);
-        console.log('JSON解析成功');
+        parsedData = JSON.parse(content);
+        console.log('[解析步骤] JSON直接解析成功');
+        parseSuccess = true;
       } catch (error) {
-        console.warn(`[警告] JSON解析失败: ${error.message}`);
-        console.log('尝试从文本中提取JSON部分...');
+        parseError = `JSON直接解析失败: ${error.message}`;
+        console.warn(`[解析步骤] ${parseError}`);
+        console.log('[解析步骤] 尝试从文本中提取JSON部分...');
         
         // 尝试提取JSON
         const extracted = extractJSON(content);
         if (extracted) {
-          console.log(`提取到JSON片段，长度: ${extracted.length} 字符`);
+          console.log(`[解析步骤] 提取到JSON片段，长度: ${extracted.length} 字符`);
+          console.log('[提取的JSON片段]');
+          console.log(extracted.length > 1500 ? extracted.substring(0, 1500) + '...' : extracted);
           try {
             parsedData = JSON.parse(extracted);
-            console.log('提取的JSON解析成功');
+            console.log('[解析步骤] 提取的JSON解析成功');
+            parseSuccess = true;
           } catch (extractError) {
-            console.error(`[错误] 提取的JSON也无法解析: ${extractError.message}`);
-            console.log('使用默认空数据结构');
+            parseError = `提取的JSON解析失败: ${extractError.message}`;
+            console.error(`[解析步骤] ${parseError}`);
+            console.log('[解析步骤] 使用默认空数据结构');
             parsedData = null;
           }
         } else {
-          console.log('未找到有效的JSON结构，使用默认空数据结构');
+          parseError = '未找到有效的JSON结构';
+          console.log(`[解析步骤] ${parseError}，使用默认空数据结构`);
           parsedData = null;
         }
       }
@@ -291,16 +306,32 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       // 如果解析失败，使用默认数据结构
       if (!parsedData) {
         parsedData = getDefaultAnalysisData(brand.name, brand.website);
-        console.log('已使用默认空数据结构');
+        console.log('[数据填充] 已使用默认空数据结构 - 智能体未返回有效数据');
       }
 
       // 验证品牌名称
       if (!parsedData.brandName) {
+        console.log(`[数据修正] 品牌名称为空，使用原始品牌名: ${brand.name}`);
         parsedData.brandName = brand.name;
       }
       
       // 确保所有必要字段存在
+      console.log('[数据处理] 确保所有必要字段存在...');
       parsedData = ensureRequiredFields(parsedData);
+
+      // 打印最终解析结果摘要
+      console.log('----------------------------------------');
+      console.log('[最终解析结果摘要]');
+      console.log(`解析成功: ${parseSuccess}`);
+      if (parseError) {
+        console.log(`错误信息: ${parseError}`);
+      }
+      console.log(`品牌名称: ${parsedData.brandName}`);
+      console.log(`概览数据: ${JSON.stringify(parsedData.overview)}`);
+      console.log(`AI可见度平台数: ${parsedData.aiVisibility?.length || 0}`);
+      console.log(`热门主题数: ${parsedData.topics?.length || 0}`);
+      console.log(`建议数: ${parsedData.suggestions?.length || 0}`);
+      console.log('----------------------------------------');
 
       const endTime = new Date();
       const duration = Math.round((endTime - startTime) / 1000);
@@ -309,7 +340,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       console.log(`[分析完成] ${endTime.toLocaleString()}`);
       console.log(`耗时: ${duration} 秒`);
       console.log(`品牌名称: ${parsedData.brandName}`);
-      console.log(`概览数据: AI平台数=${parsedData.overview.aiPlatformCount}, 查询数=${parsedData.overview.queryCount}`);
+      console.log(`解析成功: ${parseSuccess}`);
       console.log('========================================');
 
       return parsedData;
