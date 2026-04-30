@@ -102,7 +102,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   // 使用用户提供的geo模板格式调用智能体，返回JSON格式
   try {
     // 极简提示词：只传递品牌名称和JSON格式要求
-    const analysisPrompt = `${brand.name} JSON`;
+    const analysisPrompt = `${brand.name} 请返回JSON格式的数据`;
 
     try {
       const response = await fetch(llmApiUrl, {
