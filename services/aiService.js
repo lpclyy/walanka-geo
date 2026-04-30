@@ -101,8 +101,8 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
   // 使用用户提供的geo模板格式调用智能体，返回JSON格式
   try {
-    // 简化提示词：只传递品牌名称，让智能体按预设模板返回数据
-    const analysisPrompt = `分析品牌"${brand.name}"，请按照您预设的模板格式返回JSON数据。`;
+    // 极简提示词：只传递品牌名称和JSON格式要求
+    const analysisPrompt = `${brand.name} JSON`;
 
     try {
       const response = await fetch(llmApiUrl, {
@@ -116,15 +116,11 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
           agent: agentId || '',
           messages: [
             {
-              role: 'system',
-              content: '你是一位专业的品牌分析专家，使用GEO智能体进行品牌分析。请严格按照用户提供的模板格式返回分析结果。'
-            },
-            {
               role: 'user',
               content: analysisPrompt
             }
           ],
-          temperature: 0.3,
+          temperature: 0,
           max_tokens: 8000
         })
       });
