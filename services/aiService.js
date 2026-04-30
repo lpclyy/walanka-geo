@@ -161,19 +161,48 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       console.log('智能体返回内容已接收，开始解析...');
       console.log(`返回内容长度: ${content.length} 字符`);
       
-      // 打印智能体返回的原始内容（前2000字符，避免日志过长）
+      // 打印智能体返回的原始内容
       console.log('----------------------------------------');
       console.log('[智能体原始返回内容]');
       console.log('----------------------------------------');
-      console.log(content.length > 2000 ? content.substring(0, 2000) + '...(内容已截断)' : content);
+      if (content.length > 5000) {
+        console.log(`[内容过长，显示前5000字符]`);
+        console.log(content.substring(0, 5000) + '...(剩余 ' + (content.length - 5000) + ' 字符)');
+      } else {
+        console.log(content);
+      }
       console.log('----------------------------------------');
 
       // 从文本中提取JSON部分
       const extractJSON = (text) => {
         const firstBrace = text.indexOf('{');
-        const lastBrace = text.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
-          return text.substring(firstBrace, lastBrace + 1);
+        if (firstBrace === -1) {
+          return null;
+        }
+        
+        let depth = 0;
+        let endIndex = -1;
+        
+        for (let i = firstBrace; i < text.length; i++) {
+          if (text[i] === '{') {
+            depth++;
+          } else if (text[i] === '}') {
+            depth--;
+            if (depth === 0) {
+              endIndex = i;
+              break;
+            }
+          } else if (text[i] === '"') {
+            // 跳过字符串内容
+            i++;
+            while (i < text.length && (text[i] !== '"' || text[i-1] === '\\')) {
+              i++;
+            }
+          }
+        }
+        
+        if (endIndex !== -1 && firstBrace < endIndex) {
+          return text.substring(firstBrace, endIndex + 1);
         }
         return null;
       };
@@ -235,6 +264,24 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         parsedData.brandName = brand.name;
       }
       
+      // 打印智能体原始返回数据结构（用于调试）
+      console.log('----------------------------------------');
+      console.log('[智能体原始返回数据结构]');
+      console.log(`原始字段列表: ${Object.keys(parsedData).join(', ')}`);
+      console.log('----------------------------------------');
+      
+      // 字段映射转换：将智能体返回的下划线格式转换为代码期望的格式
+      parsedData = transformAgentData(parsedData);
+      
+      // 打印转换后的数据结构
+      console.log('----------------------------------------');
+      console.log('[字段转换后数据结构]');
+      console.log(`转换后字段列表: ${Object.keys(parsedData).join(', ')}`);
+      console.log(`官方定位: ${JSON.stringify(parsedData.officialPositioning)}`);
+      console.log(`关键词数量: ${parsedData.keywords?.length || 0}`);
+      console.log(`话题数量: ${parsedData.topics?.length || 0}`);
+      console.log('----------------------------------------');
+      
       // 确保所有必要字段存在
       parsedData = ensureRequiredFields(parsedData);
 
@@ -247,6 +294,8 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       console.log(`AI可见度平台数: ${parsedData.aiVisibility?.length || 0}`);
       console.log(`热门主题数: ${parsedData.topics?.length || 0}`);
       console.log(`建议数: ${parsedData.suggestions?.length || 0}`);
+      console.log(`官方定位: ${JSON.stringify(parsedData.officialPositioning)}`);
+      console.log(`关键词数量: ${parsedData.keywords?.length || 0}`);
       console.log('----------------------------------------');
 
       const endTime = new Date();
@@ -630,6 +679,174 @@ function getDefaultAnalysisData(brandName) {
     competitors: [],
     suggestions: []
   };
+}
+
+/**
+ * 字段映射转换：将智能体返回的下划线格式字段转换为代码期望的格式
+ * @param {Object} agentData - 智能体返回的原始数据
+ * @returns {Object} 转换后的数据
+ */
+function transformAgentData(agentData) {
+  if (!agentData || typeof agentData !== 'object') {
+    return agentData;
+  }
+
+  const transformed = { ...agentData };
+
+  // 处理官方定位字段映射
+  if (agentData.source || agentData.mission || agentData.core_business || 
+      agentData.user_scale || agentData.brand_upgrade) {
+    transformed.officialPositioning = transformed.officialPositioning || {};
+    transformed.officialPositioning.source = agentData.source || transformed.officialPositioning.source;
+    transformed.officialPositioning.mission = agentData.mission || transformed.officialPositioning.mission;
+    transformed.officialPositioning.coreBusiness = agentData.core_business || transformed.officialPositioning.coreBusiness;
+    transformed.officialPositioning.userScale = agentData.user_scale || transformed.officialPositioning.userScale;
+    transformed.officialPositioning.brandUpgrade = agentData.brand_upgrade || transformed.officialPositioning.brandUpgrade;
+  }
+
+  // 处理关键词字段映射
+  if (agentData.ai_keywords && Array.isArray(agentData.ai_keywords)) {
+    transformed.keywords = agentData.ai_keywords.map(item => ({
+      keyword: item.keyword || item.name || '',
+      frequency: item.count || item.frequency || 0
+    }));
+  }
+
+  // 处理感知差异字段映射
+  if (agentData.ai_vs_traditional_diffs && Array.isArray(agentData.ai_vs_traditional_diffs)) {
+    transformed.perceptionDifferences = agentData.ai_vs_traditional_diffs;
+  }
+
+  // 处理搜索关联字段映射（支持数组和对象两种格式）
+  if (agentData.search_associations) {
+    if (Array.isArray(agentData.search_associations)) {
+      transformed.searchAssociations = agentData.search_associations.map(item => ({
+        type: item.type || '',
+        example: item.example || ''
+      }));
+    } else if (typeof agentData.search_associations === 'object') {
+      // 如果是对象格式，转换为数组
+      transformed.searchAssociations = Object.entries(agentData.search_associations).map(([key, value]) => ({
+        type: key.replace(/_/g, ' '),
+        example: value || ''
+      }));
+    }
+  }
+
+  // 处理情感分布字段映射
+  if (agentData.sentiment_distribution) {
+    transformed.sentimentDistribution = {
+      positive: agentData.sentiment_distribution.positive || 0,
+      neutral: agentData.sentiment_distribution.neutral || 0,
+      negative: agentData.sentiment_distribution.negative || 0,
+      positiveChange: agentData.sentiment_distribution.positive_change || '0%',
+      neutralChange: agentData.sentiment_distribution.neutral_change || '0%',
+      negativeChange: agentData.sentiment_distribution.negative_change || '0%'
+    };
+  }
+
+  // 处理热门话题字段映射
+  if (agentData.hot_topics && Array.isArray(agentData.hot_topics)) {
+    transformed.topics = agentData.hot_topics.map(item => ({
+      name: item.topic || item.name || '',
+      count: item.count || item.co_occurrence_rate || 0,
+      trend: '稳定'
+    }));
+  }
+
+  // 处理AI可见度字段映射
+  if (agentData.ai_visibility && Array.isArray(agentData.ai_visibility)) {
+    transformed.aiVisibility = agentData.ai_visibility.map(item => ({
+      platform: item.platform || '',
+      mentionCount: item.mention_count || 0,
+      totalQueries: item.total_queries || 0,
+      mentionRate: item.mention_rate || 0,
+      remark: item.remark || ''
+    }));
+  }
+
+  // 处理引用来源字段映射
+  if (agentData.citation_sources && Array.isArray(agentData.citation_sources)) {
+    transformed.citationSources = agentData.citation_sources.map(item => ({
+      type: item.type || '',
+      percentage: item.percentage || 0,
+      representative: item.representative || ''
+    }));
+  }
+
+  // 处理概览数据字段映射（直接在顶层的字段）
+  if (agentData.avg_mention_rate !== undefined) {
+    transformed.overview = transformed.overview || {};
+    transformed.overview.brandMentionRate = agentData.avg_mention_rate;
+  }
+  if (agentData.avg_positive_rate !== undefined) {
+    transformed.overview = transformed.overview || {};
+    transformed.overview.positiveSentimentRate = agentData.avg_positive_rate;
+  }
+  if (agentData.avg_citation_rate !== undefined) {
+    transformed.overview = transformed.overview || {};
+    transformed.overview.officialCitationRate = agentData.avg_citation_rate;
+  }
+  
+  // 处理概览数据字段映射（嵌套的overview对象）
+  if (agentData.overview) {
+    const overview = agentData.overview;
+    transformed.overview = transformed.overview || {};
+    transformed.overview.aiPlatformCount = overview.ai_platform_count || overview.aiPlatformCount || transformed.overview.aiPlatformCount;
+    transformed.overview.queryCount = overview.query_count || overview.queryCount || transformed.overview.queryCount;
+    transformed.overview.brandMentionRate = overview.brand_mention_rate || overview.brandMentionRate || transformed.overview.brandMentionRate;
+    transformed.overview.positiveSentimentRate = overview.positive_sentiment_rate || overview.positiveSentimentRate || transformed.overview.positiveSentimentRate;
+    transformed.overview.officialCitationRate = overview.official_citation_rate || overview.officialCitationRate || transformed.overview.officialCitationRate;
+    transformed.overview.dataSourceNote = overview.data_source_note || overview.dataSourceNote || transformed.overview.dataSourceNote;
+    transformed.overview.overallScore = overview.overall_score || overview.overallScore || transformed.overview.overallScore;
+    transformed.overview.confidence = overview.confidence || transformed.overview.confidence;
+    transformed.overview.summary = overview.summary || transformed.overview.summary;
+    transformed.overview.industry = overview.industry || transformed.overview.industry;
+  }
+
+  // 处理品牌名称字段映射
+  if (agentData.brand_name) {
+    transformed.brandName = agentData.brand_name;
+  }
+
+  // 处理网站字段映射
+  if (agentData.website) {
+    transformed.officialWebsite = agentData.website;
+  }
+
+  // 处理更新时间字段映射
+  if (agentData.update_time) {
+    transformed.updateTime = agentData.update_time;
+  }
+
+  // 处理首页份额字段映射
+  if (agentData.homepage_share && typeof agentData.homepage_share === 'object') {
+    const share = agentData.homepage_share;
+    if (share.brand_word !== undefined) {
+      transformed.brandHomeShare = share.brand_word;
+    }
+    if (share.brand_service !== undefined) {
+      transformed.serviceHomeShare = share.brand_service;
+    }
+    if (share.brand_competition !== undefined) {
+      transformed.competitionHomeShare = share.brand_competition;
+    }
+  }
+
+  // 处理平台可见度字段映射
+  if (agentData.platforms && Array.isArray(agentData.platforms)) {
+    transformed.aiVisibility = agentData.platforms.map(item => ({
+      platform: item.name || '',
+      mentionRate: item.mention_rate || 0,
+      mentionCount: item.mention_count || 0,
+      totalQueries: 0,
+      remark: ''
+    }));
+  }
+
+  console.log('[字段转换] 已完成智能体数据字段映射转换');
+  
+  return transformed;
 }
 
 /**

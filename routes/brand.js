@@ -141,7 +141,7 @@ router.post('/:id/generate-prompts', async (req, res) => {
 router.post('/:id/analyze', async (req, res) => {
   try {
     const { id } = req.params;
-    const { selectedPromptIds, customPrompts, brandInfo, skipPrompts } = req.body;
+    const { selectedPromptIds, customPrompts, brandInfo, skipPrompts = true } = req.body;
 
     console.log(`开始品牌分析: ID=${id}`);
     console.log(`跳过提示词: ${skipPrompts}`);
