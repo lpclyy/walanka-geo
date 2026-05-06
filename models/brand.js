@@ -117,11 +117,20 @@ async function saveAnalysisResult(brandId, analysisData) {
   
   // 处理undefined值，转换为null或默认值
   const getValue = (value, defaultValue = '{}') => {
-    if (value === undefined || value === null) {
-      return defaultValue;
+    if (value === undefined) {
+      return null; // 将undefined转换为null，用于SQL NULL
+    }
+    if (value === null) {
+      return defaultValue; // null使用默认值
     }
     if (typeof value === 'string') {
-      return value;
+      return value || null; // 空字符串也转换为null
+    }
+    // 对于对象或数组，先检查是否有效
+    if (typeof value === 'object') {
+      // 检查是否是空对象或空数组
+      const isEmpty = Array.isArray(value) ? value.length === 0 : Object.keys(value).length === 0;
+      return isEmpty ? defaultValue : JSON.stringify(value);
     }
     return JSON.stringify(value);
   };

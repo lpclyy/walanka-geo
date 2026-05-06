@@ -490,45 +490,35 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       }
       console.log('----------------------------------------');
 
-      // 从文本中提取JSON部分（改进版）
+      // 使用正则表达式和深度匹配提取JSON数据
       const extractJSON = (text) => {
         console.log('[extractJSON] 输入文本长度:', text.length);
         
-        // 第一步：剔除开头的非JSON数据（查找第一个 { 的位置）
-        const firstBraceIndex = text.indexOf('{');
-        if (firstBraceIndex === -1) {
+        // 使用正则表达式找到所有可能的JSON起始位置
+        const jsonStartRegex = /\{/g;
+        const startPositions = [];
+        let match;
+        
+        while ((match = jsonStartRegex.exec(text)) !== null) {
+          startPositions.push(match.index);
+        }
+        
+        if (startPositions.length === 0) {
           console.log('[extractJSON] 未找到JSON起始标记 {');
           return null;
         }
         
-        // 如果开头有非JSON内容，跳过它们
-        if (firstBraceIndex > 0) {
-          console.log('[extractJSON] 剔除开头的非JSON数据，跳过', firstBraceIndex, '个字符');
-        }
+        console.log('[extractJSON] 找到', startPositions.length, '个JSON起始位置');
         
-        // 从第一个 { 开始处理
-        const trimmedText = text.substring(firstBraceIndex);
-        
-        // 第二步：查找所有可能的JSON起始位置
-        const jsonCandidates = [0]; // 第一个 { 肯定是候选
-        let lastIndex = 0;
-        
-        // 查找所有 { 出现的位置
-        while ((lastIndex = trimmedText.indexOf('{', lastIndex + 1)) !== -1) {
-          jsonCandidates.push(lastIndex);
-        }
-        
-        console.log('[extractJSON] 找到', jsonCandidates.length, '个可能的JSON起始位置');
-        
-        // 第三步：尝试从每个候选位置提取JSON
-        for (const startIndex of jsonCandidates) {
+        // 尝试从每个起始位置提取完整的JSON
+        for (const startIndex of startPositions) {
           let depth = 0;
           let endIndex = -1;
           let inString = false;
           let escape = false;
           
-          for (let i = startIndex; i < trimmedText.length; i++) {
-            const char = trimmedText[i];
+          for (let i = startIndex; i < text.length; i++) {
+            const char = text[i];
             
             // 处理转义字符
             if (escape) {
@@ -540,8 +530,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
             if (char === '"' && !inString) {
               inString = true;
             } else if (char === '"' && inString) {
-              // 检查是否是转义的引号
-              if (trimmedText[i-1] !== '\\') {
+              if (text[i-1] !== '\\') {
                 inString = false;
               }
             } else if (char === '\\' && inString) {
@@ -563,12 +552,16 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
           }
           
           if (endIndex !== -1 && endIndex > startIndex) {
-            const extracted = trimmedText.substring(startIndex, endIndex + 1);
-            console.log('[extractJSON] 成功提取JSON片段，起始位置:', startIndex + firstBraceIndex, '结束位置:', endIndex + firstBraceIndex, '长度:', extracted.length);
+            const extracted = text.substring(startIndex, endIndex + 1);
             
-            // 验证提取的JSON是否基本有效（至少有一些字段）
-            if (extracted.length > 50) {
+            // 验证JSON是否有效
+            try {
+              JSON.parse(extracted);
+              console.log('[extractJSON] JSON提取成功，起始位置:', startIndex, '结束位置:', endIndex, '长度:', extracted.length);
               return extracted;
+            } catch (parseError) {
+              console.log('[extractJSON] JSON解析失败，尝试下一个候选:', parseError.message);
+              continue;
             }
           }
         }
