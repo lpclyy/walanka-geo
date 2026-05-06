@@ -356,53 +356,73 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
           const searchData = await searchResponse.json();
           console.log('[工具调用] 搜索响应:', JSON.stringify(searchData, null, 2));
           
-          // 提取搜索结果作为工具响应
-          const searchResult = searchData.choices?.[0]?.message?.content || '{}';
+          // 检查搜索响应是否也是工具调用
+          const searchToolCalls = searchData.choices?.[0]?.message?.tool_calls;
+          const searchContent = searchData.choices?.[0]?.message?.content;
           
-          // 添加工具响应到对话历史
-          messages.push({
-            role: 'tool',
-            content: searchResult,
-            tool_call_id: toolCallId
-          });
-          
-          // 调用大模型进行总结
-          console.log('[工具调用] 正在请求大模型总结搜索结果...');
-          const finalResponse = await fetch(llmApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${llmApiKey}`
-            },
-            body: JSON.stringify({
-              model: llmModel,
-              messages: messages,
-              temperature: 0.3,
-              max_tokens: 8000,
-              stream: false
-            })
-          });
-          
-          if (!finalResponse.ok) {
-            const errorText = await finalResponse.text();
-            const error = `豆包大模型总结调用失败: ${finalResponse.status} - ${errorText}`;
-            console.error('错误:', error);
-            return {
-              error: {
-                module: 'aiService.performAIAnalysis',
-                function: 'fetch (summary)',
-                message: error,
-                details: `HTTP状态码: ${finalResponse.status}`
-              }
-            };
+          if (searchToolCalls && searchToolCalls.length > 0) {
+            // 继续工具调用流程
+            console.log('[工具调用] 搜索响应仍然是工具调用，继续处理...');
+            messages.push({
+              role: 'assistant',
+              content: '',
+              tool_calls: searchToolCalls
+            });
+            
+            // 再次调用获取最终结果
+            const finalResponse = await fetch(llmApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${llmApiKey}`
+              },
+              body: JSON.stringify({
+                model: llmModel,
+                messages: messages,
+                temperature: 0.3,
+                max_tokens: 8000,
+                stream: false
+              })
+            });
+            
+            if (!finalResponse.ok) {
+              const errorText = await finalResponse.text();
+              const error = `豆包大模型总结调用失败: ${finalResponse.status} - ${errorText}`;
+              console.error('错误:', error);
+              return {
+                error: {
+                  module: 'aiService.performAIAnalysis',
+                  function: 'fetch (summary)',
+                  message: error,
+                  details: `HTTP状态码: ${finalResponse.status}`
+                }
+              };
+            }
+            
+            const finalData = await finalResponse.json();
+            content = finalData.choices?.[0]?.message?.content || finalData.content || finalData.result;
+          } else {
+            // 搜索响应直接包含结果
+            content = searchContent || searchData.content || searchData.result;
           }
-          
-          const finalData = await finalResponse.json();
-          content = finalData.choices?.[0]?.message?.content || finalData.content || finalData.result;
         }
       }
       
+      // 只有在没有工具调用或者工具调用完成后，才检查内容是否为空
       if (!content) {
+        // 如果有工具调用但内容为空，可能是正常的，不要报错
+        if (toolCalls && toolCalls.length > 0) {
+          const error = '工具调用后大模型返回内容为空';
+          console.error('错误:', error);
+          return {
+            error: {
+              module: 'aiService.performAIAnalysis',
+              function: 'response processing',
+              message: error,
+              details: '工具调用完成后大模型未返回任何内容'
+            }
+          };
+        }
         const error = '豆包大模型返回内容为空';
         console.error('错误:', error);
         console.log('完整响应:', JSON.stringify(responseData));
