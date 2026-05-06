@@ -310,7 +310,8 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
                 content: JSON.stringify({
                   success: true,
                   message: '搜索已完成，请根据搜索结果进行总结'
-                })
+                }),
+                tool_call_id: toolCalls[0].id
               }
             ],
             temperature: 0,
