@@ -736,7 +736,30 @@
                                 </div>
                             </div>
                             
-                            <!-- 步骤3: 分析完成 -->
+                            <!-- 步骤4: 分析失败 -->
+                            <div id="brand-step-5" style="display: none;">
+                                <div style="text-align: center; padding: 40px 20px;">
+                                    <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                        <span style="font-size: 40px; color: #991b1b;">✗</span>
+                                    </div>
+                                    <h3 style="color: #333; margin-bottom: 10px;">分析失败</h3>
+                                    <p id="failureMessage" style="color: #dc2626; margin-bottom: 30px;">分析过程中遇到错误，请重试</p>
+                                    <div style="max-width: 500px; margin: 0 auto 30px; background: #fef2f2; padding: 20px; border-radius: 10px; text-align: left;">
+                                        <div style="color: #666; font-size: 14px; margin-bottom: 10px;">可能的原因：</div>
+                                        <ul style="color: #666; font-size: 14px; margin: 0; padding-left: 20px;">
+                                            <li>网络连接问题</li>
+                                            <li>智能体服务暂时不可用</li>
+                                            <li>数据解析失败</li>
+                                        </ul>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; justify-content: center;">
+                                        <button onclick="retryBrandAnalysis()" style="background: var(--primary-color); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500;">重新分析</button>
+                                        <button onclick="goToStep(1)" style="background: #e2e8f0; color: #333; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500;">添加新品牌</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 步骤5: 分析完成 -->
                             <div id="brand-step-4" style="display: none;">
                                 <div style="text-align: center; padding: 40px 20px;">
                                     <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -3842,17 +3865,15 @@
                     if (data.errorDetails) {
                         errorMessage += `\n\n错误详情:\n模块: ${data.errorDetails.module}\n函数: ${data.errorDetails.function}\n原因: ${data.errorDetails.details}`;
                     }
-                    showToast(errorMessage, 'error');
-                    goToStep(1);
+                    showAnalysisFailure(errorMessage);
                 }
             } catch (error) {
                 console.error('开始分析失败:', error);
                 if (error.name === 'AbortError') {
-                    showToast('分析请求超时，请稍后重试', 'error');
+                    showAnalysisFailure('分析请求超时，请稍后重试');
                 } else {
-                    showToast('开始分析失败，请稍后重试', 'error');
+                    showAnalysisFailure('开始分析失败，请稍后重试');
                 }
-                goToStep(1);
             }
         }
         
@@ -3874,8 +3895,7 @@
                             showAnalysisResult();
                         } else if (result.status === 'failed') {
                             clearInterval(interval);
-                            alert('分析失败，请稍后重试');
-                            goToStep(1);
+                            showAnalysisFailure(result.message || '分析失败，请稍后重试');
                         }
                     }
                 } catch (error) {
@@ -3893,11 +3913,11 @@
                 if (data.success) {
                     displayAnalysisResult(data.data?.analysis || data.analysis);
                 } else {
-                    alert(data.error || '获取分析结果失败');
+                    showAnalysisFailure(data.error || '获取分析结果失败');
                 }
             } catch (error) {
                 console.error('获取分析结果失败:', error);
-                alert('获取分析结果失败，请稍后重试');
+                showAnalysisFailure('获取分析结果失败，请稍后重试');
             }
         }
 
@@ -4091,10 +4111,78 @@ ${suggestions.map(s => `- [${s.priority}] ${s.title}：${s.description}`).join('
         
         // 切换步骤
         function goToStep(step) {
-            for (let i = 1; i <= 4; i++) {
+            for (let i = 1; i <= 5; i++) {
                 const stepElement = document.getElementById(`brand-step-${i}`);
                 if (stepElement) {
                     stepElement.style.display = i === step ? 'block' : 'none';
+                }
+            }
+        }
+        
+        // 显示分析失败界面
+        function showAnalysisFailure(message) {
+            const failureMessage = document.getElementById('failureMessage');
+            if (failureMessage) {
+                failureMessage.textContent = message || '分析过程中遇到错误，请重试';
+            }
+            goToStep(5);
+        }
+        
+        // 重新分析
+        async function retryBrandAnalysis() {
+            if (!currentBrandId || !currentBrandInfo) {
+                showToast('品牌信息丢失，请重新添加品牌', 'error');
+                goToStep(1);
+                return;
+            }
+            
+            goToStep(3);
+            
+            try {
+                // 添加超时设置
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 300000); // 5分钟超时
+
+                const response = await fetch(`/api/brands/${currentBrandId}/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        brandInfo: currentBrandInfo
+                    }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                console.log('分析响应数据:', data);
+
+                if (data.success) {
+                    if (data.data?.analysis || data.analysis) {
+                        showAnalysisResultDirectly(data.data?.analysis || data.analysis);
+                    } else {
+                        pollAnalysisProgress();
+                    }
+                } else {
+                    let errorMessage = data.error || '开始分析失败';
+                    if (data.errorDetails) {
+                        errorMessage += `\n\n错误详情:\n模块: ${data.errorDetails.module}\n函数: ${data.errorDetails.function}\n原因: ${data.errorDetails.details}`;
+                    }
+                    showAnalysisFailure(errorMessage);
+                }
+            } catch (error) {
+                console.error('重新分析失败:', error);
+                if (error.name === 'AbortError') {
+                    showAnalysisFailure('分析请求超时，请稍后重试');
+                } else {
+                    showAnalysisFailure('重新分析失败，请稍后重试');
                 }
             }
         }

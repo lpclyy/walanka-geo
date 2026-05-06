@@ -234,7 +234,6 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
         body: JSON.stringify({
           model: llmModel,
-          agent: agentId || '',
           messages: [
             {
               role: 'user',
@@ -242,13 +241,14 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
             }
           ],
           temperature: 0,
-          max_tokens: 8000
+          max_tokens: 8000,
+          stream: false
         })
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        const error = `OpenClaw智能体调用失败: ${response.status} - ${errorText}`;
+        const error = `火山方舟大模型调用失败: ${response.status} - ${errorText}`;
         console.error('错误:', error);
         return {
           error: {
@@ -261,16 +261,18 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       }
 
       const responseData = await response.json();
-      const content = responseData.choices?.[0]?.message?.content;
+      // 火山方舟返回格式: { choices: [{ message: { content: '...' } }], ... }
+      const content = responseData.choices?.[0]?.message?.content || responseData.content;
       if (!content) {
-        const error = 'OpenClaw智能体返回内容为空';
+        const error = '火山方舟大模型返回内容为空';
         console.error('错误:', error);
+        console.log('完整响应:', JSON.stringify(responseData));
         return {
           error: {
             module: 'aiService.performAIAnalysis',
             function: 'response processing',
             message: error,
-            details: '智能体未返回任何内容'
+            details: '大模型未返回任何内容'
           }
         };
       }
