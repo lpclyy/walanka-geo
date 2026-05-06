@@ -273,8 +273,70 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       }
 
       const responseData = await response.json();
-      // 火山方舟返回格式: { choices: [{ message: { content: '...' } }], ... }
-      const content = responseData.choices?.[0]?.message?.content || responseData.content;
+      console.log('[响应处理] 完整响应数据:', JSON.stringify(responseData, null, 2));
+      
+      // 检查是否有工具调用请求（大模型使用内置搜索后返回的格式）
+      const toolCalls = responseData.choices?.[0]?.message?.tool_calls;
+      const messageContent = responseData.choices?.[0]?.message?.content;
+      
+      let content = messageContent;
+      
+      // 如果大模型返回了工具调用结果（已经完成搜索），但格式是 tool_calls
+      // 需要再次调用大模型进行总结
+      if (toolCalls && toolCalls.length > 0) {
+        console.log('[工具调用] 检测到大模型已执行搜索，正在请求总结...');
+        
+        // 调用大模型进行总结，传递工具调用结果
+        const finalResponse = await fetch(llmApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${llmApiKey}`
+          },
+          body: JSON.stringify({
+            model: llmModel,
+            messages: [
+              {
+                role: 'user',
+                content: analysisPrompt
+              },
+              {
+                role: 'assistant',
+                content: '',
+                tool_calls: toolCalls
+              },
+              {
+                role: 'tool',
+                content: JSON.stringify({
+                  success: true,
+                  message: '搜索已完成，请根据搜索结果进行总结'
+                })
+              }
+            ],
+            temperature: 0,
+            max_tokens: 8000,
+            stream: false
+          })
+        });
+        
+        if (!finalResponse.ok) {
+          const errorText = await finalResponse.text();
+          const error = `火山方舟大模型总结调用失败: ${finalResponse.status} - ${errorText}`;
+          console.error('错误:', error);
+          return {
+            error: {
+              module: 'aiService.performAIAnalysis',
+              function: 'fetch (summary)',
+              message: error,
+              details: `HTTP状态码: ${finalResponse.status}`
+            }
+          };
+        }
+        
+        const finalData = await finalResponse.json();
+        content = finalData.choices?.[0]?.message?.content || finalData.content;
+      }
+      
       if (!content) {
         const error = '火山方舟大模型返回内容为空';
         console.error('错误:', error);
