@@ -226,8 +226,9 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 请直接返回JSON，不要用代码块包裹，不要添加任何额外文字。如果某个字段未搜索到信息，请填写"暂无信息"。`;
 
     try {
-      // 直接调用豆包大模型，不使用工具调用
-      console.log('[调用豆包大模型] 开始请求分析...');
+      // 调用豆包大模型，启用内置 web_search 工具
+      console.log('[调用豆包大模型] 开始请求分析，启用内置搜索...');
+      
       const response = await fetch(llmApiUrl, {
         method: 'POST',
         headers: {
@@ -238,8 +239,20 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
           model: llmModel,
           messages: [
             {
+              role: 'system',
+              content: '你是一个品牌分析专家。请使用你的联网搜索能力获取最新信息来完成品牌分析任务。'
+            },
+            {
               role: 'user',
               content: analysisPrompt
+            }
+          ],
+          tools: [
+            {
+              type: 'web_search',
+              web_search: {
+                enable: true
+              }
             }
           ],
           temperature: 0.3,
