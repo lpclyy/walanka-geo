@@ -226,13 +226,14 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 请直接返回JSON，不要用代码块包裹，不要添加任何额外文字。如果某个字段未搜索到信息，请填写"暂无信息"。`;
 
     try {
+      // 直接调用豆包大模型，不使用工具调用
+      console.log('[调用豆包大模型] 开始请求分析...');
       const response = await fetch(llmApiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${llmApiKey}`
         },
-
         body: JSON.stringify({
           model: llmModel,
           messages: [
@@ -241,18 +242,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
               content: analysisPrompt
             }
           ],
-          tools: [
-            {
-              type: 'function',
-              function: {
-                name: 'web_search',
-                description: '用于搜索网络上的最新信息，获取品牌在各大AI平台的可见度数据',
-                parameters: {}
-              }
-            }
-          ],
-          tool_choice: 'auto',
-          temperature: 0,
+          temperature: 0.3,
           max_tokens: 8000,
           stream: false
         })
@@ -260,7 +250,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
       if (!response.ok) {
         const errorText = await response.text();
-        const error = `火山方舟大模型调用失败: ${response.status} - ${errorText}`;
+        const error = `豆包大模型调用失败: ${response.status} - ${errorText}`;
         console.error('错误:', error);
         return {
           error: {
@@ -275,71 +265,13 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       const responseData = await response.json();
       console.log('[响应处理] 完整响应数据:', JSON.stringify(responseData, null, 2));
       
-      // 检查是否有工具调用请求（大模型使用内置搜索后返回的格式）
-      const toolCalls = responseData.choices?.[0]?.message?.tool_calls;
-      const messageContent = responseData.choices?.[0]?.message?.content;
-      
-      let content = messageContent;
-      
-      // 如果大模型返回了工具调用结果（已经完成搜索），但格式是 tool_calls
-      // 需要再次调用大模型进行总结
-      if (toolCalls && toolCalls.length > 0) {
-        console.log('[工具调用] 检测到大模型已执行搜索，正在请求总结...');
-        
-        // 调用大模型进行总结，传递工具调用结果
-        const finalResponse = await fetch(llmApiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${llmApiKey}`
-          },
-          body: JSON.stringify({
-            model: llmModel,
-            messages: [
-              {
-                role: 'user',
-                content: analysisPrompt
-              },
-              {
-                role: 'assistant',
-                content: '',
-                tool_calls: toolCalls
-              },
-              {
-                role: 'tool',
-                content: JSON.stringify({
-                  success: true,
-                  message: '搜索已完成，请根据搜索结果进行总结'
-                }),
-                tool_call_id: toolCalls[0].id
-              }
-            ],
-            temperature: 0,
-            max_tokens: 8000,
-            stream: false
-          })
-        });
-        
-        if (!finalResponse.ok) {
-          const errorText = await finalResponse.text();
-          const error = `火山方舟大模型总结调用失败: ${finalResponse.status} - ${errorText}`;
-          console.error('错误:', error);
-          return {
-            error: {
-              module: 'aiService.performAIAnalysis',
-              function: 'fetch (summary)',
-              message: error,
-              details: `HTTP状态码: ${finalResponse.status}`
-            }
-          };
-        }
-        
-        const finalData = await finalResponse.json();
-        content = finalData.choices?.[0]?.message?.content || finalData.content;
-      }
+      // 提取豆包大模型返回的内容
+      const content = responseData.choices?.[0]?.message?.content || 
+                     responseData.content || 
+                     responseData.result;
       
       if (!content) {
-        const error = '火山方舟大模型返回内容为空';
+        const error = '豆包大模型返回内容为空';
         console.error('错误:', error);
         console.log('完整响应:', JSON.stringify(responseData));
         return {
@@ -352,12 +284,12 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         };
       }
 
-      console.log('智能体返回内容已接收，开始解析...');
+      console.log('豆包大模型返回内容已接收，开始解析...');
       console.log(`返回内容长度: ${content.length} 字符`);
       
-      // 打印智能体返回的原始内容
+      // 打印豆包大模型返回的原始内容
       console.log('----------------------------------------');
-      console.log('[智能体原始返回内容]');
+      console.log('[豆包大模型原始返回内容]');
       console.log('----------------------------------------');
       if (content.length > 5000) {
         console.log(`[内容过长，显示前5000字符]`);
@@ -546,7 +478,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       // 打印最终解析结果摘要
       console.log('----------------------------------------');
       console.log('[最终解析结果摘要]');
-      console.log(`解析成功: ${parseSuccess}`);
+      console.log(`解析成功: true`);
       console.log(`品牌名称: ${parsedData.brandName}`);
       console.log(`概览数据: ${JSON.stringify(parsedData.overview)}`);
       console.log(`AI可见度平台数: ${parsedData.aiVisibility?.length || 0}`);
@@ -569,13 +501,13 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
     } catch (error) {
       console.log('========================================');
-      console.error(`[错误] 调用OpenClaw智能体失败: ${error.message}`);
+      console.error(`[错误] 调用豆包大模型失败: ${error.message}`);
       console.log('========================================');
       return {
         error: {
           module: 'aiService.performAIAnalysis',
           function: 'API call',
-          message: '调用OpenClaw智能体失败',
+          message: '调用豆包大模型失败',
           details: error.message
         }
       };
@@ -953,33 +885,43 @@ function normalizeChineseKeys(agentData) {
   
   // 中文键名到英文键名的映射
   const keyMap = {
+    '板块1': 'overview',
     '板块1：数据总览': 'overview',
     '板块1: 数据总览': 'overview',
     '数据总览': 'overview',
+    '板块2': 'aiVisibility',
     '板块2：品牌AI可见度': 'aiVisibility',
     '板块2: 品牌AI可见度': 'aiVisibility',
     '品牌AI可见度': 'aiVisibility',
     '品牌可见度': 'visibility',
+    '板块3': 'officialPositioning',
     '板块3：品牌概览': 'officialPositioning',
     '板块3: 品牌概览': 'officialPositioning',
     '品牌概览': 'officialPositioning',
+    '板块4': 'visibility',
     '板块4：品牌可见度': 'visibility',
     '板块4: 品牌可见度': 'visibility',
+    '板块5': 'perception',
     '板块5：品牌感知': 'perception',
     '板块5: 品牌感知': 'perception',
     '品牌感知': 'perception',
+    '板块6': 'topics',
     '板块6：主题分析': 'topics',
     '板块6: 主题分析': 'topics',
     '主题分析': 'topics',
+    '板块7': 'citations',
     '板块7：引用分析': 'citations',
     '板块7: 引用分析': 'citations',
     '引用分析': 'citations',
+    '板块8': 'prompts',
     '板块8：提示词列表': 'prompts',
     '板块8: 提示词列表': 'prompts',
     '提示词列表': 'prompts',
+    '板块9': 'answerSnapshot',
     '板块9：答案快照': 'answerSnapshot',
     '板块9: 答案快照': 'answerSnapshot',
     '答案快照': 'answerSnapshot',
+    '板块10': 'competition',
     '板块10：改进建议+竞品分析': 'competition',
     '板块10: 改进建议+竞品分析': 'competition',
     '改进建议+竞品分析': 'competition',
