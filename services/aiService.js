@@ -222,7 +222,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   - priority: 优先级（P0/P1/P2）
 
 ## 输出格式要求
-请直接返回JSON，不要用代码块包裹，不要添加任何额外文字。如果某个字段未搜索到信息，请填写"暂无信息"。
+请直接返回JSON，不要用代码块包裹，不要添加任何额外文字。如果某个字段未搜索到信息，请填写"暂无信息"。`;
 
     try {
       const response = await fetch(llmApiUrl, {
@@ -231,6 +231,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${llmApiKey}`
         },
+
         body: JSON.stringify({
           model: llmModel,
           agent: agentId || '',
