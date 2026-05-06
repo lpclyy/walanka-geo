@@ -302,75 +302,37 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       if (toolCalls && toolCalls.length > 0) {
         console.log('[工具调用] 检测到大模型请求工具调用，finish_reason:', finishReason);
         
-        // 提取工具调用信息
-        const toolCall = toolCalls[0];
-        const functionName = toolCall.function?.name;
-        const functionArgs = toolCall.function?.arguments;
-        const toolCallId = toolCall.id;
+        // 添加工具调用消息到对话历史
+        messages.push({
+          role: 'assistant',
+          content: '',
+          tool_calls: toolCalls
+        });
         
-        console.log('[工具调用] 函数名:', functionName);
-        console.log('[工具调用] 参数:', functionArgs);
-        console.log('[工具调用] 调用ID:', toolCallId);
+        // 循环处理工具调用，直到获取到实际内容
+        let currentToolCalls = toolCalls;
+        let maxIterations = 5;
+        let iteration = 0;
         
-        if (functionName === 'web_search') {
-          // 调用豆包的 web_search 工具执行搜索
-          console.log('[工具调用] 正在调用豆包内置 web_search 工具...');
+        while (currentToolCalls && currentToolCalls.length > 0 && iteration < maxIterations) {
+          iteration++;
+          console.log(`[工具调用] 第 ${iteration} 轮工具调用处理...`);
           
-          // 将工具调用消息添加到对话历史
-          messages.push({
-            role: 'assistant',
-            content: '',
-            tool_calls: toolCalls
-          });
+          // 提取工具调用信息
+          const toolCall = currentToolCalls[0];
+          const functionName = toolCall.function?.name;
+          const functionArgs = toolCall.function?.arguments;
+          const toolCallId = toolCall.id;
           
-          // 调用豆包获取搜索结果
-          const searchResponse = await fetch(llmApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${llmApiKey}`
-            },
-            body: JSON.stringify({
-              model: llmModel,
-              messages: messages,
-              temperature: 0.3,
-              max_tokens: 8000,
-              stream: false
-            })
-          });
+          console.log('[工具调用] 函数名:', functionName);
+          console.log('[工具调用] 参数:', functionArgs);
+          console.log('[工具调用] 调用ID:', toolCallId);
           
-          if (!searchResponse.ok) {
-            const errorText = await searchResponse.text();
-            const error = `豆包大模型搜索调用失败: ${searchResponse.status} - ${errorText}`;
-            console.error('错误:', error);
-            return {
-              error: {
-                module: 'aiService.performAIAnalysis',
-                function: 'fetch (search)',
-                message: error,
-                details: `HTTP状态码: ${searchResponse.status}`
-              }
-            };
-          }
-          
-          const searchData = await searchResponse.json();
-          console.log('[工具调用] 搜索响应:', JSON.stringify(searchData, null, 2));
-          
-          // 检查搜索响应是否也是工具调用
-          const searchToolCalls = searchData.choices?.[0]?.message?.tool_calls;
-          const searchContent = searchData.choices?.[0]?.message?.content;
-          
-          if (searchToolCalls && searchToolCalls.length > 0) {
-            // 继续工具调用流程
-            console.log('[工具调用] 搜索响应仍然是工具调用，继续处理...');
-            messages.push({
-              role: 'assistant',
-              content: '',
-              tool_calls: searchToolCalls
-            });
+          if (functionName === 'web_search') {
+            // 调用豆包获取搜索结果（直接传递对话历史，豆包会自动处理搜索）
+            console.log('[工具调用] 正在调用豆包处理搜索...');
             
-            // 再次调用获取最终结果
-            const finalResponse = await fetch(llmApiUrl, {
+            const searchResponse = await fetch(llmApiUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -379,31 +341,108 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
               body: JSON.stringify({
                 model: llmModel,
                 messages: messages,
+                tools: [
+                  {
+                    type: 'function',
+                    function: {
+                      name: 'web_search',
+                      description: '用于搜索网络上的最新信息，获取品牌相关的新闻、评价、市场数据等',
+                      parameters: {}
+                    }
+                  }
+                ],
+                tool_choice: 'auto',
                 temperature: 0.3,
                 max_tokens: 8000,
                 stream: false
               })
             });
             
-            if (!finalResponse.ok) {
-              const errorText = await finalResponse.text();
-              const error = `豆包大模型总结调用失败: ${finalResponse.status} - ${errorText}`;
+            if (!searchResponse.ok) {
+              const errorText = await searchResponse.text();
+              const error = `豆包大模型搜索调用失败: ${searchResponse.status} - ${errorText}`;
               console.error('错误:', error);
               return {
                 error: {
                   module: 'aiService.performAIAnalysis',
-                  function: 'fetch (summary)',
+                  function: 'fetch (search)',
                   message: error,
-                  details: `HTTP状态码: ${finalResponse.status}`
+                  details: `HTTP状态码: ${searchResponse.status}`
                 }
               };
             }
             
-            const finalData = await finalResponse.json();
-            content = finalData.choices?.[0]?.message?.content || finalData.content || finalData.result;
+            const searchData = await searchResponse.json();
+            console.log('[工具调用] 搜索响应:', JSON.stringify(searchData, null, 2));
+            
+            // 检查响应
+            const searchToolCalls = searchData.choices?.[0]?.message?.tool_calls;
+            const searchContent = searchData.choices?.[0]?.message?.content;
+            const searchFinishReason = searchData.choices?.[0]?.finish_reason;
+            
+            if (searchContent && searchContent.trim()) {
+              // 获取到内容，结束循环
+              content = searchContent;
+              console.log(`[工具调用] 第 ${iteration} 轮获取到内容，长度: ${content.length}`);
+              break;
+            } else if (searchToolCalls && searchToolCalls.length > 0) {
+              // 还有工具调用，继续循环
+              console.log(`[工具调用] 第 ${iteration} 轮仍有工具调用，继续...`);
+              currentToolCalls = searchToolCalls;
+              messages.push({
+                role: 'assistant',
+                content: '',
+                tool_calls: searchToolCalls
+              });
+            } else if (searchFinishReason === 'stop') {
+              // finish_reason 是 stop 但内容为空，发送空消息触发总结
+              console.log('[工具调用] finish_reason 是 stop 但内容为空，发送总结请求...');
+              messages.push({
+                role: 'user',
+                content: '请根据搜索结果，按照要求的JSON格式输出品牌分析报告。'
+              });
+              
+              const finalResponse = await fetch(llmApiUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${llmApiKey}`
+                },
+                body: JSON.stringify({
+                  model: llmModel,
+                  messages: messages,
+                  temperature: 0.3,
+                  max_tokens: 8000,
+                  stream: false
+                })
+              });
+              
+              if (!finalResponse.ok) {
+                const errorText = await finalResponse.text();
+                const error = `豆包大模型总结调用失败: ${finalResponse.status} - ${errorText}`;
+                console.error('错误:', error);
+                return {
+                  error: {
+                    module: 'aiService.performAIAnalysis',
+                    function: 'fetch (summary)',
+                    message: error,
+                    details: `HTTP状态码: ${finalResponse.status}`
+                  }
+                };
+              }
+              
+              const finalData = await finalResponse.json();
+              content = finalData.choices?.[0]?.message?.content || finalData.content || finalData.result;
+              break;
+            } else {
+              // 无法继续，退出循环
+              console.log('[工具调用] 无法继续，退出循环');
+              break;
+            }
           } else {
-            // 搜索响应直接包含结果
-            content = searchContent || searchData.content || searchData.result;
+            // 未知的工具调用，退出循环
+            console.log('[工具调用] 未知的工具调用:', functionName);
+            break;
           }
         }
       }
