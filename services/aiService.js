@@ -241,6 +241,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
               content: analysisPrompt
             }
           ],
+          tools: [{ type: "web_search" }], 
           temperature: 0,
           max_tokens: 8000,
           stream: false
