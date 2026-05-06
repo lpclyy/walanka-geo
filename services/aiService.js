@@ -241,7 +241,17 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
               content: analysisPrompt
             }
           ],
-          tools: [{ type: "web_search" }], 
+          tools: [
+            {
+              type: 'function',
+              function: {
+                name: 'web_search',
+                description: '用于搜索网络上的最新信息，获取品牌在各大AI平台的可见度数据',
+                parameters: {}
+              }
+            }
+          ],
+          tool_choice: 'auto',
           temperature: 0,
           max_tokens: 8000,
           stream: false
