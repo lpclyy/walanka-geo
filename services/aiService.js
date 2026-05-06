@@ -1513,7 +1513,7 @@ function ensureRequiredFields(data) {
   });
 
   // 计算前端需要的visibility数据
-  if (merged.aiVisibility && merged.aiVisibility.length > 0) {
+  if (merged.aiVisibility && Array.isArray(merged.aiVisibility) && merged.aiVisibility.length > 0) {
     const rates = merged.aiVisibility.filter(v => v.mentionRate > 0).map(v => v.mentionRate);
     merged.visibility.overallVisibility = rates.length > 0 
       ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) 
@@ -1553,7 +1553,7 @@ function ensureRequiredFields(data) {
     }));
   }
 
-  if (!merged.citations || merged.citations.length === 0) {
+  if (!merged.citations || !Array.isArray(merged.citations) || merged.citations.length === 0) {
     merged.citations = [];
   } else {
     merged.citations = merged.citations.map(c => ({
@@ -1563,7 +1563,7 @@ function ensureRequiredFields(data) {
   }
 
   // 生成suggestions结构
-  if (!merged.suggestions || merged.suggestions.length === 0) {
+  if (!merged.suggestions || !Array.isArray(merged.suggestions) || merged.suggestions.length === 0) {
     merged.suggestions = [];
   } else {
     merged.suggestions = merged.suggestions.map(s => ({
