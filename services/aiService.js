@@ -1543,7 +1543,7 @@ function ensureRequiredFields(data) {
   }
 
   // 生成topics和citations结构
-  if (!merged.topics || merged.topics.length === 0) {
+  if (!merged.topics || !Array.isArray(merged.topics) || merged.topics.length === 0) {
     merged.topics = [];
   } else {
     merged.topics = merged.topics.map(t => ({
