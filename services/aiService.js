@@ -249,12 +249,15 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
           ],
           tools: [
             {
-              type: 'web_search',
-              web_search: {
-                enable: true
+              type: 'function',
+              function: {
+                name: 'web_search',
+                description: '用于搜索网络上的最新信息，获取品牌相关的新闻、评价、市场数据等',
+                parameters: {}
               }
             }
           ],
+          tool_choice: 'auto',
           temperature: 0.3,
           max_tokens: 8000,
           stream: false
