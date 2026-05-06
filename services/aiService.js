@@ -940,6 +940,141 @@ function getDefaultAnalysisData(brandName) {
 }
 
 /**
+ * 将智能体返回的中文键名格式转换为标准英文键名格式
+ * @param {Object} agentData - 智能体返回的原始数据
+ * @returns {Object} 转换后的数据
+ */
+function normalizeChineseKeys(agentData) {
+  if (!agentData || typeof agentData !== 'object') {
+    return agentData;
+  }
+
+  const result = {};
+  
+  // 中文键名到英文键名的映射
+  const keyMap = {
+    '板块1：数据总览': 'overview',
+    '板块1: 数据总览': 'overview',
+    '数据总览': 'overview',
+    '板块2：品牌AI可见度': 'aiVisibility',
+    '板块2: 品牌AI可见度': 'aiVisibility',
+    '品牌AI可见度': 'aiVisibility',
+    '品牌可见度': 'visibility',
+    '板块3：品牌概览': 'officialPositioning',
+    '板块3: 品牌概览': 'officialPositioning',
+    '品牌概览': 'officialPositioning',
+    '板块4：品牌可见度': 'visibility',
+    '板块4: 品牌可见度': 'visibility',
+    '板块5：品牌感知': 'perception',
+    '板块5: 品牌感知': 'perception',
+    '品牌感知': 'perception',
+    '板块6：主题分析': 'topics',
+    '板块6: 主题分析': 'topics',
+    '主题分析': 'topics',
+    '板块7：引用分析': 'citations',
+    '板块7: 引用分析': 'citations',
+    '引用分析': 'citations',
+    '板块8：提示词列表': 'prompts',
+    '板块8: 提示词列表': 'prompts',
+    '提示词列表': 'prompts',
+    '板块9：答案快照': 'answerSnapshot',
+    '板块9: 答案快照': 'answerSnapshot',
+    '答案快照': 'answerSnapshot',
+    '板块10：改进建议+竞品分析': 'competition',
+    '板块10: 改进建议+竞品分析': 'competition',
+    '改进建议+竞品分析': 'competition',
+    '改进建议': 'suggestions',
+    '竞品分析': 'competition',
+    
+    // 子字段映射
+    'dataUpdateTime': 'updateTime',
+    'platformCount': 'aiPlatformCount',
+    'queryCount': 'queryCount',
+    'avgMentionRate': 'brandMentionRate',
+    'avgPositiveRate': 'positiveSentimentRate',
+    'officialCitationRate': 'officialCitationRate',
+    'dataSourceNote': 'dataSourceNote',
+    'platforms': 'platforms',
+    'platformName': 'platform',
+    'mentionCount': 'mentionCount',
+    'mentionRate': 'mentionRate',
+    'remark': 'remark',
+    'coreFinding': 'visibilityCoreFinding',
+    'officialPositioning': 'officialPositioning',
+    'source': 'source',
+    'mission': 'mission',
+    'coreBusiness': 'coreBusiness',
+    'userScale': 'userScale',
+    'brandUpgrade': 'brandUpgrade',
+    'aiKeywords': 'keywords',
+    'keyword': 'keyword',
+    'frequency': 'frequency',
+    'perceptionDifferences': 'perceptionDifferences',
+    'searchAssociations': 'searchAssociations',
+    'brandService': 'brandService',
+    'brandCompetition': 'brandCompetition',
+    'brandQuestion': 'brandQuestion',
+    'brandAI': 'brandAI',
+    'searchShare': 'searchShare',
+    'brandKeyword': 'brandKeyword',
+    'serviceKeyword': 'serviceKeyword',
+    'competitionKeyword': 'competitionKeyword',
+    'sentimentDistribution': 'sentimentDistribution',
+    'type': 'type',
+    'percentage': 'percentage',
+    'change': 'change',
+    'platformKeywords': 'platformKeywords',
+    'officialMedia': 'officialMedia',
+    'industryAnalysis': 'industryAnalysis',
+    'socialUser': 'socialUser',
+    'aiPlatform': 'aiPlatform',
+    'typicalReviews': 'typicalReviews',
+    'positive': 'positive',
+    'negative': 'negative',
+    'coreTopics': 'coreTopics',
+    'rank': 'rank',
+    'topic': 'topic',
+    'coOccurrenceRate': 'coOccurrenceRate',
+    'sourceClassification': 'sourceClassification',
+    'representativeSources': 'representativeSources',
+    'citationHabits': 'citationHabits',
+    'domesticNews': 'domesticNews',
+    'investmentAnalysis': 'investmentAnalysis',
+    'question': 'question',
+    'summary': 'summary',
+    'competitors': 'competitors',
+    'name': 'name',
+    'selectionReason': 'selectionReason',
+    'competitorAnalysis': 'competitorAnalysis',
+    'indicators': 'indicators',
+    'brandValue': 'brandValue',
+    'competitorAValue': 'competitorAValue',
+    'competitorBValue': 'competitorBValue',
+    'competitorPromptAnalysis': 'competitorPromptAnalysis',
+    'competitorA': 'competitorA',
+    'competitorB': 'competitorB',
+    'improvementSuggestions': 'suggestions',
+    'action': 'action',
+    'expectedEffect': 'expectedEffect',
+    'priority': 'priority'
+  };
+
+  for (const key of Object.keys(agentData)) {
+    const value = agentData[key];
+    const normalizedKey = keyMap[key] || key;
+    
+    // 如果值是对象，递归处理
+    if (value && typeof value === 'object') {
+      result[normalizedKey] = normalizeChineseKeys(value);
+    } else {
+      result[normalizedKey] = value;
+    }
+  }
+
+  return result;
+}
+
+/**
  * 字段映射转换：将智能体返回的下划线格式字段转换为代码期望的格式
  * @param {Object} agentData - 智能体返回的原始数据
  * @returns {Object} 转换后的数据
@@ -949,8 +1084,113 @@ function transformAgentData(agentData) {
     return agentData;
   }
 
-  const transformed = { ...agentData };
+  // 先处理中文键名格式（智能体返回的格式）
+  const normalizedData = normalizeChineseKeys(agentData);
+  const transformed = { ...normalizedData };
 
+  // 处理智能体返回的 platforms 数组格式（来自板块2：品牌AI可见度）
+  if (normalizedData.platforms && Array.isArray(normalizedData.platforms)) {
+    transformed.aiVisibility = normalizedData.platforms.map(item => ({
+      platform: item.platform || item.platformName || '',
+      mentionCount: item.mentionCount || 0,
+      totalQueries: item.totalQueries || 0,
+      mentionRate: typeof item.mentionRate === 'string' 
+        ? parseFloat(item.mentionRate.replace('%', '')) || 0 
+        : (item.mentionRate || 0),
+      remark: item.remark || ''
+    }));
+  }
+
+  // 处理智能体返回的关键词数组格式（来自板块3：品牌概览）
+  if (normalizedData.keywords && Array.isArray(normalizedData.keywords)) {
+    transformed.keywords = normalizedData.keywords.map(item => ({
+      keyword: item.keyword || item.name || '',
+      frequency: item.frequency || item.count || 0
+    }));
+  }
+
+  // 处理智能体返回的核心主题数组格式（来自板块6：主题分析）
+  if (normalizedData.coreTopics && Array.isArray(normalizedData.coreTopics)) {
+    transformed.topics = normalizedData.coreTopics.map(item => ({
+      name: item.topic || item.name || '',
+      count: typeof item.coOccurrenceRate === 'string' 
+        ? parseFloat(item.coOccurrenceRate.replace('%', '')) || 0 
+        : (item.coOccurrenceRate || item.count || 0),
+      trend: '稳定'
+    }));
+  }
+
+  // 处理智能体返回的来源分类数组格式（来自板块7：引用分析）
+  if (normalizedData.sourceClassification && Array.isArray(normalizedData.sourceClassification)) {
+    transformed.citations = normalizedData.sourceClassification.map(item => ({
+      source: item.type || '',
+      count: typeof item.percentage === 'string' 
+        ? parseFloat(item.percentage.replace('%', '')) || 0 
+        : (item.percentage || item.count || 0),
+      representative: item.representativeSources || ''
+    }));
+  }
+
+  // 处理智能体返回的改进建议数组格式（来自板块10：改进建议+竞品分析）
+  if (normalizedData.suggestions && Array.isArray(normalizedData.suggestions)) {
+    transformed.suggestions = normalizedData.suggestions.map(item => ({
+      priority: item.priority || 'P2',
+      title: item.action || item.title || '',
+      description: item.expectedEffect || item.description || '',
+      difficulty: item.difficulty || 3
+    }));
+  }
+
+  // 处理智能体返回的竞品数组格式（来自板块10：改进建议+竞品分析）
+  if (normalizedData.competitors && Array.isArray(normalizedData.competitors)) {
+    transformed.competitors = normalizedData.competitors.map(item => ({
+      name: item.name || '',
+      selectionReason: item.selectionReason || '',
+      marketShare: typeof item.marketShare === 'string' 
+        ? parseFloat(item.marketShare.replace('%', '')) || 0 
+        : (item.marketShare || 0)
+    }));
+  }
+
+  // 处理情感分布字段映射
+  if (normalizedData.sentimentDistribution) {
+    transformed.sentimentDistribution = {
+      positive: typeof normalizedData.sentimentDistribution.positive === 'string' 
+        ? parseFloat(normalizedData.sentimentDistribution.positive.replace('%', '')) || 0 
+        : (normalizedData.sentimentDistribution.positive || 0),
+      neutral: typeof normalizedData.sentimentDistribution.neutral === 'string' 
+        ? parseFloat(normalizedData.sentimentDistribution.neutral.replace('%', '')) || 0 
+        : (normalizedData.sentimentDistribution.neutral || 0),
+      negative: typeof normalizedData.sentimentDistribution.negative === 'string' 
+        ? parseFloat(normalizedData.sentimentDistribution.negative.replace('%', '')) || 0 
+        : (normalizedData.sentimentDistribution.negative || 0),
+      positiveChange: normalizedData.sentimentDistribution.positiveChange || normalizedData.sentimentDistribution.change || '0%',
+      neutralChange: normalizedData.sentimentDistribution.neutralChange || '0%',
+      negativeChange: normalizedData.sentimentDistribution.negativeChange || '0%'
+    };
+  }
+
+  // 处理概览数据字段映射（转换百分比字符串为数字）
+  if (transformed.overview) {
+    const overview = transformed.overview;
+    if (typeof overview.brandMentionRate === 'string') {
+      overview.brandMentionRate = parseFloat(overview.brandMentionRate.replace('%', '')) || 0;
+    }
+    if (typeof overview.positiveSentimentRate === 'string') {
+      overview.positiveSentimentRate = parseFloat(overview.positiveSentimentRate.replace('%', '')) || 0;
+    }
+    if (typeof overview.officialCitationRate === 'string') {
+      overview.officialCitationRate = parseFloat(overview.officialCitationRate.replace('%', '')) || 0;
+    }
+    if (typeof overview.avgMentionRate === 'string') {
+      overview.brandMentionRate = parseFloat(overview.avgMentionRate.replace('%', '')) || overview.brandMentionRate || 0;
+    }
+    if (typeof overview.avgPositiveRate === 'string') {
+      overview.positiveSentimentRate = parseFloat(overview.avgPositiveRate.replace('%', '')) || overview.positiveSentimentRate || 0;
+    }
+  }
+
+  // 保留原有的下划线格式字段处理（兼容旧格式）
   // 处理官方定位字段映射
   if (agentData.source || agentData.mission || agentData.core_business || 
       agentData.user_scale || agentData.brand_upgrade) {
@@ -962,7 +1202,7 @@ function transformAgentData(agentData) {
     transformed.officialPositioning.brandUpgrade = agentData.brand_upgrade || transformed.officialPositioning.brandUpgrade;
   }
 
-  // 处理关键词字段映射
+  // 处理关键词字段映射（下划线格式）
   if (agentData.ai_keywords && Array.isArray(agentData.ai_keywords)) {
     transformed.keywords = agentData.ai_keywords.map(item => ({
       keyword: item.keyword || item.name || '',
@@ -970,40 +1210,7 @@ function transformAgentData(agentData) {
     }));
   }
 
-  // 处理感知差异字段映射
-  if (agentData.ai_vs_traditional_diffs && Array.isArray(agentData.ai_vs_traditional_diffs)) {
-    transformed.perceptionDifferences = agentData.ai_vs_traditional_diffs;
-  }
-
-  // 处理搜索关联字段映射（支持数组和对象两种格式）
-  if (agentData.search_associations) {
-    if (Array.isArray(agentData.search_associations)) {
-      transformed.searchAssociations = agentData.search_associations.map(item => ({
-        type: item.type || '',
-        example: item.example || ''
-      }));
-    } else if (typeof agentData.search_associations === 'object') {
-      // 如果是对象格式，转换为数组
-      transformed.searchAssociations = Object.entries(agentData.search_associations).map(([key, value]) => ({
-        type: key.replace(/_/g, ' '),
-        example: value || ''
-      }));
-    }
-  }
-
-  // 处理情感分布字段映射
-  if (agentData.sentiment_distribution) {
-    transformed.sentimentDistribution = {
-      positive: agentData.sentiment_distribution.positive || 0,
-      neutral: agentData.sentiment_distribution.neutral || 0,
-      negative: agentData.sentiment_distribution.negative || 0,
-      positiveChange: agentData.sentiment_distribution.positive_change || '0%',
-      neutralChange: agentData.sentiment_distribution.neutral_change || '0%',
-      negativeChange: agentData.sentiment_distribution.negative_change || '0%'
-    };
-  }
-
-  // 处理热门话题字段映射
+  // 处理热门话题字段映射（下划线格式）
   if (agentData.hot_topics && Array.isArray(agentData.hot_topics)) {
     transformed.topics = agentData.hot_topics.map(item => ({
       name: item.topic || item.name || '',
@@ -1012,7 +1219,7 @@ function transformAgentData(agentData) {
     }));
   }
 
-  // 处理AI可见度字段映射
+  // 处理AI可见度字段映射（下划线格式）
   if (agentData.ai_visibility && Array.isArray(agentData.ai_visibility)) {
     transformed.aiVisibility = agentData.ai_visibility.map(item => ({
       platform: item.platform || '',
@@ -1021,29 +1228,6 @@ function transformAgentData(agentData) {
       mentionRate: item.mention_rate || 0,
       remark: item.remark || ''
     }));
-  }
-
-  // 处理引用来源字段映射
-  if (agentData.citation_sources && Array.isArray(agentData.citation_sources)) {
-    transformed.citationSources = agentData.citation_sources.map(item => ({
-      type: item.type || '',
-      percentage: item.percentage || 0,
-      representative: item.representative || ''
-    }));
-  }
-
-  // 处理概览数据字段映射（直接在顶层的字段）
-  if (agentData.avg_mention_rate !== undefined) {
-    transformed.overview = transformed.overview || {};
-    transformed.overview.brandMentionRate = agentData.avg_mention_rate;
-  }
-  if (agentData.avg_positive_rate !== undefined) {
-    transformed.overview = transformed.overview || {};
-    transformed.overview.positiveSentimentRate = agentData.avg_positive_rate;
-  }
-  if (agentData.avg_citation_rate !== undefined) {
-    transformed.overview = transformed.overview || {};
-    transformed.overview.officialCitationRate = agentData.avg_citation_rate;
   }
   
   // 处理概览数据字段映射（嵌套的overview对象）
