@@ -290,80 +290,140 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       }
       console.log('----------------------------------------');
 
-      // 从文本中提取JSON部分
+      // 从文本中提取JSON部分（改进版）
       const extractJSON = (text) => {
-        const firstBrace = text.indexOf('{');
-        if (firstBrace === -1) {
+        console.log('[extractJSON] 输入文本长度:', text.length);
+        
+        // 查找所有可能的JSON起始位置
+        const jsonCandidates = [];
+        let lastIndex = 0;
+        
+        // 查找所有 { 出现的位置
+        while ((lastIndex = text.indexOf('{', lastIndex)) !== -1) {
+          jsonCandidates.push(lastIndex);
+          lastIndex++;
+        }
+        
+        console.log('[extractJSON] 找到', jsonCandidates.length, '个可能的JSON起始位置');
+        
+        if (jsonCandidates.length === 0) {
+          console.log('[extractJSON] 未找到JSON起始标记 {');
           return null;
         }
         
-        let depth = 0;
-        let endIndex = -1;
-        
-        for (let i = firstBrace; i < text.length; i++) {
-          if (text[i] === '{') {
-            depth++;
-          } else if (text[i] === '}') {
-            depth--;
-            if (depth === 0) {
-              endIndex = i;
-              break;
+        // 尝试从每个候选位置提取JSON
+        for (const startIndex of jsonCandidates) {
+          let depth = 0;
+          let endIndex = -1;
+          let inString = false;
+          let escape = false;
+          
+          for (let i = startIndex; i < text.length; i++) {
+            const char = text[i];
+            
+            // 处理转义字符
+            if (escape) {
+              escape = false;
+              continue;
             }
-          } else if (text[i] === '"') {
-            // 跳过字符串内容
-            i++;
-            while (i < text.length && (text[i] !== '"' || text[i-1] === '\\')) {
-              i++;
+            
+            // 处理字符串
+            if (char === '"' && !inString) {
+              inString = true;
+            } else if (char === '"' && inString) {
+              // 检查是否是转义的引号
+              if (text[i-1] !== '\\') {
+                inString = false;
+              }
+            } else if (char === '\\' && inString) {
+              escape = true;
+            }
+            
+            // 只有不在字符串中时才处理大括号
+            if (!inString) {
+              if (char === '{') {
+                depth++;
+              } else if (char === '}') {
+                depth--;
+                if (depth === 0) {
+                  endIndex = i;
+                  break;
+                }
+              }
+            }
+          }
+          
+          if (endIndex !== -1 && endIndex > startIndex) {
+            const extracted = text.substring(startIndex, endIndex + 1);
+            console.log('[extractJSON] 成功提取JSON片段，起始位置:', startIndex, '结束位置:', endIndex, '长度:', extracted.length);
+            
+            // 验证提取的JSON是否基本有效（至少有一些字段）
+            if (extracted.length > 50) {
+              return extracted;
             }
           }
         }
         
-        if (endIndex !== -1 && firstBrace < endIndex) {
-          return text.substring(firstBrace, endIndex + 1);
-        }
+        console.log('[extractJSON] 未能找到有效的完整JSON结构');
         return null;
       };
 
-      // 解析JSON数据
-      let parsedData;
-      let parseSuccess = false;
+      // 解析JSON数据：仅保留有效的JSON格式数据
+      let parsedData = null;
       let parseError = null;
       
+      console.log('[解析步骤] 开始验证数据格式...');
+      
+      // 第一步：检查是否包含有效的JSON结构标记
+      const hasValidJsonStructure = content.includes('{') && content.includes('}');
+      if (!hasValidJsonStructure) {
+        parseError = '未找到有效的JSON结构标记（{}）';
+        console.error(`[解析步骤] ${parseError}`);
+        console.log('[解析步骤] 跳过非JSON格式数据');
+        console.log('========================================');
+        return {
+          error: {
+            module: 'aiService.performAIAnalysis',
+            function: 'JSON.parse',
+            message: '智能体返回非JSON格式数据',
+            details: parseError
+          }
+        };
+      }
+      
+      // 第二步：尝试直接解析JSON
       try {
         parsedData = JSON.parse(content);
         console.log('[解析步骤] JSON直接解析成功');
-        parseSuccess = true;
       } catch (error) {
         parseError = `JSON直接解析失败: ${error.message}`;
         console.warn(`[解析步骤] ${parseError}`);
         console.log('[解析步骤] 尝试从文本中提取JSON部分...');
         
-        // 尝试提取JSON
+        // 第三步：尝试提取JSON片段
         const extracted = extractJSON(content);
         if (extracted) {
           console.log(`[解析步骤] 提取到JSON片段，长度: ${extracted.length} 字符`);
-          console.log('[提取的JSON片段]');
-          console.log(extracted.length > 1500 ? extracted.substring(0, 1500) + '...' : extracted);
+          
+          // 验证提取的JSON是否有效
           try {
             parsedData = JSON.parse(extracted);
             console.log('[解析步骤] 提取的JSON解析成功');
-            parseSuccess = true;
+            parseError = null; // 解析成功，清除错误
           } catch (extractError) {
             parseError = `提取的JSON解析失败: ${extractError.message}`;
             console.error(`[解析步骤] ${parseError}`);
-            console.log('[解析步骤] 使用默认空数据结构');
-            parsedData = null;
+            console.log('[解析步骤] 跳过无效的JSON数据');
           }
         } else {
           parseError = '未找到有效的JSON结构';
-          console.log(`[解析步骤] ${parseError}，使用默认空数据结构`);
-          parsedData = null;
+          console.log(`[解析步骤] ${parseError}，跳过非JSON数据`);
         }
       }
-
-      // 如果解析失败，返回错误
-      if (!parsedData) {
-        const errorMsg = parseError || '智能体返回的数据无效';
+      
+      // 第四步：验证最终解析结果
+      if (!parsedData || typeof parsedData !== 'object') {
+        const errorMsg = parseError || '智能体返回的数据不是有效的JSON对象';
         console.error(`[错误] 解析失败: ${errorMsg}`);
         console.log('========================================');
         return {
@@ -375,6 +435,10 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
           }
         };
       }
+      
+      console.log('[解析步骤] JSON数据验证通过，保留有效数据');
+      console.log('[解析步骤] JSON结构类型:', Array.isArray(parsedData) ? 'Array' : 'Object');
+      console.log('[解析步骤] JSON字段数量:', Array.isArray(parsedData) ? parsedData.length + ' items' : Object.keys(parsedData).length + ' fields');
 
       // 验证品牌名称
       if (!parsedData.brandName) {
