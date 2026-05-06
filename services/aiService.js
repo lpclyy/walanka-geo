@@ -281,10 +281,126 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       const responseData = await response.json();
       console.log('[响应处理] 完整响应数据:', JSON.stringify(responseData, null, 2));
       
-      // 提取豆包大模型返回的内容
-      const content = responseData.choices?.[0]?.message?.content || 
-                     responseData.content || 
-                     responseData.result;
+      // 检查是否有工具调用请求
+      const toolCalls = responseData.choices?.[0]?.message?.tool_calls;
+      const finishReason = responseData.choices?.[0]?.finish_reason;
+      const messageContent = responseData.choices?.[0]?.message?.content;
+      
+      let content = messageContent;
+      let messages = [
+        {
+          role: 'system',
+          content: '你是一个品牌分析专家。请使用你的联网搜索能力获取最新信息来完成品牌分析任务。'
+        },
+        {
+          role: 'user',
+          content: analysisPrompt
+        }
+      ];
+      
+      // 如果大模型请求调用工具（tool_calls 不为空）
+      if (toolCalls && toolCalls.length > 0) {
+        console.log('[工具调用] 检测到大模型请求工具调用，finish_reason:', finishReason);
+        
+        // 提取工具调用信息
+        const toolCall = toolCalls[0];
+        const functionName = toolCall.function?.name;
+        const functionArgs = toolCall.function?.arguments;
+        const toolCallId = toolCall.id;
+        
+        console.log('[工具调用] 函数名:', functionName);
+        console.log('[工具调用] 参数:', functionArgs);
+        console.log('[工具调用] 调用ID:', toolCallId);
+        
+        if (functionName === 'web_search') {
+          // 调用豆包的 web_search 工具执行搜索
+          console.log('[工具调用] 正在调用豆包内置 web_search 工具...');
+          
+          // 将工具调用消息添加到对话历史
+          messages.push({
+            role: 'assistant',
+            content: '',
+            tool_calls: toolCalls
+          });
+          
+          // 调用豆包获取搜索结果
+          const searchResponse = await fetch(llmApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${llmApiKey}`
+            },
+            body: JSON.stringify({
+              model: llmModel,
+              messages: messages,
+              temperature: 0.3,
+              max_tokens: 8000,
+              stream: false
+            })
+          });
+          
+          if (!searchResponse.ok) {
+            const errorText = await searchResponse.text();
+            const error = `豆包大模型搜索调用失败: ${searchResponse.status} - ${errorText}`;
+            console.error('错误:', error);
+            return {
+              error: {
+                module: 'aiService.performAIAnalysis',
+                function: 'fetch (search)',
+                message: error,
+                details: `HTTP状态码: ${searchResponse.status}`
+              }
+            };
+          }
+          
+          const searchData = await searchResponse.json();
+          console.log('[工具调用] 搜索响应:', JSON.stringify(searchData, null, 2));
+          
+          // 提取搜索结果作为工具响应
+          const searchResult = searchData.choices?.[0]?.message?.content || '{}';
+          
+          // 添加工具响应到对话历史
+          messages.push({
+            role: 'tool',
+            content: searchResult,
+            tool_call_id: toolCallId
+          });
+          
+          // 调用大模型进行总结
+          console.log('[工具调用] 正在请求大模型总结搜索结果...');
+          const finalResponse = await fetch(llmApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${llmApiKey}`
+            },
+            body: JSON.stringify({
+              model: llmModel,
+              messages: messages,
+              temperature: 0.3,
+              max_tokens: 8000,
+              stream: false
+            })
+          });
+          
+          if (!finalResponse.ok) {
+            const errorText = await finalResponse.text();
+            const error = `豆包大模型总结调用失败: ${finalResponse.status} - ${errorText}`;
+            console.error('错误:', error);
+            return {
+              error: {
+                module: 'aiService.performAIAnalysis',
+                function: 'fetch (summary)',
+                message: error,
+                details: `HTTP状态码: ${finalResponse.status}`
+              }
+            };
+          }
+          
+          const finalData = await finalResponse.json();
+          content = finalData.choices?.[0]?.message?.content || finalData.content || finalData.result;
+        }
+      }
       
       if (!content) {
         const error = '豆包大模型返回内容为空';
