@@ -126,21 +126,27 @@ async function saveAnalysisResult(brandId, analysisData) {
     return JSON.stringify(value);
   };
   
+  // 确保brandId是数字类型
+  const numericBrandId = parseInt(brandId, 10);
+  if (isNaN(numericBrandId)) {
+    throw new Error(`无效的品牌ID: ${brandId}`);
+  }
+  
   await db.execute(
     'INSERT INTO brand_analysis (brand_id, overview, visibility, perception, strengths, opportunities, competition, risks, topics, citations, snapshots, suggestions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [
-      brandId,
-      getValue(analysisData.overview),
-      getValue(analysisData.visibility),
-      getValue(analysisData.perception),
-      getValue(analysisData.strengths, '[]'),
-      getValue(analysisData.opportunities, '[]'),
-      getValue(analysisData.competition),
-      getValue(analysisData.risks, '[]'),
-      getValue(analysisData.topics, '[]'),
-      getValue(analysisData.citations, '[]'),
-      getValue(analysisData.snapshots, '[]'),
-      getValue(analysisData.suggestions, '[]')
+      numericBrandId,
+      getValue(analysisData?.overview),
+      getValue(analysisData?.visibility),
+      getValue(analysisData?.perception),
+      getValue(analysisData?.strengths, '[]'),
+      getValue(analysisData?.opportunities, '[]'),
+      getValue(analysisData?.competition),
+      getValue(analysisData?.risks, '[]'),
+      getValue(analysisData?.topics, '[]'),
+      getValue(analysisData?.citations, '[]'),
+      getValue(analysisData?.snapshots, '[]'),
+      getValue(analysisData?.suggestions, '[]')
     ]
   );
 }
