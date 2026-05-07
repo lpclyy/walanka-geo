@@ -102,128 +102,161 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   // 使用用户提供的geo模板格式调用智能体，返回JSON格式
   try {
     // 详细提示词：指导大模型使用联网搜索功能搜集数据并返回JSON格式
-    const analysisPrompt = `${brand.name} 请使用你的联网搜索功能，按照以下GEO品牌分析报告模板搜集数据，并以JSON格式返回结果。
+    const analysisPrompt = `## 任务：${brand.name}品牌GEO分析报告
 
-## 任务要求
-1. **使用联网搜索**：请使用你的搜索功能，搜索「${brand.name}」在各大AI平台（豆包、通义千问、文心一言、讯飞星火、腾讯混元、Kimi、DeepSeek、智谱GLM、夸克AI、ChatGPT、Gemini、Claude、秘塔AI、即梦AI、腾讯元宝）的可见度和相关信息
-2. **严格按照模板结构**：必须覆盖以下所有板块和字段
-3. **数据完整性**：每个字段都必须有值，不得遗漏
-4. **空值处理**：若搜索后未找到对应信息，请填写"暂无信息"
-5. **格式要求**：仅返回JSON格式，不要包含任何markdown、解释文字或多余内容
-6. **语言要求**：所有内容使用中文
+### 要求
+1. **必须使用联网搜索**：搜索「${brand.name}」在各大AI平台的可见度和相关信息
+2. **严格按照模板结构输出**：必须覆盖所有10个板块，每个字段都要有值
+3. **空值处理**：未找到的信息填写"暂无信息"
+4. **格式要求**：仅返回JSON格式，不要包含任何markdown、解释文字或多余内容
+5. **语言要求**：所有内容使用中文
 
-## 品牌分析报告模板结构
+### JSON输出结构（必须严格遵循）
+{
+  "板块1": {
+    "dataUpdateTime": "YYYY-MM-DD HH:MM:SS",
+    "platformCount": 数字,
+    "queryCount": 数字,
+    "avgMentionRate": "X%",
+    "avgPositiveRate": "Y%",
+    "officialCitationRate": "Z%",
+    "dataSourceNote": "基于搜索引擎实时结果..."
+  },
+  "板块2": {
+    "platforms": [
+      {"platformName": "豆包", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "千问", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "DeepSeek", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "腾讯元宝", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "Kimi", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "文心一言", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "智谱GLM", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "夸克AI", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "讯飞星火", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "混元", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "秘塔AI", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "即梦AI", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "ChatGPT", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "Gemini", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
+      {"platformName": "Claude", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"}
+    ],
+    "coreFinding": "一句话总结核心发现"
+  },
+  "板块3": {
+    "officialPositioning": {
+      "source": "官网域名",
+      "mission": "企业使命",
+      "coreBusiness": "核心业务",
+      "userScale": "用户规模",
+      "brandUpgrade": "品牌升级"
+    },
+    "aiKeywords": [
+      {"keyword": "关键词1", "frequency": "N次"},
+      {"keyword": "关键词2", "frequency": "N次"},
+      {"keyword": "关键词3", "frequency": "N次"},
+      {"keyword": "关键词4", "frequency": "N次"},
+      {"keyword": "关键词5", "frequency": "N次"}
+    ],
+    "perceptionDifferences": ["差异1", "差异2", "差异3"]
+  },
+  "板块4": {
+    "searchAssociations": {
+      "brandService": "示例",
+      "brandCompetition": "示例",
+      "brandQuestion": "示例",
+      "brandAI": "示例"
+    },
+    "searchShare": {
+      "brandKeyword": "X%",
+      "serviceKeyword": "X%",
+      "competitionKeyword": "X%"
+    }
+  },
+  "板块5": {
+    "sentimentDistribution": [
+      {"type": "正面", "percentage": "X%", "change": "±X%"},
+      {"type": "中立/混合", "percentage": "Y%", "change": "±Y%"},
+      {"type": "负面", "percentage": "Z%", "change": "±Z%"}
+    ],
+    "platformKeywords": {
+      "officialMedia": {"positive": "关键词", "negative": "关键词"},
+      "industryAnalysis": {"positive": "关键词", "negative": "关键词"},
+      "socialUser": {"positive": "关键词", "negative": "关键词"},
+      "aiPlatform": {"positive": "关键词", "negative": "关键词"}
+    },
+    "typicalReviews": {
+      "positive": {"sources": ["来源1", "来源2"], "content": "正面评价内容"},
+      "negative": {"sources": ["来源3", "来源4"], "content": "负面评价内容"}
+    }
+  },
+  "板块6": {
+    "coreTopics": [
+      {"rank": 1, "topic": "主题1", "coOccurrenceRate": "X%"},
+      {"rank": 2, "topic": "主题2", "coOccurrenceRate": "Y%"},
+      {"rank": 3, "topic": "主题3", "coOccurrenceRate": "Z%"},
+      {"rank": 4, "topic": "主题4", "coOccurrenceRate": "W%"},
+      {"rank": 5, "topic": "主题5", "coOccurrenceRate": "V%"}
+    ]
+  },
+  "板块7": {
+    "sourceClassification": [
+      {"type": "官网引用", "percentage": "X%", "representativeSources": "来源"},
+      {"type": "权威媒体", "percentage": "Y%", "representativeSources": "来源"},
+      {"type": "学术/研报", "percentage": "Z%", "representativeSources": "来源"},
+      {"type": "社交/论坛", "percentage": "W%", "representativeSources": "来源"},
+      {"type": "电商评论", "percentage": "V%", "representativeSources": "来源"}
+    ],
+    "citationHabits": {
+      "domesticNews": {"preference": "偏好", "feature": "特点"},
+      "investmentAnalysis": {"preference": "偏好", "feature": "特点"},
+      "aiPlatform": {"preference": "偏好", "feature": "特点"}
+    }
+  },
+  "板块8": {
+    "prompts": [
+      {"queryType": "品牌认知", "question": "什么是${brand.name}？", "summary": "摘要"},
+      {"queryType": "产品评价", "question": "${brand.name}好不好用？", "summary": "摘要"},
+      {"queryType": "竞品对比", "question": "${brand.name}和竞品哪个好？", "summary": "摘要"},
+      {"queryType": "使用方法", "question": "${brand.name}怎么用？", "summary": "摘要"},
+      {"queryType": "最新动态", "question": "${brand.name}最新消息", "summary": "摘要"},
+      {"queryType": "价格相关", "question": "${brand.name}价格怎么样？", "summary": "摘要"},
+      {"queryType": "官方信息", "question": "${brand.name}官网是什么？", "summary": "摘要"},
+      {"queryType": "口碑与评价", "question": "${brand.name}口碑怎么样？", "summary": "摘要"}
+    ]
+  },
+  "板块9": {
+    "question": "转化意图最强的问题",
+    "source": "来源URL",
+    "excerpt": "关键段落摘录"
+  },
+  "板块10": {
+    "competitors": [
+      {"name": "竞品A", "selectionReason": "选择依据"},
+      {"name": "竞品B", "selectionReason": "选择依据"}
+    ],
+    "competitorAnalysis": {
+      "marketShare": {"brand": "X%", "competitorA": "X%", "competitorB": "X%"},
+      "positiveRate": {"brand": "X%", "competitorA": "X%", "competitorB": "X%"},
+      "aiMentionRate": {"brand": "X%", "competitorA": "X%", "competitorB": "X%"},
+      "officialCitationRate": {"brand": "X%", "competitorA": "X%", "competitorB": "X%"}
+    },
+    "competitorPromptAnalysis": {
+      "competitorA": {"strategy": "核心策略", "aiAssociation": "AI关联"},
+      "competitorB": {"strategy": "核心策略", "aiAssociation": "AI关联"}
+    },
+    "improvementSuggestions": [
+      {"action": "行动1", "expectedEffect": "预期效果", "priority": "P0/P1/P2"},
+      {"action": "行动2", "expectedEffect": "预期效果", "priority": "P0/P1/P2"}
+    ]
+  },
+  "brandName": "${brand.name}"
+}
 
-### 板块1：数据总览
-必须包含字段：
-- dataUpdateTime: 数据更新时间，格式为"YYYY-MM-DD HH:MM:SS"
-- platformCount: 覆盖AI平台数量，数字
-- queryCount: 执行查询总数，数字
-- avgMentionRate: 平均品牌提及率，带百分号如"X%"
-- avgPositiveRate: 平均正面情感占比，带百分号如"Y%"
-- officialCitationRate: 官网引用率，带百分号如"Z%"
-- dataSourceNote: 数据来源说明，如"基于搜索引擎实时结果，受限于各AI平台无公开搜索API，本报告通过全网搜索间接统计，估算误差±8%"
-
-### 板块2：品牌AI可见度
-必须包含字段：
-- platforms: 数组，每个元素包含：
-  - platformName: 平台名称（豆包、千问、DeepSeek、腾讯元宝、Kimi、文心一言、智谱GLM、夸克AI、讯飞星火、混元、秘塔AI、即梦AI、ChatGPT、Gemini、Claude）
-  - mentionCount: 提及次数，格式为"X/M"
-  - mentionRate: 提及率，带百分号如"X%"
-  - remark: 备注，若无则填"暂无信息"
-- coreFinding: 核心发现，一句话总结
-
-### 板块3：品牌概览
-必须包含字段：
-- officialPositioning: 官方自我定位，包含：
-  - source: 来源（官网域名）
-  - mission: 企业使命，若无则填"暂无信息"
-  - coreBusiness: 核心业务，若无则填"暂无信息"
-  - userScale: 用户规模，若无则填"暂无信息"
-  - brandUpgrade: 品牌升级，若无则填"暂无信息"
-- aiKeywords: AI平台视角下的高频关键词，数组，包含：
-  - keyword: 关键词
-  - frequency: 出现频次
-- perceptionDifferences: AI与传统品牌认知差异，数组，至少3条
-
-### 板块4：品牌可见度
-必须包含字段：
-- searchAssociations: 搜索联想词，包含：
-  - brandService: 品牌+服务示例
-  - brandCompetition: 品牌+竞争示例
-  - brandQuestion: 品牌+问题示例
-  - brandAI: 品牌+AI示例
-- searchShare: 搜索首页占有率，包含：
-  - brandKeyword: 品牌词首页占有率
-  - serviceKeyword: "品牌+服务"相关词占有率
-  - competitionKeyword: "品牌+竞争"类词占有率
-
-### 板块5：品牌感知（情感/立场分析）
-必须包含字段：
-- sentimentDistribution: 整体情感分布，数组，包含：
-  - type: 情感类型（正面、中立/混合、负面）
-  - percentage: 占比，带百分号
-  - change: 较上一季度变化，如"+X%"或"-X%"
-- platformKeywords: 各平台典型关键词，包含：
-  - officialMedia: 官方/权威媒体（正面关键词，负面关键词）
-  - industryAnalysis: 行业分析（正面关键词，负面关键词）
-  - socialUser: 社交/用户（正面关键词，负面关键词）
-  - aiPlatform: AI平台分析（正面关键词，负面关键词）
-- typicalReviews: 典型正面与负面评价，包含：
-  - positive: 正面评价，包含来源和内容片段
-  - negative: 负面评价，包含来源和内容片段
-
-### 板块6：主题分析
-必须包含字段：
-- coreTopics: 核心关联主题Top 5，数组，包含：
-  - rank: 排名（1-5）
-  - topic: 主题名称
-  - coOccurrenceRate: 共现率，带百分号
-
-### 板块7：引用分析
-必须包含字段：
-- sourceClassification: 来源分类统计，数组，包含：
-  - type: 来源类型（官网引用、权威媒体、学术/研报、社交/论坛、电商评论）
-  - percentage: 占比，带百分号
-  - representativeSources: 代表来源
-- citationHabits: 引用习惯对比，包含：
-  - domesticNews: 国内新闻（偏好引用来源、特点）
-  - investmentAnalysis: 投资分析（偏好引用来源、特点）
-  - aiPlatform: AI平台（偏好引用来源、特点）
-
-### 板块8：提示词列表
-必须包含字段：
-- prompts: 数组，每个元素包含：
-  - queryType: 查询类型（品牌认知、产品评价、竞品对比、使用方法、最新动态、价格相关、官方信息、口碑与评价）
-  - question: 问题（如"什么是XX？"）
-  - summary: 响应摘要
-
-### 板块9：答案快照
-必须包含字段：
-- question: 转化意图最强的问题
-- source: 来源URL
-- excerpt: 关键段落摘录
-
-### 板块10：改进建议+竞品分析
-必须包含字段：
-- competitors: 竞品设置说明，数组，包含：
-  - name: 竞品名称
-  - selectionReason: 选择依据
-- competitorAnalysis: 竞品品牌分析表，包含：
-  - indicators: 指标名称（市场份额、情感正面率、AI提及率、官方引用率）
-  - brandValue: 本品牌数值
-  - competitorAValue: 竞品A数值
-  - competitorBValue: 竞品B数值
-- competitorPromptAnalysis: 竞品提示词分析，包含：
-  - competitorA: 竞品A的核心策略和AI关联
-  - competitorB: 竞品B的核心策略和AI关联
-- improvementSuggestions: SEO/GEO改进建议，数组，包含：
-  - action: 行动项
-  - expectedEffect: 预期效果
-  - priority: 优先级（P0/P1/P2）
-
-## 输出格式要求
-请直接返回JSON，不要用代码块包裹，不要添加任何额外文字。如果某个字段未搜索到信息，请填写"暂无信息"。`;
+### 注意事项
+- 所有字段必须存在，不得缺失
+- 数字字段使用数字类型，百分比字段使用带百分号的字符串
+- 数组字段必须有至少1个元素
+- 仅返回JSON，不要添加任何其他内容`;
 
     try {
       // 调用豆包大模型，启用内置 web_search 工具
@@ -1421,9 +1454,319 @@ function transformAgentData(agentData) {
     }));
   }
 
+  // 处理大模型返回的"板块"格式数据
+  processSectionData(agentData, transformed);
+
   console.log('[字段转换] 已完成智能体数据字段映射转换');
   
   return transformed;
+}
+
+/**
+ * 处理大模型返回的"板块"格式数据
+ * @param {Object} agentData - 智能体返回的原始数据
+ * @param {Object} transformed - 转换后的数据对象
+ */
+function processSectionData(agentData, transformed) {
+  // 定义板块到字段的映射
+  const sectionMap = {
+    '板块1': processSection1,  // 品牌概览
+    '板块2': processSection2,  // AI可见度
+    '板块3': processSection3,  // 品牌定位与官方信息
+    '板块4': processSection4,  // 关键词分析
+    '板块5': processSection5,  // 舆情情感分析
+    '板块6': processSection6,  // 主题分析
+    '板块7': processSection7,  // 引用分析
+    '板块8': processSection8,  // 问答分析
+    '板块9': processSection9,  // 官方信息
+    '板块10': processSection10 // 改进建议与竞品分析
+  };
+
+  for (const key of Object.keys(agentData)) {
+    // 检查是否是板块格式
+    if (key.startsWith('板块') && agentData[key] && typeof agentData[key] === 'object') {
+      const processor = sectionMap[key];
+      if (processor) {
+        processor(agentData[key], transformed);
+      } else {
+        console.log(`[板块处理] 未找到板块 ${key} 的处理器`);
+      }
+    }
+  }
+}
+
+// 处理板块1：品牌概览
+function processSection1(data, transformed) {
+  if (!data) return;
+  transformed.overview = transformed.overview || {};
+  
+  // 处理概览数据
+  if (data.aiPlatformCount !== undefined) {
+    transformed.overview.aiPlatformCount = parseInt(data.aiPlatformCount) || 0;
+  }
+  if (data.queryCount !== undefined) {
+    transformed.overview.queryCount = parseInt(data.queryCount) || 0;
+  }
+  if (data.brandMentionRate !== undefined) {
+    const rate = typeof data.brandMentionRate === 'string' 
+      ? parseFloat(data.brandMentionRate.replace('%', '')) 
+      : data.brandMentionRate;
+    transformed.overview.brandMentionRate = rate || 0;
+  }
+  if (data.positiveSentimentRate !== undefined) {
+    const rate = typeof data.positiveSentimentRate === 'string' 
+      ? parseFloat(data.positiveSentimentRate.replace('%', '')) 
+      : data.positiveSentimentRate;
+    transformed.overview.positiveSentimentRate = rate || 0;
+  }
+  if (data.officialCitationRate !== undefined) {
+    const rate = typeof data.officialCitationRate === 'string' 
+      ? parseFloat(data.officialCitationRate.replace('%', '')) 
+      : data.officialCitationRate;
+    transformed.overview.officialCitationRate = rate || 0;
+  }
+  if (data.overallScore !== undefined) {
+    const score = typeof data.overallScore === 'string' 
+      ? parseFloat(data.overallScore) 
+      : data.overallScore;
+    transformed.overview.overallScore = score || 0;
+  }
+  if (data.confidence !== undefined) {
+    const conf = typeof data.confidence === 'string' 
+      ? parseFloat(data.confidence) 
+      : data.confidence;
+    transformed.overview.confidence = conf || 0;
+  }
+  if (data.summary !== undefined) {
+    transformed.overview.summary = data.summary;
+  }
+  if (data.industry !== undefined) {
+    transformed.overview.industry = data.industry;
+  }
+  if (data.brandName !== undefined) {
+    transformed.brandName = data.brandName;
+  }
+}
+
+// 处理板块2：AI可见度
+function processSection2(data, transformed) {
+  if (!data || !data.aiPlatform) return;
+  
+  transformed.aiVisibility = transformed.aiVisibility || [];
+  
+  const platforms = data.aiPlatform;
+  if (Array.isArray(platforms)) {
+    platforms.forEach(platform => {
+      if (platform.platform) {
+        const mentionRate = typeof platform.mentionRate === 'string' 
+          ? parseFloat(platform.mentionRate.replace('%', '')) 
+          : platform.mentionRate;
+        transformed.aiVisibility.push({
+          platform: platform.platform,
+          mentionCount: parseInt(platform.mentionCount) || 0,
+          totalQueries: parseInt(platform.totalQueries) || 0,
+          mentionRate: mentionRate || 0,
+          remark: platform.remark || ''
+        });
+      }
+    });
+  }
+}
+
+// 处理板块3：品牌定位与官方信息
+function processSection3(data, transformed) {
+  if (!data) return;
+  
+  transformed.officialPositioning = transformed.officialPositioning || {};
+  
+  if (data.source !== undefined) {
+    transformed.officialPositioning.source = data.source;
+  }
+  if (data.mission !== undefined) {
+    transformed.officialPositioning.mission = data.mission;
+  }
+  if (data.coreBusiness !== undefined) {
+    transformed.officialPositioning.coreBusiness = data.coreBusiness;
+  }
+  if (data.userScale !== undefined) {
+    transformed.officialPositioning.userScale = data.userScale;
+  }
+  if (data.brandUpgrade !== undefined) {
+    transformed.officialPositioning.brandUpgrade = data.brandUpgrade;
+  }
+}
+
+// 处理板块4：关键词分析
+function processSection4(data, transformed) {
+  if (!data || !data.keywords) return;
+  
+  transformed.keywords = transformed.keywords || [];
+  
+  const keywords = data.keywords;
+  if (Array.isArray(keywords)) {
+    keywords.forEach(keyword => {
+      if (keyword.keyword) {
+        const frequency = typeof keyword.frequency === 'string' 
+          ? parseFloat(keyword.frequency.replace('%', '')) 
+          : keyword.frequency;
+        transformed.keywords.push({
+          keyword: keyword.keyword,
+          frequency: frequency || parseInt(keyword.frequency) || parseInt(keyword.count) || 0
+        });
+      }
+    });
+  }
+}
+
+// 处理板块5：舆情情感分析
+function processSection5(data, transformed) {
+  if (!data) return;
+  
+  transformed.perception = transformed.perception || {};
+  transformed.sentimentDistribution = transformed.sentimentDistribution || {};
+  
+  if (data.positive !== undefined) {
+    const val = typeof data.positive === 'string' 
+      ? parseFloat(data.positive.replace('%', '')) 
+      : data.positive;
+    transformed.perception.positive = val || 0;
+    transformed.sentimentDistribution.positive = val || 0;
+  }
+  if (data.neutral !== undefined) {
+    const val = typeof data.neutral === 'string' 
+      ? parseFloat(data.neutral.replace('%', '')) 
+      : data.neutral;
+    transformed.perception.neutral = val || 0;
+    transformed.sentimentDistribution.neutral = val || 0;
+  }
+  if (data.negative !== undefined) {
+    const val = typeof data.negative === 'string' 
+      ? parseFloat(data.negative.replace('%', '')) 
+      : data.negative;
+    transformed.perception.negative = val || 0;
+    transformed.sentimentDistribution.negative = val || 0;
+  }
+}
+
+// 处理板块6：主题分析
+function processSection6(data, transformed) {
+  if (!data || !data.coreTopics) return;
+  
+  transformed.topics = transformed.topics || [];
+  
+  const topics = data.coreTopics;
+  if (Array.isArray(topics)) {
+    topics.forEach(topic => {
+      if (topic.topic) {
+        const count = typeof topic.coOccurrenceRate === 'string' 
+          ? parseFloat(topic.coOccurrenceRate.replace('%', '')) 
+          : topic.coOccurrenceRate;
+        transformed.topics.push({
+          name: topic.topic,
+          count: count || parseInt(topic.count) || 0,
+          trend: '稳定'
+        });
+      }
+    });
+  }
+}
+
+// 处理板块7：引用分析
+function processSection7(data, transformed) {
+  if (!data || !data.sourceClassification) return;
+  
+  transformed.citations = transformed.citations || [];
+  
+  const classifications = data.sourceClassification;
+  if (Array.isArray(classifications)) {
+    classifications.forEach(item => {
+      if (item.type) {
+        const count = typeof item.percentage === 'string' 
+          ? parseFloat(item.percentage.replace('%', '')) 
+          : item.percentage;
+        transformed.citations.push({
+          source: item.type,
+          count: count || parseInt(item.count) || 0,
+          representative: item.representativeSources || ''
+        });
+      }
+    });
+  }
+  
+  // 处理citationHabits
+  if (data.citationHabits) {
+    transformed.citationHabits = data.citationHabits;
+  }
+}
+
+// 处理板块8：问答分析
+function processSection8(data, transformed) {
+  if (!data) return;
+  
+  transformed.prompts = transformed.prompts || [];
+  
+  if (data.prompts && Array.isArray(data.prompts)) {
+    data.prompts.forEach((prompt, index) => {
+      if (prompt.question) {
+        transformed.prompts.push({
+          id: `prompt_${Date.now()}_${index}`,
+          question: prompt.question,
+          summary: prompt.summary || '',
+          queryType: prompt.queryType || '产品评价'
+        });
+      }
+    });
+  }
+}
+
+// 处理板块9：官方信息
+function processSection9(data, transformed) {
+  if (!data) return;
+  
+  if (data.question) {
+    // 可以将这些信息添加到overview中
+    transformed.overview = transformed.overview || {};
+    if (data.source) {
+      transformed.overview.source = data.source;
+    }
+  }
+}
+
+// 处理板块10：改进建议与竞品分析
+function processSection10(data, transformed) {
+  if (!data) return;
+  
+  // 处理改进建议
+  if (data.suggestions && Array.isArray(data.suggestions)) {
+    transformed.suggestions = transformed.suggestions || [];
+    data.suggestions.forEach(suggestion => {
+      if (suggestion.action || suggestion.title) {
+        transformed.suggestions.push({
+          priority: suggestion.priority || 'P2',
+          title: suggestion.action || suggestion.title,
+          description: suggestion.expectedEffect || suggestion.description || '',
+          difficulty: suggestion.difficulty || 3
+        });
+      }
+    });
+  }
+  
+  // 处理竞品分析
+  if (data.competitors && Array.isArray(data.competitors)) {
+    transformed.competitors = transformed.competitors || [];
+    data.competitors.forEach(competitor => {
+      if (competitor.name) {
+        const marketShare = typeof competitor.marketShare === 'string' 
+          ? parseFloat(competitor.marketShare.replace('%', '')) 
+          : competitor.marketShare;
+        transformed.competitors.push({
+          name: competitor.name,
+          selectionReason: competitor.selectionReason || '',
+          marketShare: marketShare || 0
+        });
+      }
+    });
+  }
 }
 
 /**
