@@ -1552,7 +1552,10 @@ function processSection1(data, transformed) {
 function processSection2(data, transformed) {
   if (!data || !data.aiPlatform) return;
   
-  transformed.aiVisibility = transformed.aiVisibility || [];
+  // 确保aiVisibility是数组类型，如果不是则重置为空数组
+  if (!Array.isArray(transformed.aiVisibility)) {
+    transformed.aiVisibility = [];
+  }
   
   const platforms = data.aiPlatform;
   if (Array.isArray(platforms)) {
@@ -1600,7 +1603,10 @@ function processSection3(data, transformed) {
 function processSection4(data, transformed) {
   if (!data || !data.keywords) return;
   
-  transformed.keywords = transformed.keywords || [];
+  // 确保keywords是数组类型，如果不是则重置为空数组
+  if (!Array.isArray(transformed.keywords)) {
+    transformed.keywords = [];
+  }
   
   const keywords = data.keywords;
   if (Array.isArray(keywords)) {
@@ -1678,7 +1684,10 @@ function processSection6(data, transformed) {
 function processSection7(data, transformed) {
   if (!data || !data.sourceClassification) return;
   
-  transformed.citations = transformed.citations || [];
+  // 确保citations是数组类型，如果不是则重置为空数组
+  if (!Array.isArray(transformed.citations)) {
+    transformed.citations = [];
+  }
   
   const classifications = data.sourceClassification;
   if (Array.isArray(classifications)) {
@@ -1706,7 +1715,10 @@ function processSection7(data, transformed) {
 function processSection8(data, transformed) {
   if (!data) return;
   
-  transformed.prompts = transformed.prompts || [];
+  // 确保prompts是数组类型，如果不是则重置为空数组
+  if (!Array.isArray(transformed.prompts)) {
+    transformed.prompts = [];
+  }
   
   if (data.prompts && Array.isArray(data.prompts)) {
     data.prompts.forEach((prompt, index) => {
@@ -1741,7 +1753,10 @@ function processSection10(data, transformed) {
   
   // 处理改进建议
   if (data.suggestions && Array.isArray(data.suggestions)) {
-    transformed.suggestions = transformed.suggestions || [];
+    // 确保suggestions是数组类型，如果不是则重置为空数组
+    if (!Array.isArray(transformed.suggestions)) {
+      transformed.suggestions = [];
+    }
     data.suggestions.forEach(suggestion => {
       if (suggestion.action || suggestion.title) {
         transformed.suggestions.push({
@@ -1756,7 +1771,10 @@ function processSection10(data, transformed) {
   
   // 处理竞品分析
   if (data.competitors && Array.isArray(data.competitors)) {
-    transformed.competitors = transformed.competitors || [];
+    // 确保competitors是数组类型，如果不是则重置为空数组
+    if (!Array.isArray(transformed.competitors)) {
+      transformed.competitors = [];
+    }
     data.competitors.forEach(competitor => {
       if (competitor.name) {
         const marketShare = typeof competitor.marketShare === 'string' 
