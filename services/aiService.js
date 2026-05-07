@@ -1550,29 +1550,46 @@ function processSection1(data, transformed) {
 
 // 处理板块2：AI可见度
 function processSection2(data, transformed) {
-  if (!data || !data.aiPlatform) return;
+  // 支持大模型返回的两种字段名：platforms（实际返回）和 aiPlatform（原期望）
+  if (!data || (!data.platforms && !data.aiPlatform)) return;
   
   // 确保aiVisibility是数组类型，如果不是则重置为空数组
   if (!Array.isArray(transformed.aiVisibility)) {
     transformed.aiVisibility = [];
   }
   
-  const platforms = data.aiPlatform;
+  // 使用实际返回的platforms字段，如果不存在则使用aiPlatform
+  const platforms = data.platforms || data.aiPlatform;
   if (Array.isArray(platforms)) {
     platforms.forEach(platform => {
-      if (platform.platform) {
+      // 支持大模型返回的两种字段名：platformName（实际返回）和 platform（原期望）
+      const platformName = platform.platformName || platform.platform;
+      if (platformName) {
         const mentionRate = typeof platform.mentionRate === 'string' 
           ? parseFloat(platform.mentionRate.replace('%', '')) 
           : platform.mentionRate;
+        // 解析 mentionCount，格式为 "X/M"
+        const mentionCountStr = platform.mentionCount || '';
+        const mentionCountMatch = mentionCountStr.match(/(\d+)/);
+        const mentionCount = mentionCountMatch ? parseInt(mentionCountMatch[1]) : 0;
+        
         transformed.aiVisibility.push({
-          platform: platform.platform,
-          mentionCount: parseInt(platform.mentionCount) || 0,
+          platform: platformName,
+          mentionCount: mentionCount,
           totalQueries: parseInt(platform.totalQueries) || 0,
           mentionRate: mentionRate || 0,
           remark: platform.remark || ''
         });
       }
     });
+  }
+  
+  // 处理核心发现
+  if (data.coreFinding) {
+    if (!transformed.overview) {
+      transformed.overview = {};
+    }
+    transformed.overview.coreFinding = data.coreFinding;
   }
 }
 
