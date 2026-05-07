@@ -1652,7 +1652,10 @@ function processSection5(data, transformed) {
 function processSection6(data, transformed) {
   if (!data || !data.coreTopics) return;
   
-  transformed.topics = transformed.topics || [];
+  // 确保topics是数组类型，如果不是则重置为空数组
+  if (!Array.isArray(transformed.topics)) {
+    transformed.topics = [];
+  }
   
   const topics = data.coreTopics;
   if (Array.isArray(topics)) {
