@@ -3937,9 +3937,14 @@
                 const suggestions = typeof analysis.suggestions === 'string' ? JSON.parse(analysis.suggestions) : analysis.suggestions;
 
                 // 显示总结信息
-                document.getElementById('summaryBrandName').textContent = overview.brandName;
-                document.getElementById('summaryScore').textContent = `${overview.overallScore}/100`;
-                document.getElementById('summaryPromptCount').textContent = `${selectedPromptIds.length + customPrompts.length}个`;
+                const summaryBrandName = document.getElementById('summaryBrandName');
+                if (summaryBrandName) summaryBrandName.textContent = overview.brandName;
+                
+                const summaryScore = document.getElementById('summaryScore');
+                if (summaryScore) summaryScore.textContent = `${overview.overallScore}/100`;
+                
+                const summaryPromptCount = document.getElementById('summaryPromptCount');
+                if (summaryPromptCount) summaryPromptCount.textContent = `${selectedPromptIds.length + customPrompts.length}个`;
 
                 // 显示分析总结
                 const analysisSummary = document.getElementById('analysisSummary');
