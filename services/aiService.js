@@ -1907,15 +1907,216 @@ async function getBatchPromptAnswers(prompts, context = {}, customAgentId = '') 
   return results;
 }
 
+/**
+ * 将系统内部格式数据转换为GEO模板格式
+ * @param {Object} data - 系统内部格式数据
+ * @returns {Object} GEO模板格式数据
+ */
+function transformToGeoFormat(data) {
+  if (!data || typeof data !== 'object') {
+    return {};
+  }
+
+  const geoData = {
+    data_overview: {
+      report_id: `geo_${Date.now()}`,
+      brand_name: data.brandName || '',
+      brand_website: data.officialWebsite || data.website || '',
+      generated_at: data.updateTime || new Date().toISOString(),
+      tested_platforms: (data.visibility?.platforms || data.aiVisibility || []).map(p => p.platform || p.name),
+      total_prompts: data.overview?.queryCount || 0,
+      total_queries: (data.visibility?.platforms || data.aiVisibility || []).reduce((sum, p) => sum + (p.totalQueries || 0), 0) || data.overview?.queryCount || 0,
+      total_mentions: data.visibility?.mentionCount || 0,
+      overall_mention_rate: data.overview?.brandMentionRate || 0,
+      overall_avg_position: data.overview?.avgPosition || null,
+      insight: ''
+    },
+    brand_overview: {
+      ai_visibility_score: data.visibility?.overallVisibility || data.overview?.overallScore || 0,
+      share_of_voice: data.share_of_voice || null,
+      visibility_rate: data.overview?.brandMentionRate || 0,
+      visibility_rate_denominator: '',
+      avg_position: data.overview?.avgPosition || null,
+      positive_ratio: data.perception?.positive || data.sentimentDistribution?.positive || 0,
+      neutral_ratio: data.perception?.neutral || data.sentimentDistribution?.neutral || 0,
+      negative_ratio: data.perception?.negative || data.sentimentDistribution?.negative || 0,
+      insight: ''
+    },
+    brand_visibility: {
+      by_platform: (data.visibility?.platforms || data.aiVisibility || []).map(p => ({
+        platform: p.name || p.platform || '',
+        queries: p.totalQueries || p.queries || 0,
+        mentions: p.mentionCount || p.mentions || 0,
+        mention_rate: p.mentionRate || p.visibility || 0,
+        mention_rate_denominator: '',
+        avg_position: p.avgPosition || null,
+        citations: p.citations || 0,
+        citation_rate: p.citationRate || null,
+        citation_rate_denominator: ''
+      })),
+      by_topic: (data.topics || []).map(t => ({
+        topic: t.name || t.topic || '',
+        mentions: t.count || 0,
+        mention_rate: t.coOccurrenceRate || t.mentionRate || 0,
+        mention_rate_denominator: ''
+      })),
+      insight: ''
+    },
+    brand_perception: {
+      aggregate: {
+        positive_count: Math.round((data.perception?.positive || 0) / 100 * (data.visibility?.mentionCount || 1)),
+        neutral_count: Math.round((data.perception?.neutral || 0) / 100 * (data.visibility?.mentionCount || 1)),
+        negative_count: Math.round((data.perception?.negative || 0) / 100 * (data.visibility?.mentionCount || 1)),
+        positive_ratio: data.perception?.positive || 0,
+        neutral_ratio: data.perception?.neutral || 0,
+        negative_ratio: data.perception?.negative || 0
+      },
+      by_platform: (data.visibility?.platforms || data.aiVisibility || []).map(p => ({
+        platform: p.name || p.platform || '',
+        positive: Math.round((data.perception?.positive || 0)),
+        neutral: Math.round((data.perception?.neutral || 0)),
+        negative: Math.round((data.perception?.negative || 0))
+      })),
+      sample_quotes: [],
+      insight: ''
+    },
+    topic_analysis: {
+      clusters: (data.topics || []).map(t => ({
+        cluster_name: t.name || t.topic || '',
+        prompts_count: t.promptsCount || 0,
+        total_mentions: t.count || 0,
+        mention_rate: t.coOccurrenceRate || t.mentionRate || 0,
+        mention_rate_denominator: '',
+        avg_position: t.avgPosition || null,
+        dominant_sentiment: t.dominantSentiment || 'neutral'
+      })),
+      insight: ''
+    },
+    citation_analysis: {
+      total_unique_urls: data.citations?.length || 0,
+      unique_urls: (data.citations || []).map(c => c.url || '').filter(url => url),
+      domain_breakdown: buildDomainBreakdown(data.citations),
+      brand_domain_citations: (data.citations || []).filter(c => c.isBrand).reduce((sum, c) => sum + (c.count || 1), 0),
+      third_party_citations: (data.citations || []).filter(c => !c.isBrand).reduce((sum, c) => sum + (c.count || 1), 0),
+      third_party_ratio: calculateThirdPartyRatio(data.citations),
+      most_cited_pages: buildMostCitedPages(data.citations),
+      insight: ''
+    },
+    prompts_with_snapshots: (data.prompts || data.snapshots || []).map(p => ({
+      prompt_text: p.question || p.prompt_text || '',
+      platform: p.platform || '',
+      brand_mentioned: p.brand_mentioned || p.mentioned || false,
+      position: p.position || null,
+      has_citation: p.has_citation || p.hasCitation || false,
+      cited_urls: p.cited_urls || p.urls || [],
+      sentiment: p.sentiment || null,
+      accuracy: p.accuracy || null,
+      response_snapshot: p.answer?.substring(0, 300) || p.response_snapshot || '',
+      full_response_length: p.answer?.length || p.response_snapshot?.length || 0
+    })),
+    improvement_suggestions: {
+      total_gaps: data.suggestions?.length || 0,
+      suggestions: (data.suggestions || []).map(s => ({
+        gap_type: s.gap_type || s.gapType || 'missing_in_prompt',
+        prompt_text: s.prompt_text || s.promptText || s.title || '',
+        platform: s.platform || '',
+        current_status: s.current_status || s.currentStatus || '',
+        recommendation: s.recommendation || s.description || s.expectedEffect || '',
+        priority: s.priority === 'P0' ? 'high' : (s.priority === 'P1' ? 'medium' : 'low')
+      })),
+      overall_summary: ''
+    },
+    competitor_brand_analysis: {
+      competitors: (data.competitors || []).map(comp => ({
+        name: comp.name || '',
+        website: comp.website || '',
+        visibility_score: comp.visibility_score || comp.marketShare || 0,
+        total_mentions: comp.total_mentions || 0,
+        mention_rate: comp.mention_rate || comp.aiMentionRate || 0,
+        avg_position: comp.avg_position || null,
+        positive_ratio: comp.positive_ratio || comp.sentimentRate || 0,
+        share_of_voice: comp.share_of_voice || comp.marketShare || 0
+      })),
+      insight: ''
+    },
+    competitor_prompt_analysis: [],
+    competitor_settings: {
+      auto_discovered: false,
+      competitor_list: (data.competitors || []).map(c => c.name),
+      comparison_basis: 'same_prompts_and_platforms'
+    },
+    errors: data.errors || []
+  };
+
+  return geoData;
+}
+
+/**
+ * 从引用数据构建域名统计
+ * @param {Array} citations - 引用数据
+ * @returns {Object} 域名统计
+ */
+function buildDomainBreakdown(citations) {
+  const breakdown = {};
+  if (!citations || !Array.isArray(citations)) {
+    return breakdown;
+  }
+
+  for (const citation of citations) {
+    const source = citation.source || citation.url || 'unknown';
+    try {
+      const url = new URL(source);
+      const domain = url.hostname;
+      breakdown[domain] = (breakdown[domain] || 0) + (citation.count || 1);
+    } catch {
+      breakdown[source] = (breakdown[source] || 0) + (citation.count || 1);
+    }
+  }
+
+  return breakdown;
+}
+
+/**
+ * 计算第三方引用占比
+ * @param {Array} citations - 引用数据
+ * @returns {number} 第三方占比
+ */
+function calculateThirdPartyRatio(citations) {
+  if (!citations || !Array.isArray(citations) || citations.length === 0) {
+    return 0;
+  }
+
+  const total = citations.reduce((sum, c) => sum + (c.count || 1), 0);
+  const thirdParty = citations.filter(c => !c.isBrand).reduce((sum, c) => sum + (c.count || 1), 0);
+
+  return total > 0 ? Math.round((thirdParty / total) * 100) : 0;
+}
+
+/**
+ * 构建高频引用页面列表
+ * @param {Array} citations - 引用数据
+ * @returns {Array} 高频引用页面
+ */
+function buildMostCitedPages(citations) {
+  if (!citations || !Array.isArray(citations)) {
+    return [];
+  }
+
+  return citations
+    .filter(c => c.url)
+    .map(c => ({ url: c.url, count: c.count || 1 }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+}
+
 module.exports = {
   performAIAnalysis,
   performPromptAnalysis,
   generateArticle,
   aiChat,
-  // 新增提示词相关函数
   generateBrandPrompts,
   getPromptAnswer,
   getBatchPromptAnswers,
-  // 暴露预设模板供外部使用
+  transformToGeoFormat,
   PRESET_PROMPT_TEMPLATES
 };

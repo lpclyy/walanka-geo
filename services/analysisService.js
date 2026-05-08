@@ -599,12 +599,185 @@ function getMetrics(metricType) {
   return ANALYSIS_METRICS;
 }
 
+/**
+ * GEO模板格式指标定义（符合 geo模板.txt 规范）
+ */
+const GEO_METRICS = {
+  // 数据总览
+  data_overview: {
+    report_id: { name: '报告ID', type: 'string' },
+    brand_name: { name: '品牌名称', type: 'string' },
+    brand_website: { name: '品牌官网', type: 'string' },
+    generated_at: { name: '生成时间', type: 'datetime' },
+    tested_platforms: { name: '测试平台', type: 'array' },
+    total_prompts: { name: '提示词总数', type: 'integer' },
+    total_queries: { name: '总查询次数', type: 'integer' },
+    total_mentions: { name: '总提及次数', type: 'integer' },
+    overall_mention_rate: { name: '总体提及率', type: 'percentage' },
+    overall_avg_position: { name: '平均位置', type: 'float' }
+  },
+
+  // 品牌概览
+  brand_overview: {
+    ai_visibility_score: { name: 'AI可见度得分', type: 'integer', min: 0, max: 100 },
+    share_of_voice: { name: '声音份额', type: 'percentage' },
+    visibility_rate: { name: '可见度', type: 'percentage' },
+    avg_position: { name: '平均位置', type: 'float' },
+    positive_ratio: { name: '正面比率', type: 'percentage' },
+    neutral_ratio: { name: '中立比率', type: 'percentage' },
+    negative_ratio: { name: '负面比率', type: 'percentage' }
+  },
+
+  // 品牌可见度
+  brand_visibility: {
+    by_platform: {
+      name: '分平台可见度', type: 'array',
+      item: { platform: 'string', queries: 'integer', mentions: 'integer', mention_rate: 'percentage', avg_position: 'float', citations: 'integer', citation_rate: 'percentage' }
+    },
+    by_topic: {
+      name: '分主题可见度', type: 'array',
+      item: { topic: 'string', mentions: 'integer', mention_rate: 'percentage' }
+    }
+  },
+
+  // 品牌感知
+  brand_perception: {
+    aggregate: { name: '汇总统计', type: 'object', fields: { positive_count: 'integer', neutral_count: 'integer', negative_count: 'integer', positive_ratio: 'percentage', neutral_ratio: 'percentage', negative_ratio: 'percentage' } },
+    by_platform: { name: '分平台情感', type: 'array' },
+    sample_quotes: { name: '情感样例', type: 'array' }
+  },
+
+  // 主题分析
+  topic_analysis: {
+    clusters: { name: '主题聚类', type: 'array', item: { cluster_name: 'string', prompts_count: 'integer', total_mentions: 'integer', mention_rate: 'percentage', avg_position: 'float', dominant_sentiment: 'string' } }
+  },
+
+  // 引用分析
+  citation_analysis: {
+    total_unique_urls: { name: '唯一URL数', type: 'integer' },
+    brand_domain_citations: { name: '品牌域名引用', type: 'integer' },
+    third_party_citations: { name: '第三方引用', type: 'integer' },
+    third_party_ratio: { name: '第三方占比', type: 'percentage' }
+  },
+
+  // 改进建议
+  improvement_suggestions: {
+    total_gaps: { name: '缺口总数', type: 'integer' },
+    suggestions: { name: '建议列表', type: 'array', item: { gap_type: 'string', prompt_text: 'string', platform: 'string', current_status: 'string', recommendation: 'string', priority: 'string' } }
+  },
+
+  // 竞品分析
+  competitor_brand_analysis: {
+    competitors: { name: '竞品列表', type: 'array', item: { name: 'string', website: 'string', visibility_score: 'integer', total_mentions: 'integer', mention_rate: 'percentage', avg_position: 'float', positive_ratio: 'percentage', share_of_voice: 'percentage' } }
+  }
+};
+
+/**
+ * 从GEO模板格式数据提取并转换为系统内部格式
+ * @param {Object} geoData - 符合geo模板.txt格式的数据
+ * @returns {Object} 系统内部格式数据
+ */
+function transformFromGeoFormat(geoData) {
+  if (!geoData || typeof geoData !== 'object') {
+    return {};
+  }
+
+  const result = {
+    brandName: geoData.data_overview?.brand_name || geoData.brand_name || '',
+    officialWebsite: geoData.data_overview?.brand_website || geoData.brand_website || '',
+    updateTime: geoData.data_overview?.generated_at || new Date().toISOString(),
+    overview: {
+      aiPlatformCount: geoData.data_overview?.tested_platforms?.length || 0,
+      queryCount: geoData.data_overview?.total_queries || 0,
+      brandMentionRate: geoData.data_overview?.overall_mention_rate || 0,
+      positiveSentimentRate: geoData.brand_overview?.positive_ratio || 0,
+      officialCitationRate: geoData.citation_analysis?.brand_domain_citations || 0,
+      overallScore: geoData.brand_overview?.ai_visibility_score || 0,
+      summary: geoData.data_overview?.insight || geoData.brand_overview?.insight || ''
+    },
+    visibility: {
+      overallVisibility: geoData.brand_overview?.ai_visibility_score || 0,
+      mentionCount: geoData.data_overview?.total_mentions || 0,
+      weeklyChange: '0%',
+      industryRank: '-',
+      platforms: (geoData.brand_visibility?.by_platform || []).map(p => ({
+        name: p.platform,
+        visibility: p.mention_rate || 0,
+        mentions: p.mentions || 0
+      }))
+    },
+    perception: {
+      positive: geoData.brand_perception?.aggregate?.positive_ratio || geoData.brand_overview?.positive_ratio || 0,
+      neutral: geoData.brand_perception?.aggregate?.neutral_ratio || geoData.brand_overview?.neutral_ratio || 0,
+      negative: geoData.brand_perception?.aggregate?.negative_ratio || geoData.brand_overview?.negative_ratio || 0,
+      keywords: []
+    },
+    topics: (geoData.topic_analysis?.clusters || []).map((c, i) => ({
+      rank: i + 1,
+      topic: c.cluster_name,
+      coOccurrenceRate: c.mention_rate || 0,
+      count: c.total_mentions || 0
+    })),
+    citations: buildCitationsFromGeo(geoData),
+    competition: {
+      competitors: (geoData.competitor_brand_analysis?.competitors || []).map(comp => ({
+        name: comp.name,
+        marketShare: comp.share_of_voice || 0,
+        sentimentRate: comp.positive_ratio || 0,
+        aiMentionRate: comp.mention_rate || 0
+      }))
+    },
+    suggestions: (geoData.improvement_suggestions?.suggestions || []).map(s => ({
+      priority: s.priority === 'high' ? 'P0' : (s.priority === 'medium' ? 'P1' : 'P2'),
+      title: s.gap_type || '',
+      description: s.recommendation || s.current_status || '',
+      difficulty: 3
+    })),
+    snapshots: geoData.prompts_with_snapshots || [],
+    errors: geoData.errors || []
+  };
+
+  // 计算综合评分
+  if (result.overview) {
+    const { brandMentionRate, positiveSentimentRate, officialCitationRate } = result.overview;
+    result.overview.overallScore = Math.round((brandMentionRate + positiveSentimentRate + officialCitationRate) / 3);
+  }
+
+  return result;
+}
+
+/**
+ * 从GEO数据构建引用分析数据
+ * @param {Object} geoData - GEO格式数据
+ * @returns {Array} 引用分析数组
+ */
+function buildCitationsFromGeo(geoData) {
+  const citations = [];
+
+  if (geoData.citation_analysis?.domain_breakdown) {
+    const breakdown = geoData.citation_analysis.domain_breakdown;
+    const total = Object.values(breakdown).reduce((sum, count) => sum + count, 0);
+
+    for (const [domain, count] of Object.entries(breakdown)) {
+      citations.push({
+        source: domain,
+        count: count,
+        percentage: total > 0 ? Math.round((count / total) * 100) : 0
+      });
+    }
+  }
+
+  return citations;
+}
+
 module.exports = {
   ANALYSIS_METRICS,
+  GEO_METRICS,
   validateMetric,
   calculateOverallScore,
   calculateTrend,
   generateSummary,
   validateAnalysisData,
-  getMetrics
+  getMetrics,
+  transformFromGeoFormat
 };

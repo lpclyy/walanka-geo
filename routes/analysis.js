@@ -8,7 +8,8 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { sendSuccess, sendError, sendNotFound, sendForbidden } = require('../utils/response');
-const { validateAnalysisData, calculateTrend, getMetrics } = require('../services/analysisService');
+const { validateAnalysisData, calculateTrend, getMetrics, transformFromGeoFormat } = require('../services/analysisService');
+const { transformToGeoFormat } = require('../services/aiService');
 const { collectBrandData, batchCollect, exportToCSV, exportToJSON, getPlatforms } = require('../services/dataCollector');
 const userBrandService = require('../services/userBrandService');
 
@@ -334,6 +335,115 @@ router.get('/stats/:brandId', authenticate, async (req, res) => {
   } catch (error) {
     console.error('获取统计数据失败:', error);
     return sendError(res, '获取统计数据失败');
+  }
+});
+
+/**
+ * POST /api/analysis/geo-format
+ * 接收符合geo模板格式的品牌分析数据
+ */
+router.post('/geo-format', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { brandId, geoData } = req.body;
+
+    if (!brandId) {
+      return sendError(res, '请提供品牌ID', 400);
+    }
+
+    if (!geoData) {
+      return sendError(res, '请提供GEO格式的分析数据', 400);
+    }
+
+    // 验证权限
+    const hasPermission = await userBrandService.checkBrandPermission(userId, brandId);
+    if (!hasPermission) {
+      return sendForbidden(res, '无权访问该品牌');
+    }
+
+    // 获取品牌信息
+    const brand = await userBrandService.getBrandWithPermission(userId, brandId);
+    if (!brand) {
+      return sendNotFound(res, '品牌');
+    }
+
+    // 验证数据格式
+    if (!geoData.data_overview || !geoData.brand_overview) {
+      return sendError(res, '数据格式不符合GEO模板规范，缺少必要字段', 400);
+    }
+
+    // 将GEO格式数据转换为系统内部格式
+    const internalData = transformFromGeoFormat(geoData);
+
+    // 添加品牌名称和网站信息
+    internalData.brandName = geoData.data_overview.brand_name || brand.name;
+    internalData.officialWebsite = geoData.data_overview.brand_website || brand.website;
+
+    // 保存分析结果
+    const analysisId = await userBrandService.saveBrandAnalysis(userId, brandId, internalData);
+
+    // 如果需要返回GEO格式数据，进行转换
+    const responseData = req.query.format === 'geo' ? transformToGeoFormat(internalData) : internalData;
+
+    return sendSuccess(res, {
+      message: 'GEO格式数据分析完成',
+      analysisId,
+      data: responseData
+    });
+  } catch (error) {
+    console.error('处理GEO格式数据失败:', error);
+    return sendError(res, '处理GEO格式数据失败');
+  }
+});
+
+/**
+ * POST /api/analysis/geo-import
+ * 批量导入GEO格式数据（用于旧数据迁移）
+ */
+router.post('/geo-import', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { brands } = req.body;
+
+    if (!brands || !Array.isArray(brands)) {
+      return sendError(res, '请提供品牌数据列表', 400);
+    }
+
+    const results = [];
+    for (const item of brands) {
+      const { brandId, geoData } = item;
+
+      if (!brandId || !geoData) {
+        results.push({ brandId, success: false, error: '缺少品牌ID或数据' });
+        continue;
+      }
+
+      try {
+        const hasPermission = await userBrandService.checkBrandPermission(userId, brandId);
+        if (!hasPermission) {
+          results.push({ brandId, success: false, error: '无权访问该品牌' });
+          continue;
+        }
+
+        const internalData = transformFromGeoFormat(geoData);
+        internalData.brandName = geoData.data_overview?.brand_name || '';
+        internalData.officialWebsite = geoData.data_overview?.brand_website || '';
+
+        const analysisId = await userBrandService.saveBrandAnalysis(userId, brandId, internalData);
+        results.push({ brandId, success: true, analysisId });
+      } catch (error) {
+        results.push({ brandId, success: false, error: error.message });
+      }
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    return sendSuccess(res, {
+      message: `批量导入完成，成功 ${successCount}/${results.length}`,
+      results
+    });
+  } catch (error) {
+    console.error('批量导入GEO格式数据失败:', error);
+    return sendError(res, '批量导入GEO格式数据失败');
   }
 });
 
