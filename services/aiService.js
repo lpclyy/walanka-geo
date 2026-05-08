@@ -16,6 +16,111 @@ const brandModel = require('../models/brand');
  * @param {string} [customAgentId] - 自定义Agent ID (已废弃，仅作兼容)
  * @returns {Promise<Object>} 分析结果
  */
+// GEO模板完整结构（用于提示词生成和结果验证）
+const GEO_TEMPLATE_STRUCTURE = {
+  data_overview: {
+    report_id: '',
+    brand_name: '',
+    brand_website: '',
+    generated_at: '',
+    tested_platforms: [],
+    total_prompts: 0,
+    total_queries: 0,
+    total_mentions: 0,
+    overall_mention_rate: null,
+    overall_mention_rate_denominator: '',
+    overall_avg_position: null,
+    insight: ''
+  },
+  brand_overview: {
+    ai_visibility_score: null,
+    share_of_voice: null,
+    visibility_rate: null,
+    visibility_rate_denominator: '',
+    avg_position: null,
+    positive_ratio: null,
+    neutral_ratio: null,
+    negative_ratio: null,
+    insight: ''
+  },
+  brand_visibility: {
+    by_platform: [],
+    by_topic: [],
+    insight: ''
+  },
+  brand_perception: {
+    aggregate: { positive_count: 0, neutral_count: 0, negative_count: 0, positive_ratio: null, neutral_ratio: null, negative_ratio: null },
+    by_platform: [],
+    sample_quotes: [],
+    insight: ''
+  },
+  topic_analysis: {
+    clusters: [],
+    insight: ''
+  },
+  citation_analysis: {
+    total_unique_urls: 0,
+    unique_urls: [],
+    domain_breakdown: {},
+    brand_domain_citations: 0,
+    third_party_citations: 0,
+    third_party_ratio: null,
+    most_cited_pages: [],
+    insight: ''
+  },
+  prompts_with_snapshots: [],
+  improvement_suggestions: {
+    total_gaps: 0,
+    suggestions: [],
+    overall_summary: ''
+  },
+  competitor_brand_analysis: {
+    competitors: [],
+    insight: ''
+  },
+  competitor_prompt_analysis: [],
+  competitor_settings: {
+    auto_discovered: false,
+    competitor_list: [],
+    comparison_basis: 'same_prompts_and_platforms'
+  },
+  errors: []
+};
+
+// 生成GEO格式的系统提示词
+function generateGeoSystemPrompt(brandName, brandWebsite = '') {
+  const websiteInfo = brandWebsite ? `\n品牌官网：${brandWebsite}` : '';
+  return `你是品牌GEO分析专家。请对品牌「${brandName}」${websiteInfo}进行全面的AI平台品牌可见度分析。
+
+【严格要求】
+1. 返回纯JSON格式，不要包含任何其他文字、markdown标记或解释
+2. JSON必须严格遵循以下12个模块的结构和字段名
+3. 所有数值字段使用数字类型（不用字符串）
+4. 没有数据的字段设为 null，数组设为 []
+5. insight字段需要根据字数要求填写实质性内容
+
+【分析内容】
+请搜索该品牌在各AI平台（ChatGPT、DeepSeek、豆包、Kimi等）上的表现，收集足够数据后返回完整的JSON报告。
+
+返回格式（严格按照此结构）：
+{
+  "data_overview": { "report_id": "geo_<时间戳>", "brand_name": "", "brand_website": "", "generated_at": "ISO时间", "tested_platforms": [], "total_prompts": 数字, "total_queries": 数字, "total_mentions": 数字, "overall_mention_rate": 数字, "overall_mention_rate_denominator": "", "overall_avg_position": 数字, "insight": "200-300字" },
+  "brand_overview": { "ai_visibility_score": 数字, "share_of_voice": 数字, "visibility_rate": 数字, "visibility_rate_denominator": "", "avg_position": 数字, "positive_ratio": 数字, "neutral_ratio": 数字, "negative_ratio": 数字, "insight": "200-300字" },
+  "brand_visibility": { "by_platform": [{ "platform": "", "queries": 数字, "mentions": 数字, "mention_rate": 数字, "mention_rate_denominator": "", "avg_position": 数字, "citations": 数字, "citation_rate": 数字, "citation_rate_denominator": "" }], "by_topic": [{ "topic": "", "mentions": 数字, "mention_rate": 数字, "mention_rate_denominator": "" }], "insight": "250-400字" },
+  "brand_perception": { "aggregate": { "positive_count": 数字, "neutral_count": 数字, "negative_count": 数字, "positive_ratio": 数字, "neutral_ratio": 数字, "negative_ratio": 数字 }, "by_platform": [{ "platform": "", "positive": 数字, "neutral": 数字, "negative": 数字 }], "sample_quotes": [{ "platform": "", "prompt": "", "sentiment": "", "quote": "" }], "insight": "250-400字" },
+  "topic_analysis": { "clusters": [{ "cluster_name": "", "prompts_count": 数字, "total_mentions": 数字, "mention_rate": 数字, "mention_rate_denominator": "", "avg_position": 数字, "dominant_sentiment": "" }], "insight": "300-500字" },
+  "citation_analysis": { "total_unique_urls": 数字, "unique_urls": [], "domain_breakdown": {}, "brand_domain_citations": 数字, "third_party_citations": 数字, "third_party_ratio": 数字, "most_cited_pages": [{ "url": "", "count": 数字 }], "insight": "200-300字" },
+  "prompts_with_snapshots": [{ "prompt_text": "", "platform": "", "brand_mentioned": false, "position": null, "has_citation": false, "cited_urls": [], "sentiment": null, "accuracy": null, "response_snapshot": "", "full_response_length": 0 }],
+  "improvement_suggestions": { "total_gaps": 数字, "suggestions": [{ "gap_type": "", "prompt_text": "", "platform": "", "current_status": "", "recommendation": "80-150字", "priority": "" }], "overall_summary": "200-300字" },
+  "competitor_brand_analysis": { "competitors": [{ "name": "", "website": "", "visibility_score": 数字, "total_mentions": 数字, "mention_rate": 数字, "avg_position": 数字, "positive_ratio": 数字, "share_of_voice": 数字 }], "insight": "200-300字或'无竞品数据'" },
+  "competitor_prompt_analysis": [{ "prompt_text": "", "platform": "", "brand_performance": [{ "brand_name": "", "mentioned": false, "position": null, "sentiment": null }] }],
+  "competitor_settings": { "auto_discovered": false, "competitor_list": [], "comparison_basis": "same_prompts_and_platforms" },
+  "errors": []
+}
+
+请直接返回JSON，不要有任何前缀或解释。`;
+}
+
 async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   const startTime = new Date();
   const llmApiKey = process.env.LLM_API_KEY;
@@ -98,37 +203,28 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
   console.log(`开始调用智能体分析品牌: ${brand.name}`);
 
-  // 使用用户提供的geo模板格式调用智能体，返回JSON格式
+  // 使用GEO模板格式调用大模型
   try {
-    // 简化提示词：仅传递品牌名称和网站
-    const websiteInfo = brand.website ? `，官网：${brand.website}` : '';
-    const analysisPrompt = `请对品牌「${brand.name}」${websiteInfo}进行GEO分析，返回JSON格式的分析报告。`;
+    const systemPrompt = generateGeoSystemPrompt(brand.name, brand.website);
+    const userPrompt = `请对品牌「${brand.name}」进行完整的GEO分析，返回符合模板格式的JSON数据。`;
 
     try {
-      // 调用MiniMax大模型进行品牌分析
-      console.log('[调用MiniMax大模型] 开始请求分析...');
-      console.log(`[调用MiniMax大模型] URL: ${llmApiUrl}`);
-      console.log(`[调用MiniMax大模型] Model: ${llmModel}`);
-      console.log(`[调用MiniMax大模型] Prompt长度: ${analysisPrompt.length}字符`);
-      
+      console.log('[调用大模型] 开始请求分析...');
+      console.log(`[调用大模型] URL: ${llmApiUrl}`);
+      console.log(`[调用大模型] Model: ${llmModel}`);
+      console.log(`[调用大模型] System Prompt长度: ${systemPrompt.length}字符`);
+
       const requestBody = {
         model: llmModel,
         messages: [
-          {
-            role: 'system',
-            content: '你是一个品牌分析专家，擅长进行GEO（生成式引擎优化）品牌分析。请使用你的联网搜索能力获取最新信息来完成品牌分析任务。严格按照要求的JSON格式返回数据。'
-          },
-          {
-            role: 'user',
-            content: analysisPrompt
-          }
+          { role: 'user', content: systemPrompt + '\n\n' + userPrompt }
         ],
-        temperature: 0.3,
-        max_tokens: 8000
+        temperature: 0.1,
+        max_tokens: 16000
       };
-      
-      console.log('[调用MiniMax大模型] 请求体:', JSON.stringify(requestBody, null, 2));
-      
+
+      console.log('[调用大模型] 发送请求...');
+
       const response = await axios.post(llmApiUrl, requestBody, {
         headers: {
           'Content-Type': 'application/json',
@@ -137,306 +233,250 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         timeout: 300000
       });
 
-      console.log('[调用MiniMax大模型] 响应状态:', response.status);
-      
+      console.log('[调用大模型] 响应状态:', response.status);
+
       const responseData = response.data;
-      console.log('[响应处理] 完整响应数据:', JSON.stringify(responseData, null, 2));
-      
+      console.log('[调用大模型] 响应数据:', JSON.stringify(responseData, null, 2).substring(0, 500));
+
       // 提取响应内容
-      const messageContent = responseData.choices?.[0]?.message?.content;
-      
-      let content = messageContent;
-      
-      // 检查内容是否为空
+      let content = responseData.choices?.[0]?.message?.content;
+
       if (!content) {
-        const error = 'MiniMax大模型返回内容为空';
-        console.error('错误:', error);
-        console.log('完整响应:', JSON.stringify(responseData));
-        return {
-          error: {
-            module: 'aiService.performAIAnalysis',
-            function: 'response processing',
-            message: error,
-            details: '大模型未返回任何内容'
-          }
-        };
+        return { error: { module: 'aiService.performAIAnalysis', message: '大模型返回内容为空', details: JSON.stringify(responseData) } };
       }
 
-      console.log('MiniMax大模型返回内容已接收，开始解析...');
-      console.log(`返回内容长度: ${content.length} 字符`);
-      
-      // 打印大模型返回的原始内容
-      console.log('----------------------------------------');
-      console.log('[MiniMax大模型原始返回内容]');
-      console.log('----------------------------------------');
-      if (content.length > 5000) {
-        console.log(`[内容过长，显示前5000字符]`);
-        console.log(content.substring(0, 5000) + '...(剩余 ' + (content.length - 5000) + ' 字符)');
-      } else {
-        console.log(content);
+      console.log('[解析] 返回内容长度:', content.length, '字符');
+      console.log('[解析] 返回内容前200字符:', content.substring(0, 200));
+
+      // 清理可能的前缀（非JSON内容）
+      content = cleanJsonResponse(content);
+      console.log('[解析] 清理后内容前200字符:', content.substring(0, 200));
+
+      // 提取JSON（可能嵌套在文本中）
+      let parsedData = extractJsonFromText(content);
+
+      if (!parsedData) {
+        console.error('[错误] 无法从返回内容中提取有效JSON');
+        return { error: { module: 'aiService.performAIAnalysis', message: 'JSON解析失败', details: '无法提取有效JSON' } };
       }
-      console.log('----------------------------------------');
 
-      // 使用正则表达式和深度匹配提取JSON数据
-      const extractJSON = (text) => {
-        console.log('[extractJSON] 输入文本长度:', text.length);
-        
-        // 使用正则表达式找到所有可能的JSON起始位置
-        const jsonStartRegex = /\{/g;
-        const startPositions = [];
-        let match;
-        
-        while ((match = jsonStartRegex.exec(text)) !== null) {
-          startPositions.push(match.index);
-        }
-        
-        if (startPositions.length === 0) {
-          console.log('[extractJSON] 未找到JSON起始标记 {');
-          return null;
-        }
-        
-        console.log('[extractJSON] 找到', startPositions.length, '个JSON起始位置');
-        
-        // 尝试从每个起始位置提取完整的JSON
-        for (const startIndex of startPositions) {
-          let depth = 0;
-          let endIndex = -1;
-          let inString = false;
-          let escape = false;
-          
-          for (let i = startIndex; i < text.length; i++) {
-            const char = text[i];
-            
-            // 处理转义字符
-            if (escape) {
-              escape = false;
-              continue;
-            }
-            
-            // 处理字符串
-            if (char === '"' && !inString) {
-              inString = true;
-            } else if (char === '"' && inString) {
-              if (text[i-1] !== '\\') {
-                inString = false;
-              }
-            } else if (char === '\\' && inString) {
-              escape = true;
-            }
-            
-            // 只有不在字符串中时才处理大括号
-            if (!inString) {
-              if (char === '{') {
-                depth++;
-              } else if (char === '}') {
-                depth--;
-                if (depth === 0) {
-                  endIndex = i;
-                  break;
-                }
-              }
-            }
-          }
-          
-          if (endIndex !== -1 && endIndex > startIndex) {
-            const extracted = text.substring(startIndex, endIndex + 1);
-            
-            // 验证JSON是否有效
-            try {
-              JSON.parse(extracted);
-              console.log('[extractJSON] JSON提取成功，起始位置:', startIndex, '结束位置:', endIndex, '长度:', extracted.length);
-              return extracted;
-            } catch (parseError) {
-              console.log('[extractJSON] JSON解析失败，尝试下一个候选:', parseError.message);
-              continue;
-            }
-          }
-        }
-        
-        console.log('[extractJSON] 未能找到有效的完整JSON结构');
-        return null;
-      };
+      console.log('[解析] 成功提取JSON，字段数量:', Object.keys(parsedData).length);
 
-      // 解析JSON数据：仅保留有效的JSON格式数据
-      let parsedData = null;
-      let parseError = null;
-      
-      console.log('[解析步骤] 开始验证数据格式...');
-      
-      // 第一步：检查是否包含有效的JSON结构标记
-      const hasValidJsonStructure = content.includes('{') && content.includes('}');
-      if (!hasValidJsonStructure) {
-        parseError = '未找到有效的JSON结构标记（{}）';
-        console.error(`[解析步骤] ${parseError}`);
-        console.log('[解析步骤] 跳过非JSON格式数据');
-        console.log('========================================');
-        return {
-          error: {
-            module: 'aiService.performAIAnalysis',
-            function: 'JSON.parse',
-            message: '智能体返回非JSON格式数据',
-            details: parseError
-          }
-        };
-      }
-      
-      // 第二步：尝试直接解析JSON
-      try {
-        parsedData = JSON.parse(content);
-        console.log('[解析步骤] JSON直接解析成功');
-      } catch (error) {
-        parseError = `JSON直接解析失败: ${error.message}`;
-        console.warn(`[解析步骤] ${parseError}`);
-        console.log('[解析步骤] 尝试从文本中提取JSON部分...');
-        
-        // 第三步：尝试提取JSON片段
-        const extracted = extractJSON(content);
-        if (extracted) {
-          console.log(`[解析步骤] 提取到JSON片段，长度: ${extracted.length} 字符`);
-          
-          // 验证提取的JSON是否有效
-          try {
-            parsedData = JSON.parse(extracted);
-            console.log('[解析步骤] 提取的JSON解析成功');
-            parseError = null; // 解析成功，清除错误
-          } catch (extractError) {
-            parseError = `提取的JSON解析失败: ${extractError.message}`;
-            console.error(`[解析步骤] ${parseError}`);
-            console.log('[解析步骤] 跳过无效的JSON数据');
-          }
-        } else {
-          parseError = '未找到有效的JSON结构';
-          console.log(`[解析步骤] ${parseError}，跳过非JSON数据`);
-        }
-      }
-      
-      // 第四步：验证最终解析结果
-      if (!parsedData || typeof parsedData !== 'object') {
-        const errorMsg = parseError || '智能体返回的数据不是有效的JSON对象';
-        console.error(`[错误] 解析失败: ${errorMsg}`);
-        console.log('========================================');
-        return {
-          error: {
-            module: 'aiService.performAIAnalysis',
-            function: 'JSON.parse',
-            message: '解析智能体返回数据失败',
-            details: errorMsg
-          }
-        };
-      }
-      
-      console.log('[解析步骤] JSON数据验证通过，保留有效数据');
-      console.log('[解析步骤] JSON结构类型:', Array.isArray(parsedData) ? 'Array' : 'Object');
-      console.log('[解析步骤] JSON字段数量:', Array.isArray(parsedData) ? parsedData.length + ' items' : Object.keys(parsedData).length + ' fields');
+      // 验证并补充缺失字段
+      parsedData = validateAndFillGeoData(parsedData, brand.name, brand.website);
 
-      // 验证品牌名称
-      if (!parsedData.brandName) {
-        parsedData.brandName = brand.name;
-      }
-      
-      // 打印智能体原始返回数据结构（用于调试）
-      console.log('----------------------------------------');
-      console.log('[智能体原始返回数据结构]');
-      console.log(`原始字段列表: ${Object.keys(parsedData).join(', ')}`);
-      console.log('----------------------------------------');
-      
-      // 字段映射转换：将智能体返回的下划线格式转换为代码期望的格式
-      parsedData = transformAgentData(parsedData);
-      
-      // 打印转换后的数据结构
-      console.log('----------------------------------------');
-      console.log('[字段转换后数据结构]');
-      console.log(`转换后字段列表: ${Object.keys(parsedData).join(', ')}`);
-      console.log(`官方定位: ${JSON.stringify(parsedData.officialPositioning)}`);
-      console.log(`关键词数量: ${parsedData.keywords?.length || 0}`);
-      console.log(`话题数量: ${parsedData.topics?.length || 0}`);
-      console.log('----------------------------------------');
-      
-      // 确保所有必要字段存在
-      parsedData = ensureRequiredFields(parsedData);
-
-      // 打印最终解析结果摘要
-      console.log('----------------------------------------');
-      console.log('[最终解析结果摘要]');
-      console.log(`解析成功: true`);
-      console.log(`品牌名称: ${parsedData.brandName}`);
-      console.log(`概览数据: ${JSON.stringify(parsedData.overview)}`);
-      console.log(`AI可见度平台数: ${parsedData.aiVisibility?.length || 0}`);
-      console.log(`热门主题数: ${parsedData.topics?.length || 0}`);
-      console.log(`建议数: ${parsedData.suggestions?.length || 0}`);
-      console.log(`官方定位: ${JSON.stringify(parsedData.officialPositioning)}`);
-      console.log(`关键词数量: ${parsedData.keywords?.length || 0}`);
-      console.log('----------------------------------------');
-
-      const endTime = new Date();
-      const duration = Math.round((endTime - startTime) / 1000);
-
+      console.log('[解析] 数据验证完成');
       console.log('========================================');
-      console.log(`[分析完成] ${endTime.toLocaleString()}`);
-      console.log(`耗时: ${duration} 秒`);
-      console.log(`品牌名称: ${parsedData.brandName}`);
+      console.log('[最终结果摘要]');
+      console.log('  品牌名称:', parsedData.data_overview?.brand_name || brand.name);
+      console.log('  数据总览:', JSON.stringify(parsedData.data_overview)?.substring(0, 200));
+      console.log('  品牌可见度平台数:', parsedData.brand_visibility?.by_platform?.length || 0);
+      console.log('  主题聚类数:', parsedData.topic_analysis?.clusters?.length || 0);
+      console.log('  提示词快照数:', parsedData.prompts_with_snapshots?.length || 0);
+      console.log('  改进建议数:', parsedData.improvement_suggestions?.suggestions?.length || 0);
       console.log('========================================');
 
       return parsedData;
 
     } catch (error) {
-      console.log('========================================');
-      console.error(`[错误] 调用MiniMax大模型失败: ${error.message}`);
-      console.error(`[错误] 错误类型: ${error.name}`);
-      console.error(`[错误] 错误堆栈:`, error.stack);
-      if (error.code) {
-        console.error(`[错误] 错误代码: ${error.code}`);
-      }
+      console.error('[错误] 调用大模型失败:', error.message);
       if (error.response) {
-        console.error(`[错误] HTTP状态码: ${error.response.status}`);
-        console.error(`[错误] 响应数据:`, error.response.data);
+        console.error('[错误] 响应状态:', error.response.status);
+        console.error('[错误] 响应数据:', error.response.data);
       }
-      if (error.request) {
-        console.error(`[错误] 请求数据:`, error.request);
-      }
-      console.log('========================================');
-      
-      let errorMessage = '调用MiniMax大模型失败';
-      let errorDetails = error.message;
-      
-      if (error.response) {
-        errorMessage = `MiniMax大模型调用失败: ${error.response.status}`;
-        errorDetails = error.response.data?.message || error.response.data || error.message;
-      } else if (error.code === 'ECONNREFUSED') {
-        errorMessage = '无法连接到MiniMax服务器';
-        errorDetails = '服务器拒绝连接，请检查服务器是否正常运行';
-      } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
-        errorMessage = '请求超时';
-        errorDetails = '连接到MiniMax服务器超时';
-      }
-      
       return {
         error: {
           module: 'aiService.performAIAnalysis',
           function: 'API call',
-          message: errorMessage,
-          details: String(errorDetails),
-          errorCode: error.code,
-          errorName: error.name,
-          httpStatus: error.response?.status
+          message: '调用大模型失败',
+          details: error.response?.data?.message || error.message
         }
       };
     }
   } catch (error) {
-    console.log('========================================');
-    console.error(`[错误] 品牌分析流程失败: ${error.message}`);
-    console.error(`[错误] 错误类型: ${error.name}`);
-    console.error(`[错误] 错误堆栈:`, error.stack);
-    console.log('========================================');
-    return {
-      error: {
-        module: 'aiService.performAIAnalysis',
-        function: 'main',
-        message: '品牌分析流程失败',
-        details: error.message
-      }
-    };
+    console.error('[错误] 品牌分析流程失败:', error.message);
+    return { error: { module: 'aiService.performAIAnalysis', function: 'main', message: error.message } };
   }
+}
+
+/**
+ * 清理JSON响应中的非JSON前缀
+ * @param {string} text - 原始响应文本
+ * @returns {string} 清理后的文本
+ */
+function cleanJsonResponse(text) {
+  if (!text || typeof text !== 'string') return '';
+
+  // 移除 markdown 代码块标记
+  let cleaned = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '');
+  cleaned = cleaned.replace(/\s*```$/i, '');
+
+  // 移除前言（如 "这是分析结果：" 或 "以下是JSON："）
+  const jsonStartMatch = cleaned.match(/\{/);
+  if (jsonStartMatch && jsonStartMatch.index > 0) {
+    cleaned = cleaned.substring(jsonStartMatch.index);
+  }
+
+  return cleaned.trim();
+}
+
+/**
+ * 从文本中提取完整的JSON对象
+ * @param {string} text - 原始文本
+ * @returns {Object|null} 解析后的JSON对象或null
+ */
+function extractJsonFromText(text) {
+  if (!text || typeof text !== 'string') return null;
+  if (!text.includes('{')) return null;
+
+  // 找到第一个 { 的位置
+  const firstBrace = text.indexOf('{');
+  const substring = text.substring(firstBrace);
+
+  // 使用深度计数器找配对的 }
+  let depth = 0;
+  let endIndex = -1;
+  let inString = false;
+  let escape = false;
+
+  for (let i = 0; i < substring.length; i++) {
+    const char = substring[i];
+
+    if (escape) {
+      escape = false;
+      continue;
+    }
+
+    if (char === '"' && !escape) {
+      inString = !inString;
+    } else if (!inString) {
+      if (char === '{') {
+        depth++;
+      } else if (char === '}') {
+        depth--;
+        if (depth === 0) {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+
+    if (char === '\\') {
+      escape = true;
+    }
+  }
+
+  if (endIndex === -1) return null;
+
+  const jsonStr = substring.substring(0, endIndex + 1);
+
+  try {
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    console.log('[extractJsonFromText] JSON解析失败:', e.message);
+    return null;
+  }
+}
+
+/**
+ * 验证并补充GEO数据，填充缺失字段
+ * @param {Object} data - 解析后的GEO数据
+ * @param {string} brandName - 品牌名称
+ * @param {string} brandWebsite - 品牌网站
+ * @returns {Object} 验证并填充后的数据
+ */
+function validateAndFillGeoData(data, brandName, brandWebsite) {
+  // 合并模板结构确保所有字段存在
+  const template = JSON.parse(JSON.stringify(GEO_TEMPLATE_STRUCTURE));
+
+  // 深度合并数据
+  const result = deepMerge(template, data || {});
+
+  // 补充基本信息
+  if (!result.data_overview) result.data_overview = {};
+  result.data_overview.report_id = result.data_overview.report_id || `geo_${Date.now()}`;
+  result.data_overview.brand_name = result.data_overview.brand_name || brandName;
+  result.data_overview.brand_website = result.data_overview.brand_website || brandWebsite || '';
+  result.data_overview.generated_at = result.data_overview.generated_at || new Date().toISOString();
+  result.data_overview.tested_platforms = result.data_overview.tested_platforms || [];
+  result.data_overview.total_prompts = result.data_overview.total_prompts || 0;
+  result.data_overview.total_queries = result.data_overview.total_queries || 0;
+  result.data_overview.total_mentions = result.data_overview.total_mentions || 0;
+  result.data_overview.overall_mention_rate = result.data_overview.overall_mention_rate || 0;
+  result.data_overview.overall_avg_position = result.data_overview.overall_avg_position || null;
+
+  if (!result.brand_overview) result.brand_overview = {};
+  result.brand_overview.ai_visibility_score = result.brand_overview.ai_visibility_score || 0;
+  result.brand_overview.share_of_voice = result.brand_overview.share_of_voice || null;
+  result.brand_overview.visibility_rate = result.brand_overview.visibility_rate || result.data_overview.overall_mention_rate || 0;
+  result.brand_overview.avg_position = result.brand_overview.avg_position || result.data_overview.overall_avg_position || null;
+  result.brand_overview.positive_ratio = result.brand_overview.positive_ratio || 0;
+  result.brand_overview.neutral_ratio = result.brand_overview.neutral_ratio || 0;
+  result.brand_overview.negative_ratio = result.brand_overview.negative_ratio || 0;
+
+  if (!result.brand_visibility) result.brand_visibility = { by_platform: [], by_topic: [], insight: '' };
+  result.brand_visibility.by_platform = result.brand_visibility.by_platform || [];
+  result.brand_visibility.by_topic = result.brand_visibility.by_topic || [];
+
+  if (!result.brand_perception) result.brand_perception = { aggregate: {}, by_platform: [], sample_quotes: [], insight: '' };
+  if (!result.brand_perception.aggregate) result.brand_perception.aggregate = {};
+  result.brand_perception.aggregate.positive_count = result.brand_perception.aggregate.positive_count || 0;
+  result.brand_perception.aggregate.neutral_count = result.brand_perception.aggregate.neutral_count || 0;
+  result.brand_perception.aggregate.negative_count = result.brand_perception.aggregate.negative_count || 0;
+  result.brand_perception.aggregate.positive_ratio = result.brand_perception.aggregate.positive_ratio || 0;
+  result.brand_perception.aggregate.neutral_ratio = result.brand_perception.aggregate.neutral_ratio || 0;
+  result.brand_perception.aggregate.negative_ratio = result.brand_perception.aggregate.negative_ratio || 0;
+  result.brand_perception.by_platform = result.brand_perception.by_platform || [];
+  result.brand_perception.sample_quotes = result.brand_perception.sample_quotes || [];
+
+  if (!result.topic_analysis) result.topic_analysis = { clusters: [], insight: '' };
+  result.topic_analysis.clusters = result.topic_analysis.clusters || [];
+
+  if (!result.citation_analysis) result.citation_analysis = { total_unique_urls: 0, unique_urls: [], domain_breakdown: {}, brand_domain_citations: 0, third_party_citations: 0, third_party_ratio: null, most_cited_pages: [], insight: '' };
+  result.citation_analysis.total_unique_urls = result.citation_analysis.total_unique_urls || 0;
+  result.citation_analysis.unique_urls = result.citation_analysis.unique_urls || [];
+  result.citation_analysis.domain_breakdown = result.citation_analysis.domain_breakdown || {};
+  result.citation_analysis.most_cited_pages = result.citation_analysis.most_cited_pages || [];
+
+  result.prompts_with_snapshots = result.prompts_with_snapshots || [];
+
+  if (!result.improvement_suggestions) result.improvement_suggestions = { total_gaps: 0, suggestions: [], overall_summary: '' };
+  result.improvement_suggestions.total_gaps = result.improvement_suggestions.total_gaps || 0;
+  result.improvement_suggestions.suggestions = result.improvement_suggestions.suggestions || [];
+
+  if (!result.competitor_brand_analysis) result.competitor_brand_analysis = { competitors: [], insight: '' };
+  result.competitor_brand_analysis.competitors = result.competitor_brand_analysis.competitors || [];
+
+  result.competitor_prompt_analysis = result.competitor_prompt_analysis || [];
+
+  if (!result.competitor_settings) result.competitor_settings = { auto_discovered: false, competitor_list: [], comparison_basis: 'same_prompts_and_platforms' };
+
+  result.errors = result.errors || [];
+
+  return result;
+}
+
+/**
+ * 深度合并两个对象
+ * @param {Object} target - 目标对象（模板）
+ * @param {Object} source - 源对象（数据）
+ * @returns {Object} 合并后的对象
+ */
+function deepMerge(target, source) {
+  if (!source || typeof source !== 'object') return target;
+  if (Array.isArray(source)) return source;
+
+  const result = { ...target };
+
+  for (const key of Object.keys(source)) {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      result[key] = deepMerge(result[key] || {}, source[key]);
+    } else if (source[key] !== undefined && source[key] !== null) {
+      result[key] = source[key];
+    }
+  }
+
+  return result;
 }
 
 /**
