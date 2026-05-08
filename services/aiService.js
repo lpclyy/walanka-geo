@@ -2,7 +2,7 @@
  * AI服务模块
  * @module services/aiService
  * @description 提供品牌分析、提示词分析、文章生成等AI相关功能
- * 调用用户的OpenClaw智能体获取数据，智能体以模板格式返回
+ * 调用MiniMax大模型获取数据
  */
 
 require('dotenv').config();
@@ -10,10 +10,10 @@ const axios = require('axios');
 const brandModel = require('../models/brand');
 
 /**
- * 调用OpenClaw智能体进行品牌分析
+ * 调用MiniMax大模型进行品牌分析
  * @param {number} brandId - 品牌ID
  * @param {Object} brandInfo - 品牌信息
- * @param {string} [customAgentId] - 自定义Agent ID
+ * @param {string} [customAgentId] - 自定义Agent ID (已废弃，仅作兼容)
  * @returns {Promise<Object>} 分析结果
  */
 async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
@@ -21,17 +21,15 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
-  const agentId = customAgentId || process.env.LLM_AGENT || 'geo-agent';
 
   console.log('========================================');
   console.log(`[品牌分析开始] ${startTime.toLocaleString()}`);
   console.log(`品牌ID: ${brandId}`);
-  console.log(`Agent ID: ${agentId}`);
   console.log(`API URL: ${llmApiUrl}`);
 
   // 验证API配置
   if (!llmApiKey || !llmApiUrl || !llmModel) {
-    const error = 'Open Claw API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置';
+    const error = 'MiniMax API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置';
     console.error(`[错误] ${error}`);
     console.log('========================================');
     return {
@@ -107,17 +105,19 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
     const analysisPrompt = `请对品牌「${brand.name}」${websiteInfo}进行GEO分析，返回JSON格式的分析报告。`;
 
     try {
-      // 调用Open Claw智能体进行品牌分析
-      console.log('[调用Open Claw智能体] 开始请求分析...');
-      console.log(`[调用Open Claw智能体] URL: ${llmApiUrl}`);
-      console.log(`[调用Open Claw智能体] Model: ${llmModel}`);
-      console.log(`[调用Open Claw智能体] Agent: ${agentId}`);
-      console.log(`[调用Open Claw智能体] Prompt长度: ${analysisPrompt.length}字符`);
+      // 调用MiniMax大模型进行品牌分析
+      console.log('[调用MiniMax大模型] 开始请求分析...');
+      console.log(`[调用MiniMax大模型] URL: ${llmApiUrl}`);
+      console.log(`[调用MiniMax大模型] Model: ${llmModel}`);
+      console.log(`[调用MiniMax大模型] Prompt长度: ${analysisPrompt.length}字符`);
       
       const requestBody = {
         model: llmModel,
-        agent: agentId,
         messages: [
+          {
+            role: 'system',
+            content: '你是一个品牌分析专家，擅长进行GEO（生成式引擎优化）品牌分析。请使用你的联网搜索能力获取最新信息来完成品牌分析任务。严格按照要求的JSON格式返回数据。'
+          },
           {
             role: 'user',
             content: analysisPrompt
@@ -127,7 +127,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         max_tokens: 8000
       };
       
-      console.log('[调用Open Claw智能体] 请求体:', JSON.stringify(requestBody, null, 2));
+      console.log('[调用MiniMax大模型] 请求体:', JSON.stringify(requestBody, null, 2));
       
       const response = await axios.post(llmApiUrl, requestBody, {
         headers: {
@@ -137,7 +137,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         timeout: 300000
       });
 
-      console.log('[调用Open Claw智能体] 响应状态:', response.status);
+      console.log('[调用MiniMax大模型] 响应状态:', response.status);
       
       const responseData = response.data;
       console.log('[响应处理] 完整响应数据:', JSON.stringify(responseData, null, 2));
@@ -149,7 +149,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       
       // 检查内容是否为空
       if (!content) {
-        const error = 'Open Claw智能体返回内容为空';
+        const error = 'MiniMax大模型返回内容为空';
         console.error('错误:', error);
         console.log('完整响应:', JSON.stringify(responseData));
         return {
@@ -157,17 +157,17 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
             module: 'aiService.performAIAnalysis',
             function: 'response processing',
             message: error,
-            details: '智能体未返回任何内容'
+            details: '大模型未返回任何内容'
           }
         };
       }
 
-      console.log('Open Claw智能体返回内容已接收，开始解析...');
+      console.log('MiniMax大模型返回内容已接收，开始解析...');
       console.log(`返回内容长度: ${content.length} 字符`);
       
-      // 打印智能体返回的原始内容
+      // 打印大模型返回的原始内容
       console.log('----------------------------------------');
-      console.log('[Open Claw智能体原始返回内容]');
+      console.log('[MiniMax大模型原始返回内容]');
       console.log('----------------------------------------');
       if (content.length > 5000) {
         console.log(`[内容过长，显示前5000字符]`);
@@ -381,7 +381,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
     } catch (error) {
       console.log('========================================');
-      console.error(`[错误] 调用Open Claw智能体失败: ${error.message}`);
+      console.error(`[错误] 调用MiniMax大模型失败: ${error.message}`);
       console.error(`[错误] 错误类型: ${error.name}`);
       console.error(`[错误] 错误堆栈:`, error.stack);
       if (error.code) {
@@ -396,18 +396,18 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       }
       console.log('========================================');
       
-      let errorMessage = '调用Open Claw智能体失败';
+      let errorMessage = '调用MiniMax大模型失败';
       let errorDetails = error.message;
       
       if (error.response) {
-        errorMessage = `Open Claw智能体调用失败: ${error.response.status}`;
+        errorMessage = `MiniMax大模型调用失败: ${error.response.status}`;
         errorDetails = error.response.data?.message || error.response.data || error.message;
       } else if (error.code === 'ECONNREFUSED') {
-        errorMessage = '无法连接到Open Claw服务器';
+        errorMessage = '无法连接到MiniMax服务器';
         errorDetails = '服务器拒绝连接，请检查服务器是否正常运行';
       } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
         errorMessage = '请求超时';
-        errorDetails = '连接到Open Claw服务器超时';
+        errorDetails = '连接到MiniMax服务器超时';
       }
       
       return {
@@ -451,15 +451,13 @@ async function performPromptAnalysis(brandId, brandInfo, prompts, customAgentId 
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
-  const agentId = customAgentId || process.env.LLM_AGENT || '';
 
   console.log('=== 开始提示词分析流程 ===');
   console.log(`品牌ID: ${brandId}`);
   console.log(`提示词列表: ${JSON.stringify(prompts)}`);
-  console.log(`Agent ID: ${agentId}`);
 
   if (!llmApiKey || !llmApiUrl || !llmModel) {
-    const error = 'Open Claw API配置未完成';
+    const error = 'MiniMax API配置未完成';
     console.error('错误:', error);
     return {
       error: {
@@ -498,7 +496,6 @@ ${promptList}
 
     const response = await axios.post(llmApiUrl, {
       model: llmModel,
-      agent: agentId || '',
       messages: [
         {
           role: 'system',
@@ -548,22 +545,21 @@ async function generateArticle(brandId, brandInfo, articleRequirements, customAg
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
-  const agentId = customAgentId || process.env.LLM_AGENT || '';
 
   console.log('=== 开始文章生成流程 ===');
   console.log(`品牌ID: ${brandId}`);
   console.log(`文章需求: ${JSON.stringify(articleRequirements)}`);
 
   if (!llmApiKey || !llmApiUrl || !llmModel) {
-    return { error: { message: 'Open Claw API配置未完成' } };
-    }
+    return { error: { message: 'MiniMax API配置未完成' } };
+  }
 
-    let brand = brandInfo || await brandModel.getBrandById(brandId);
-    if (!brand) {
-      return { error: { message: '品牌不存在' } };
-    }
+  let brand = brandInfo || await brandModel.getBrandById(brandId);
+  if (!brand) {
+    return { error: { message: '品牌不存在' } };
+  }
 
-    const { title, topic, style, length } = articleRequirements;
+  const { title, topic, style, length } = articleRequirements;
   const articleRequest = `请为"${brand.name}"品牌生成一篇SEO优化的文章。
 
 品牌信息：
@@ -581,7 +577,6 @@ async function generateArticle(brandId, brandInfo, articleRequirements, customAg
   try {
     const response = await axios.post(llmApiUrl, {
       model: llmModel,
-      agent: agentId || '',
       messages: [
         {
           role: 'system',
@@ -632,13 +627,12 @@ async function aiChat(question, context = {}, customAgentId = '') {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
-  const agentId = customAgentId || process.env.LLM_AGENT || '';
 
   console.log('=== 开始AI对话 ===');
   console.log(`问题: ${question}`);
 
   if (!llmApiKey || !llmApiUrl || !llmModel) {
-    return { error: { message: 'Open Claw API配置未完成' } };
+    return { error: { message: 'MiniMax API配置未完成' } };
   }
 
   const contextInfo = Object.keys(context).length > 0
@@ -650,7 +644,6 @@ async function aiChat(question, context = {}, customAgentId = '') {
   try {
     const response = await axios.post(llmApiUrl, {
       model: llmModel,
-      agent: agentId || '',
       messages: [
         {
           role: 'system',
@@ -1716,7 +1709,6 @@ async function generatePromptsWithAI(brandName, website = '', count) {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
-  const agentId = process.env.LLM_AGENT || '';
 
   if (!llmApiKey || !llmApiUrl || !llmModel) {
     console.warn('AI配置未完成，使用预设模板生成提示词');
@@ -1755,7 +1747,6 @@ ${websiteInfo}
 
     const response = await axios.post(llmApiUrl, {
       model: llmModel,
-      agent: agentId || '',
       messages: [
         {
           role: 'system',
@@ -1802,13 +1793,12 @@ async function getPromptAnswer(question, context = {}, customAgentId = '') {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
-  const agentId = customAgentId || process.env.LLM_AGENT || '';
 
   console.log(`获取提示词答案: "${question}"`);
 
   if (!llmApiKey || !llmApiUrl || !llmModel) {
     return {
-      error: { message: 'Open Claw API配置未完成' }
+      error: { message: 'MiniMax API配置未完成' }
     };
   }
 
@@ -1828,7 +1818,6 @@ async function getPromptAnswer(question, context = {}, customAgentId = '') {
   try {
     const response = await axios.post(llmApiUrl, {
       model: llmModel,
-      agent: agentId || '',
       messages: [
         {
           role: 'system',
