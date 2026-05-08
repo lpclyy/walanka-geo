@@ -125,8 +125,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
             }
           ],
           temperature: 0.3,
-          max_tokens: 8000,
-          stream: false
+          max_tokens: 8000
         })
       });
 
