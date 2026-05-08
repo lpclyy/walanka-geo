@@ -134,7 +134,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${llmApiKey}`
         },
-        timeout: 120000
+        timeout: 300000
       });
 
       console.log('[调用Open Claw智能体] 响应状态:', response.status);
