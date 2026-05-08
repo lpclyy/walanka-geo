@@ -6,6 +6,7 @@
  */
 
 require('dotenv').config();
+const axios = require('axios');
 const brandModel = require('../models/brand');
 
 /**
@@ -108,42 +109,37 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
     try {
       // 调用Open Claw智能体进行品牌分析
       console.log('[调用Open Claw智能体] 开始请求分析...');
+      console.log(`[调用Open Claw智能体] URL: ${llmApiUrl}`);
+      console.log(`[调用Open Claw智能体] Model: ${llmModel}`);
+      console.log(`[调用Open Claw智能体] Agent: ${agentId}`);
+      console.log(`[调用Open Claw智能体] Prompt长度: ${analysisPrompt.length}字符`);
       
-      const response = await fetch(llmApiUrl, {
-        method: 'POST',
+      const requestBody = {
+        model: llmModel,
+        agent: agentId,
+        messages: [
+          {
+            role: 'user',
+            content: analysisPrompt
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 8000
+      };
+      
+      console.log('[调用Open Claw智能体] 请求体:', JSON.stringify(requestBody, null, 2));
+      
+      const response = await axios.post(llmApiUrl, requestBody, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${llmApiKey}`
         },
-        body: JSON.stringify({
-          model: llmModel,
-          agent: agentId,
-          messages: [
-            {
-              role: 'user',
-              content: analysisPrompt
-            }
-          ],
-          temperature: 0.3,
-          max_tokens: 8000
-        })
+        timeout: 120000
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        const error = `Open Claw智能体调用失败: ${response.status} - ${errorText}`;
-        console.error('错误:', error);
-        return {
-          error: {
-            module: 'aiService.performAIAnalysis',
-            function: 'fetch',
-            message: error,
-            details: `HTTP状态码: ${response.status}`
-          }
-        };
-      }
-
-      const responseData = await response.json();
+      console.log('[调用Open Claw智能体] 响应状态:', response.status);
+      
+      const responseData = response.data;
       console.log('[响应处理] 完整响应数据:', JSON.stringify(responseData, null, 2));
       
       // 提取响应内容
@@ -386,19 +382,51 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
     } catch (error) {
       console.log('========================================');
       console.error(`[错误] 调用Open Claw智能体失败: ${error.message}`);
+      console.error(`[错误] 错误类型: ${error.name}`);
+      console.error(`[错误] 错误堆栈:`, error.stack);
+      if (error.code) {
+        console.error(`[错误] 错误代码: ${error.code}`);
+      }
+      if (error.response) {
+        console.error(`[错误] HTTP状态码: ${error.response.status}`);
+        console.error(`[错误] 响应数据:`, error.response.data);
+      }
+      if (error.request) {
+        console.error(`[错误] 请求数据:`, error.request);
+      }
       console.log('========================================');
+      
+      let errorMessage = '调用Open Claw智能体失败';
+      let errorDetails = error.message;
+      
+      if (error.response) {
+        errorMessage = `Open Claw智能体调用失败: ${error.response.status}`;
+        errorDetails = error.response.data?.message || error.response.data || error.message;
+      } else if (error.code === 'ECONNREFUSED') {
+        errorMessage = '无法连接到Open Claw服务器';
+        errorDetails = '服务器拒绝连接，请检查服务器是否正常运行';
+      } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
+        errorMessage = '请求超时';
+        errorDetails = '连接到Open Claw服务器超时';
+      }
+      
       return {
         error: {
           module: 'aiService.performAIAnalysis',
           function: 'API call',
-          message: '调用Open Claw智能体失败',
-          details: error.message
+          message: errorMessage,
+          details: String(errorDetails),
+          errorCode: error.code,
+          errorName: error.name,
+          httpStatus: error.response?.status
         }
       };
     }
   } catch (error) {
     console.log('========================================');
     console.error(`[错误] 品牌分析流程失败: ${error.message}`);
+    console.error(`[错误] 错误类型: ${error.name}`);
+    console.error(`[错误] 错误堆栈:`, error.stack);
     console.log('========================================');
     return {
       error: {
@@ -468,38 +496,30 @@ ${promptList}
 
 请按照JSON格式返回结果。`;
 
-    const response = await fetch(llmApiUrl, {
-      method: 'POST',
+    const response = await axios.post(llmApiUrl, {
+      model: llmModel,
+      agent: agentId || '',
+      messages: [
+        {
+          role: 'system',
+          content: '你是品牌分析专家，专注于分析品牌在不同提示词下的表现。'
+        },
+        {
+          role: 'user',
+          content: promptAnalysisRequest
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 4000
+    }, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${llmApiKey}`
       },
-      body: JSON.stringify({
-        model: llmModel,
-        agent: agentId || '',
-        messages: [
-          {
-            role: 'system',
-            content: '你是品牌分析专家，专注于分析品牌在不同提示词下的表现。'
-          },
-          {
-            role: 'user',
-            content: promptAnalysisRequest
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 4000
-      })
+      timeout: 60000
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return {
-        error: { message: `提示词分析API调用失败: ${response.status} - ${errorText}` }
-      };
-    }
-
-    const responseData = await response.json();
+    const responseData = response.data;
     const content = responseData.choices?.[0]?.message?.content;
     
     if (!content) {
@@ -559,40 +579,34 @@ async function generateArticle(brandId, brandInfo, articleRequirements, customAg
 请生成一篇结构清晰、SEO友好的文章，包含吸引人的标题、介绍部分、主体内容（至少3个段落）和总结部分。`;
 
   try {
-    const response = await fetch(llmApiUrl, {
-      method: 'POST',
+    const response = await axios.post(llmApiUrl, {
+      model: llmModel,
+      agent: agentId || '',
+      messages: [
+        {
+          role: 'system',
+          content: '你是一位专业的SEO内容撰写专家。'
+        },
+        {
+          role: 'user',
+          content: articleRequest
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 4000
+    }, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${llmApiKey}`
       },
-      body: JSON.stringify({
-        model: llmModel,
-        agent: agentId || '',
-        messages: [
-          {
-            role: 'system',
-            content: '你是一位专业的SEO内容撰写专家。'
-          },
-          {
-            role: 'user',
-            content: articleRequest
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 4000
-      })
+      timeout: 60000
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return { error: { message: `文章生成API调用失败: ${response.status} - ${errorText}` } };
-    }
-
-    const responseData = await response.json();
+    const responseData = response.data;
     const content = responseData.choices?.[0]?.message?.content;
 
     if (!content) {
-      return { error: { message: '大模型返回内容为空' } };
+      return { error: { message: '智能体返回内容为空' } };
     }
 
     return {
@@ -602,7 +616,8 @@ async function generateArticle(brandId, brandInfo, articleRequirements, customAg
       createdAt: new Date().toISOString()
     };
   } catch (error) {
-    return { error: { message: '文章生成失败', details: error.message } };
+    const errorMsg = error.response ? `文章生成失败: ${error.response.status} - ${error.response.data?.message || error.response.data}` : `文章生成失败: ${error.message}`;
+    return { error: { message: errorMsg, details: error.message } };
   }
 }
 
@@ -633,40 +648,34 @@ async function aiChat(question, context = {}, customAgentId = '') {
   const chatRequest = `${question}${contextInfo}`;
 
   try {
-    const response = await fetch(llmApiUrl, {
-      method: 'POST',
+    const response = await axios.post(llmApiUrl, {
+      model: llmModel,
+      agent: agentId || '',
+      messages: [
+        {
+          role: 'system',
+          content: '你是一位专业的AI助手。'
+        },
+        {
+          role: 'user',
+          content: chatRequest
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
+    }, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${llmApiKey}`
       },
-      body: JSON.stringify({
-        model: llmModel,
-        agent: agentId || '',
-        messages: [
-          {
-            role: 'system',
-            content: '你是一位专业的AI助手。'
-          },
-          {
-            role: 'user',
-            content: chatRequest
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
+      timeout: 60000
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return { error: { message: `AI对话API调用失败: ${response.status} - ${errorText}` } };
-    }
-
-    const responseData = await response.json();
+    const responseData = response.data;
     const content = responseData.choices?.[0]?.message?.content;
 
     if (!content) {
-      return { error: { message: '大模型返回内容为空' } };
+      return { error: { message: '智能体返回内容为空' } };
     }
 
     return {
@@ -676,7 +685,8 @@ async function aiChat(question, context = {}, customAgentId = '') {
       createdAt: new Date().toISOString()
     };
   } catch (error) {
-    return { error: { message: 'AI对话失败', details: error.message } };
+    const errorMsg = error.response ? `AI对话失败: ${error.response.status} - ${error.response.data?.message || error.response.data}` : `AI对话失败: ${error.message}`;
+    return { error: { message: errorMsg, details: error.message } };
   }
 }
 
@@ -1743,36 +1753,30 @@ ${websiteInfo}
 
 请确保返回纯JSON，不包含其他任何文本！`;
 
-    const response = await fetch(llmApiUrl, {
-      method: 'POST',
+    const response = await axios.post(llmApiUrl, {
+      model: llmModel,
+      agent: agentId || '',
+      messages: [
+        {
+          role: 'system',
+          content: '你是一位专业的SEO专家，擅长生成用户搜索意图相关的问题。'
+        },
+        {
+          role: 'user',
+          content: promptRequest
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
+    }, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${llmApiKey}`
       },
-      body: JSON.stringify({
-        model: llmModel,
-        agent: agentId || '',
-        messages: [
-          {
-            role: 'system',
-            content: '你是一位专业的SEO专家，擅长生成用户搜索意图相关的问题。'
-          },
-          {
-            role: 'user',
-            content: promptRequest
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
+      timeout: 60000
     });
 
-    if (!response.ok) {
-      console.warn('AI生成提示词失败，使用预设模板');
-      return generatePromptsFromTemplates(brandName, count);
-    }
-
-    const responseData = await response.json();
+    const responseData = response.data;
     const content = responseData.choices?.[0]?.message?.content;
 
     try {
@@ -1822,43 +1826,35 @@ async function getPromptAnswer(question, context = {}, customAgentId = '') {
 请提供详细、准确的回答。`;
 
   try {
-    const response = await fetch(llmApiUrl, {
-      method: 'POST',
+    const response = await axios.post(llmApiUrl, {
+      model: llmModel,
+      agent: agentId || '',
+      messages: [
+        {
+          role: 'system',
+          content: '你是一位专业的品牌信息专家，能够准确回答关于各种品牌的问题。'
+        },
+        {
+          role: 'user',
+          content: answerRequest
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
+    }, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${llmApiKey}`
       },
-      body: JSON.stringify({
-        model: llmModel,
-        agent: agentId || '',
-        messages: [
-          {
-            role: 'system',
-            content: '你是一位专业的品牌信息专家，能够准确回答关于各种品牌的问题。'
-          },
-          {
-            role: 'user',
-            content: answerRequest
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
+      timeout: 60000
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return {
-        error: { message: `获取答案失败: ${response.status} - ${errorText}` }
-      };
-    }
-
-    const responseData = await response.json();
+    const responseData = response.data;
     const content = responseData.choices?.[0]?.message?.content;
 
     if (!content) {
       return {
-        error: { message: '大模型返回内容为空' }
+        error: { message: '智能体返回内容为空' }
       };
     }
 
@@ -1871,8 +1867,9 @@ async function getPromptAnswer(question, context = {}, customAgentId = '') {
       status: 'completed'
     };
   } catch (error) {
+    const errorMsg = error.response ? `获取答案失败: ${error.response.status} - ${error.response.data?.message || error.response.data}` : `获取答案失败: ${error.message}`;
     return {
-      error: { message: '获取答案失败', details: error.message }
+      error: { message: errorMsg, details: error.message }
     };
   }
 }
