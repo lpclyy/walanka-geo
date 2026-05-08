@@ -3838,7 +3838,9 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        brandInfo: currentBrandInfo
+                        brandInfo: currentBrandInfo,
+                        agent: 'geo-agent',
+                        prompt: `${currentBrandInfo.name}，严格以json格式返回数据`
                     }),
                     signal: controller.signal
                 });
@@ -3926,194 +3928,264 @@
             displayAnalysisResult(analysis);
         }
 
-        // 显示分析结果
+        // 显示分析结果 - 根据新GEO模板重构
         function displayAnalysisResult(analysis) {
             try {
                 window.currentAnalysis = analysis;
                 window.rawAnalysisData = JSON.parse(JSON.stringify(analysis));
                 
-                const overview = typeof analysis.overview === 'string' ? JSON.parse(analysis.overview) : analysis.overview;
-                const visibility = typeof analysis.visibility === 'string' ? JSON.parse(analysis.visibility) : analysis.visibility;
-                const perception = typeof analysis.perception === 'string' ? JSON.parse(analysis.perception) : analysis.perception;
-                const topics = typeof analysis.topics === 'string' ? JSON.parse(analysis.topics) : analysis.topics;
-                const citations = typeof analysis.citations === 'string' ? JSON.parse(analysis.citations) : analysis.citations;
-                const suggestions = typeof analysis.suggestions === 'string' ? JSON.parse(analysis.suggestions) : analysis.suggestions;
-
+                // 解析新模板数据结构
+                const parseModule = (key) => {
+                    if (!analysis[key]) return null;
+                    return typeof analysis[key] === 'string' ? JSON.parse(analysis[key]) : analysis[key];
+                };
+                
+                const dataOverview = parseModule('data_overview');
+                const brandOverview = parseModule('brand_overview');
+                const brandVisibility = parseModule('brand_visibility');
+                const brandPerception = parseModule('brand_perception');
+                const topicAnalysis = parseModule('topic_analysis');
+                const citationAnalysis = parseModule('citation_analysis');
+                const improvementSuggestions = parseModule('improvement_suggestions');
+                const competitorBrandAnalysis = parseModule('competitor_brand_analysis');
+                
+                // 兼容旧数据结构
+                const overview = dataOverview || brandOverview || {};
+                const visibility = brandVisibility || {};
+                const perception = brandPerception?.aggregate || brandPerception || {};
+                const topics = topicAnalysis?.clusters || [];
+                const citations = citationAnalysis || {};
+                const suggestions = improvementSuggestions?.suggestions || [];
+                
                 // 显示总结信息
                 const summaryBrandName = document.getElementById('summaryBrandName');
-                if (summaryBrandName) summaryBrandName.textContent = overview.brandName;
+                if (summaryBrandName) summaryBrandName.textContent = overview.brand_name || overview.brandName || '-';
                 
                 const summaryScore = document.getElementById('summaryScore');
-                if (summaryScore) summaryScore.textContent = `${overview.overallScore}/100`;
+                if (summaryScore) summaryScore.textContent = `${brandOverview?.ai_visibility_score || overview.overallScore || 0}/100`;
                 
                 const summaryPromptCount = document.getElementById('summaryPromptCount');
-                if (summaryPromptCount) summaryPromptCount.textContent = `${selectedPromptIds.length + customPrompts.length}个`;
+                if (summaryPromptCount) summaryPromptCount.textContent = `${dataOverview?.total_prompts || selectedPromptIds.length + customPrompts.length}个`;
 
                 // 显示分析总结
                 const analysisSummary = document.getElementById('analysisSummary');
-                if (analysisSummary) {
+                if (analysisSummary && dataOverview) {
                     const summaryText = `品牌分析总结：
 
-品牌名称：${overview.brandName}
-所属行业：${overview.industry}
-综合评分：${overview.overallScore}/100
-置信度：${Math.round(overview.confidence * 100)}%
+品牌名称：${dataOverview.brand_name || '-'}
+官网：${dataOverview.brand_website || '-'}
+数据更新时间：${dataOverview.generated_at || '-'}
+
+数据总览：
+- 覆盖平台数：${dataOverview.tested_platforms?.length || 0}个
+- 测试提示词数：${dataOverview.total_prompts || 0}个
+- 总查询次数：${dataOverview.total_queries || 0}次
+- 品牌提及次数：${dataOverview.total_mentions || 0}次
+- 总体提及率：${dataOverview.overall_mention_rate?.toFixed?.(2) || dataOverview.overall_mention_rate || 0}%
+- 平均出现位置：${dataOverview.overall_avg_position?.toFixed?.(2) || dataOverview.overall_avg_position || '-'}
 
 品牌概览：
-${overview.summary}
+- AI可见度得分：${brandOverview?.ai_visibility_score || 0}/100
+- 综合提及率：${brandOverview?.visibility_rate?.toFixed?.(2) || brandOverview?.visibility_rate || 0}%
+- 平均位置：${brandOverview?.avg_position?.toFixed?.(2) || brandOverview?.avg_position || '-'}
+- 正面情感占比：${brandOverview?.positive_ratio?.toFixed?.(2) || brandOverview?.positive_ratio || 0}%
+- 负面情感占比：${brandOverview?.negative_ratio?.toFixed?.(2) || brandOverview?.negative_ratio || 0}%
 
-可见度分析：
-- 整体可见度：${visibility.overallVisibility}%
-- 提及次数：${visibility.mentionCount}
-- 环比变化：${visibility.weeklyChange}
-- 行业排名：${visibility.industryRank}
+平台表现：
+${brandVisibility?.by_platform?.map(p => `- ${p.platform}: 提及率${p.mention_rate?.toFixed?.(1) || p.mention_rate}% (${p.mentions}/${p.queries})`).join('\n') || '暂无数据'}
 
-平台分布：
-${visibility.platforms.map(p => `- ${p.name}: ${p.visibility}%`).join('\n')}
+主题分析：
+${topicAnalysis?.clusters?.map((t, i) => `- ${t.cluster_name}: 提及率${t.mention_rate?.toFixed?.(1) || t.mention_rate}% (${t.dominant_sentiment})`).slice(0, 5).join('\n') || '暂无数据'}
 
-情感分析：
-- 正面评价：${perception.positive}%
-- 中性评价：${perception.neutral}%
-- 负面评价：${perception.negative}%
+引用分析：
+- 唯一URL数：${citationAnalysis?.total_unique_urls || 0}
+- 官网引用次数：${citationAnalysis?.brand_domain_citations || 0}
+- 第三方引用次数：${citationAnalysis?.third_party_citations || 0}
 
-热门主题：
-${topics.map(t => `- ${t.name}：${t.count}次 (${t.trend})`).join('\n')}
-
-引用来源：
-${citations.map(c => `- ${c.source}：${c.count}次`).join('\n')}
-
-优化建议：
-${suggestions.map(s => `- [${s.priority}] ${s.title}：${s.description}`).join('\n')}`;
+改进建议：
+${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] ${s.gap_type}: ${s.recommendation?.substring(0, 50)}...`).join('\n') || '暂无数据'}`;
                     analysisSummary.textContent = summaryText;
                 }
 
-                // 品牌概览模块
-                const brandOverview = document.querySelector('#brand-overview .brand-overview-container');
-                if (brandOverview) {
-                    // 更新概览数据
-                    const overviewCards = brandOverview.querySelectorAll('div[style*="background: #f8f9fa"]');
-                    if (overviewCards.length > 0) {
-                        // 品牌提及率
-                        if (overviewCards[0]) {
-                            overviewCards[0].querySelector('p:nth-child(2)').textContent = `${Math.round(overview.confidence * 100)}%`;
-                        }
-                        // 品牌可见度
-                        if (overviewCards[1]) {
-                            overviewCards[1].querySelector('p:nth-child(2)').textContent = `${visibility.overallVisibility}%`;
-                        }
-                        // 品牌好感度
-                        if (overviewCards[2]) {
-                            overviewCards[2].querySelector('p:nth-child(2)').textContent = `${perception.positive}%`;
-                        }
-                        // 品牌影响力
-                        if (overviewCards[3]) {
-                            overviewCards[3].querySelector('p:nth-child(2)').textContent = `${Math.round((overview.overallScore / 100) * 100)}%`;
-                        }
-                    }
-                }
-
-                // 品牌可见度模块
-                const brandVisibility = document.getElementById('brand-visibility');
-                if (brandVisibility) {
-                    // 更新AI平台可见度
-                    const aiVisibilityBar = brandVisibility.querySelector('#aiVisibilityBar');
-                    const aiVisibilityValue = brandVisibility.querySelector('#aiVisibilityValue');
-                    if (aiVisibilityBar && aiVisibilityValue) {
-                        aiVisibilityBar.style.width = `${visibility.overallVisibility}%`;
-                        aiVisibilityValue.textContent = `${visibility.overallVisibility}%`;
-                    }
-                    
-                    // 更新提及次数
-                    const mentionCount = brandVisibility.querySelector('#mentionCount');
-                    const weeklyChange = brandVisibility.querySelector('#weeklyChange');
-                    if (mentionCount && weeklyChange) {
-                        mentionCount.textContent = visibility.mentionCount;
-                        weeklyChange.textContent = `较上周 ${visibility.weeklyChange}`;
-                    }
-                    
-                    // 更新行业排名
-                    const industryRank = brandVisibility.querySelector('#industryRank');
-                    if (industryRank) {
-                        industryRank.textContent = visibility.industryRank;
-                    }
-                    
-                    // 更新平台分布
-                    const platformDistribution = brandVisibility.querySelector('#platformDistribution');
-                    if (platformDistribution) {
-                        platformDistribution.innerHTML = '';
-                        visibility.platforms.forEach(platform => {
-                            const platformItem = document.createElement('div');
-                            platformItem.style.cssText = 'background: #f8f9fa; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;';
-                            platformItem.innerHTML = `
-                                <span style="font-size: 14px; color: #666;">${platform.name}</span>
-                                <span style="font-size: 14px; font-weight: 500; color: var(--primary-color);">${platform.visibility}%</span>
-                            `;
-                            platformDistribution.appendChild(platformItem);
-                        });
-                    }
-                }
-
-                // 品牌感知模块
-                const brandPerception = document.getElementById('brand-perception');
-                if (brandPerception) {
-                    // 更新情感分析
-                    const positiveSentiment = brandPerception.querySelector('#positiveSentiment');
-                    const neutralSentiment = brandPerception.querySelector('#neutralSentiment');
-                    const negativeSentiment = brandPerception.querySelector('#negativeSentiment');
-                    if (positiveSentiment) positiveSentiment.textContent = `${perception.positive}%`;
-                    if (neutralSentiment) neutralSentiment.textContent = `${perception.neutral}%`;
-                    if (negativeSentiment) negativeSentiment.textContent = `${perception.negative}%`;
-                }
-
-                // 主题分析模块
-                const topicAnalysis = document.getElementById('topic-analysis');
-                if (topicAnalysis) {
-                    // 更新主题详情
-                    const topicDetails = topicAnalysis.querySelector('#topicDetails');
-                    if (topicDetails) {
-                        topicDetails.innerHTML = '';
-                        topics.forEach(topic => {
-                            const topicItem = document.createElement('div');
-                            topicItem.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px;';
-                            topicItem.innerHTML = `
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <h5 style="margin: 0; color: #333; font-size: 14px;">${topic.name}</h5>
-                                    <span style="font-size: 12px; color: #10b981;">${topic.trend}</span>
-                                </div>
-                                <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">提及次数: ${topic.count}</p>
-                            `;
-                            topicDetails.appendChild(topicItem);
-                        });
-                    }
-                }
-
-                // 引用分析模块
-                const referenceAnalysis = document.getElementById('reference-analysis');
-                if (referenceAnalysis) {
-                    // 更新引用详情
-                    const citationDetails = referenceAnalysis.querySelector('#citationDetails');
-                    if (citationDetails) {
-                        citationDetails.innerHTML = '';
-                        citations.forEach(citation => {
-                            const citationItem = document.createElement('div');
-                            citationItem.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px;';
-                            citationItem.innerHTML = `
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <h5 style="margin: 0; color: #333; font-size: 14px;">${citation.source}</h5>
-                                    <span style="font-size: 14px; font-weight: 500; color: var(--primary-color);">${citation.count}次</span>
-                                </div>
-                                <a href="${citation.url}" target="_blank" style="margin: 10px 0 0 0; font-size: 14px; color: #3b82f6; text-decoration: none;">查看来源</a>
-                            `;
-                            citationDetails.appendChild(citationItem);
-                        });
-                    }
-                }
+                // 更新品牌概览模块
+                updateBrandOverviewModule(brandOverview, overview);
+                
+                // 更新品牌可见度模块
+                updateBrandVisibilityModule(brandVisibility, visibility);
+                
+                // 更新品牌感知模块
+                updateBrandPerceptionModule(brandPerception, perception);
+                
+                // 更新主题分析模块
+                updateTopicAnalysisModule(topicAnalysis, topics);
+                
+                // 更新引用分析模块
+                updateCitationAnalysisModule(citationAnalysis, citations);
 
                 goToStep(4);
                 loadBrandList();
             } catch (error) {
                 console.error('解析分析结果失败:', error);
                 alert('解析分析结果失败，请稍后重试');
+            }
+        }
+        
+        // 更新品牌概览模块
+        function updateBrandOverviewModule(brandOverview, fallback) {
+            const brandOverviewEl = document.querySelector('#brand-overview .brand-overview-container');
+            if (!brandOverviewEl) return;
+            
+            const score = brandOverview?.ai_visibility_score || fallback?.overallScore || 0;
+            const visibilityRate = brandOverview?.visibility_rate || fallback?.overallVisibility || 0;
+            const positiveRatio = brandOverview?.positive_ratio || fallback?.positive || 0;
+            
+            const overviewCards = brandOverviewEl.querySelectorAll('div[style*="background: #f8f9fa"]');
+            if (overviewCards.length > 0) {
+                if (overviewCards[0]) overviewCards[0].querySelector('p:nth-child(2)').textContent = `${Math.round(positiveRatio)}%`;
+                if (overviewCards[1]) overviewCards[1].querySelector('p:nth-child(2)').textContent = `${Math.round(visibilityRate)}%`;
+                if (overviewCards[2]) overviewCards[2].querySelector('p:nth-child(2)').textContent = `${Math.round(positiveRatio)}%`;
+                if (overviewCards[3]) overviewCards[3].querySelector('p:nth-child(2)').textContent = `${Math.round(score)}%`;
+            }
+        }
+        
+        // 更新品牌可见度模块
+        function updateBrandVisibilityModule(brandVisibility, fallback) {
+            const brandVisibilityEl = document.getElementById('brand-visibility');
+            if (!brandVisibilityEl) return;
+            
+            // 计算总体提及率
+            const byPlatform = brandVisibility?.by_platform || [];
+            let totalMentions = 0, totalQueries = 0;
+            byPlatform.forEach(p => {
+                totalMentions += p.mentions || 0;
+                totalQueries += p.queries || 0;
+            });
+            const overallRate = totalQueries > 0 ? (totalMentions / totalQueries * 100).toFixed(1) : (fallback?.overallVisibility || 0);
+            
+            // 更新AI平台可见度
+            const aiVisibilityBar = brandVisibilityEl.querySelector('#aiVisibilityBar');
+            const aiVisibilityValue = brandVisibilityEl.querySelector('#aiVisibilityValue');
+            if (aiVisibilityBar && aiVisibilityValue) {
+                aiVisibilityBar.style.width = `${overallRate}%`;
+                aiVisibilityValue.textContent = `${overallRate}%`;
+            }
+            
+            // 更新提及次数
+            const mentionCount = brandVisibilityEl.querySelector('#mentionCount');
+            const weeklyChange = brandVisibilityEl.querySelector('#weeklyChange');
+            if (mentionCount) mentionCount.textContent = totalMentions;
+            if (weeklyChange) weeklyChange.textContent = `共查询${totalQueries}次`;
+            
+            // 更新平台分布
+            const platformDistribution = brandVisibilityEl.querySelector('#platformDistribution');
+            if (platformDistribution && byPlatform.length > 0) {
+                platformDistribution.innerHTML = '';
+                byPlatform.forEach(platform => {
+                    const rate = platform.mention_rate ? platform.mention_rate.toFixed(1) : 0;
+                    const platformItem = document.createElement('div');
+                    platformItem.style.cssText = 'background: #f8f9fa; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;';
+                    platformItem.innerHTML = `
+                        <span style="font-size: 14px; color: #666;">${platform.platform}</span>
+                        <span style="font-size: 14px; font-weight: 500; color: var(--primary-color);">${rate}%</span>
+                    `;
+                    platformDistribution.appendChild(platformItem);
+                });
+            }
+        }
+        
+        // 更新品牌感知模块
+        function updateBrandPerceptionModule(brandPerception, fallback) {
+            const brandPerceptionEl = document.getElementById('brand-perception');
+            if (!brandPerceptionEl) return;
+            
+            const aggregate = brandPerception?.aggregate || {};
+            const positive = aggregate.positive_ratio || fallback?.positive || 0;
+            const neutral = aggregate.neutral_ratio || fallback?.neutral || 0;
+            const negative = aggregate.negative_ratio || fallback?.negative || 0;
+            
+            const positiveSentiment = brandPerceptionEl.querySelector('#positiveSentiment');
+            const neutralSentiment = brandPerceptionEl.querySelector('#neutralSentiment');
+            const negativeSentiment = brandPerceptionEl.querySelector('#negativeSentiment');
+            
+            if (positiveSentiment) positiveSentiment.textContent = `${positive.toFixed ? positive.toFixed(1) : positive}%`;
+            if (neutralSentiment) neutralSentiment.textContent = `${neutral.toFixed ? neutral.toFixed(1) : neutral}%`;
+            if (negativeSentiment) negativeSentiment.textContent = `${negative.toFixed ? negative.toFixed(1) : negative}%`;
+        }
+        
+        // 更新主题分析模块
+        function updateTopicAnalysisModule(topicAnalysis, fallbackTopics) {
+            const topicAnalysisEl = document.getElementById('topic-analysis');
+            if (!topicAnalysisEl) return;
+            
+            const clusters = topicAnalysis?.clusters || fallbackTopics || [];
+            const topicDetails = topicAnalysisEl.querySelector('#topicDetails');
+            
+            if (topicDetails && clusters.length > 0) {
+                topicDetails.innerHTML = '';
+                clusters.forEach((topic, index) => {
+                    const name = topic.cluster_name || topic.name || '-';
+                    const count = topic.total_mentions || topic.mentions || topic.count || 0;
+                    const rate = topic.mention_rate ? topic.mention_rate.toFixed(1) : 0;
+                    const sentiment = topic.dominant_sentiment || topic.trend || '-';
+                    
+                    const topicItem = document.createElement('div');
+                    topicItem.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px;';
+                    topicItem.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h5 style="margin: 0; color: #333; font-size: 14px;">${name}</h5>
+                            <span style="font-size: 12px; color: #10b981;">${sentiment}</span>
+                        </div>
+                        <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">提及次数: ${count} (${rate}%)</p>
+                    `;
+                    topicDetails.appendChild(topicItem);
+                });
+            }
+        }
+        
+        // 更新引用分析模块
+        function updateCitationAnalysisModule(citationAnalysis, fallback) {
+            const referenceAnalysisEl = document.getElementById('reference-analysis');
+            if (!referenceAnalysisEl) return;
+            
+            const citationDetails = referenceAnalysisEl.querySelector('#citationDetails');
+            if (!citationDetails) return;
+            
+            // 构建引用数据列表
+            const citations = [];
+            
+            // 添加most_cited_pages
+            if (citationAnalysis?.most_cited_pages) {
+                citationAnalysis.most_cited_pages.forEach(page => {
+                    citations.push({ source: page.url, count: page.count });
+                });
+            }
+            
+            // 添加domain_breakdown
+            if (citationAnalysis?.domain_breakdown) {
+                Object.entries(citationAnalysis.domain_breakdown).forEach(([domain, count]) => {
+                    citations.push({ source: domain, count: count });
+                });
+            }
+            
+            // 兼容旧数据
+            if (fallback && Array.isArray(fallback)) {
+                fallback.forEach(c => citations.push(c));
+            }
+            
+            if (citations.length > 0) {
+                citationDetails.innerHTML = '';
+                citations.slice(0, 10).forEach(citation => {
+                    const citationItem = document.createElement('div');
+                    citationItem.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px;';
+                    citationItem.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h5 style="margin: 0; color: #333; font-size: 14px; word-break: break-all;">${citation.source}</h5>
+                            <span style="font-size: 14px; font-weight: 500; color: var(--primary-color); margin-left: 10px;">${citation.count}次</span>
+                        </div>
+                        ${citation.url ? `<a href="${citation.url}" target="_blank" style="margin: 10px 0 0 0; font-size: 14px; color: #3b82f6; text-decoration: none;">查看来源</a>` : ''}
+                    `;
+                    citationDetails.appendChild(citationItem);
+                });
             }
         }
         
@@ -4157,7 +4229,9 @@ ${suggestions.map(s => `- [${s.priority}] ${s.title}：${s.description}`).join('
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        brandInfo: currentBrandInfo
+                        brandInfo: currentBrandInfo,
+                        agent: 'geo-agent',
+                        prompt: `${currentBrandInfo.name}，严格以json格式返回数据`
                     }),
                     signal: controller.signal
                 });
