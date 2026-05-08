@@ -20,16 +20,17 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   const llmApiKey = process.env.LLM_API_KEY;
   const llmApiUrl = process.env.LLM_API_URL;
   const llmModel = process.env.LLM_MODEL;
-  const agentId = customAgentId || process.env.LLM_AGENT;
+  const agentId = customAgentId || process.env.LLM_AGENT || 'geo-agent';
 
   console.log('========================================');
   console.log(`[品牌分析开始] ${startTime.toLocaleString()}`);
   console.log(`品牌ID: ${brandId}`);
-  console.log(`Agent ID: ${agentId || '默认Agent'}`);
+  console.log(`Agent ID: ${agentId}`);
+  console.log(`API URL: ${llmApiUrl}`);
 
   // 验证API配置
   if (!llmApiKey || !llmApiUrl || !llmModel) {
-    const error = '大模型API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置';
+    const error = 'Open Claw API配置未完成，请检查.env文件中的LLM_API_KEY、LLM_API_URL和LLM_MODEL配置';
     console.error(`[错误] ${error}`);
     console.log('========================================');
     return {
@@ -97,170 +98,16 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
   }
 
   console.log(`开始调用智能体分析品牌: ${brand.name}`);
-  console.log('注意：品牌分析仅使用品牌名称，不传递网址信息');
 
   // 使用用户提供的geo模板格式调用智能体，返回JSON格式
   try {
-    // 详细提示词：指导大模型使用联网搜索功能搜集数据并返回JSON格式
-    const analysisPrompt = `## 任务：${brand.name}品牌GEO分析报告
-
-### 要求
-1. **必须使用联网搜索**：搜索「${brand.name}」在各大AI平台的可见度和相关信息
-2. **严格按照模板结构输出**：必须覆盖所有10个板块，每个字段都要有值
-3. **空值处理**：未找到的信息填写"暂无信息"
-4. **格式要求**：仅返回JSON格式，不要包含任何markdown、解释文字或多余内容
-5. **语言要求**：所有内容使用中文
-
-### JSON输出结构（必须严格遵循）
-{
-  "板块1": {
-    "dataUpdateTime": "YYYY-MM-DD HH:MM:SS",
-    "platformCount": 数字,
-    "queryCount": 数字,
-    "avgMentionRate": "X%",
-    "avgPositiveRate": "Y%",
-    "officialCitationRate": "Z%",
-    "dataSourceNote": "基于搜索引擎实时结果..."
-  },
-  "板块2": {
-    "platforms": [
-      {"platformName": "豆包", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "千问", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "DeepSeek", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "腾讯元宝", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "Kimi", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "文心一言", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "智谱GLM", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "夸克AI", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "讯飞星火", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "混元", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "秘塔AI", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "即梦AI", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "ChatGPT", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "Gemini", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"},
-      {"platformName": "Claude", "mentionCount": "X/M", "mentionRate": "X%", "remark": "备注"}
-    ],
-    "coreFinding": "一句话总结核心发现"
-  },
-  "板块3": {
-    "officialPositioning": {
-      "source": "官网域名",
-      "mission": "企业使命",
-      "coreBusiness": "核心业务",
-      "userScale": "用户规模",
-      "brandUpgrade": "品牌升级"
-    },
-    "aiKeywords": [
-      {"keyword": "关键词1", "frequency": "N次"},
-      {"keyword": "关键词2", "frequency": "N次"},
-      {"keyword": "关键词3", "frequency": "N次"},
-      {"keyword": "关键词4", "frequency": "N次"},
-      {"keyword": "关键词5", "frequency": "N次"}
-    ],
-    "perceptionDifferences": ["差异1", "差异2", "差异3"]
-  },
-  "板块4": {
-    "searchAssociations": {
-      "brandService": "示例",
-      "brandCompetition": "示例",
-      "brandQuestion": "示例",
-      "brandAI": "示例"
-    },
-    "searchShare": {
-      "brandKeyword": "X%",
-      "serviceKeyword": "X%",
-      "competitionKeyword": "X%"
-    }
-  },
-  "板块5": {
-    "sentimentDistribution": [
-      {"type": "正面", "percentage": "X%", "change": "±X%"},
-      {"type": "中立/混合", "percentage": "Y%", "change": "±Y%"},
-      {"type": "负面", "percentage": "Z%", "change": "±Z%"}
-    ],
-    "platformKeywords": {
-      "officialMedia": {"positive": "关键词", "negative": "关键词"},
-      "industryAnalysis": {"positive": "关键词", "negative": "关键词"},
-      "socialUser": {"positive": "关键词", "negative": "关键词"},
-      "aiPlatform": {"positive": "关键词", "negative": "关键词"}
-    },
-    "typicalReviews": {
-      "positive": {"sources": ["来源1", "来源2"], "content": "正面评价内容"},
-      "negative": {"sources": ["来源3", "来源4"], "content": "负面评价内容"}
-    }
-  },
-  "板块6": {
-    "coreTopics": [
-      {"rank": 1, "topic": "主题1", "coOccurrenceRate": "X%"},
-      {"rank": 2, "topic": "主题2", "coOccurrenceRate": "Y%"},
-      {"rank": 3, "topic": "主题3", "coOccurrenceRate": "Z%"},
-      {"rank": 4, "topic": "主题4", "coOccurrenceRate": "W%"},
-      {"rank": 5, "topic": "主题5", "coOccurrenceRate": "V%"}
-    ]
-  },
-  "板块7": {
-    "sourceClassification": [
-      {"type": "官网引用", "percentage": "X%", "representativeSources": "来源"},
-      {"type": "权威媒体", "percentage": "Y%", "representativeSources": "来源"},
-      {"type": "学术/研报", "percentage": "Z%", "representativeSources": "来源"},
-      {"type": "社交/论坛", "percentage": "W%", "representativeSources": "来源"},
-      {"type": "电商评论", "percentage": "V%", "representativeSources": "来源"}
-    ],
-    "citationHabits": {
-      "domesticNews": {"preference": "偏好", "feature": "特点"},
-      "investmentAnalysis": {"preference": "偏好", "feature": "特点"},
-      "aiPlatform": {"preference": "偏好", "feature": "特点"}
-    }
-  },
-  "板块8": {
-    "prompts": [
-      {"queryType": "品牌认知", "question": "什么是${brand.name}？", "summary": "摘要"},
-      {"queryType": "产品评价", "question": "${brand.name}好不好用？", "summary": "摘要"},
-      {"queryType": "竞品对比", "question": "${brand.name}和竞品哪个好？", "summary": "摘要"},
-      {"queryType": "使用方法", "question": "${brand.name}怎么用？", "summary": "摘要"},
-      {"queryType": "最新动态", "question": "${brand.name}最新消息", "summary": "摘要"},
-      {"queryType": "价格相关", "question": "${brand.name}价格怎么样？", "summary": "摘要"},
-      {"queryType": "官方信息", "question": "${brand.name}官网是什么？", "summary": "摘要"},
-      {"queryType": "口碑与评价", "question": "${brand.name}口碑怎么样？", "summary": "摘要"}
-    ]
-  },
-  "板块9": {
-    "question": "转化意图最强的问题",
-    "source": "来源URL",
-    "excerpt": "关键段落摘录"
-  },
-  "板块10": {
-    "competitors": [
-      {"name": "竞品A", "selectionReason": "选择依据"},
-      {"name": "竞品B", "selectionReason": "选择依据"}
-    ],
-    "competitorAnalysis": {
-      "marketShare": {"brand": "X%", "competitorA": "X%", "competitorB": "X%"},
-      "positiveRate": {"brand": "X%", "competitorA": "X%", "competitorB": "X%"},
-      "aiMentionRate": {"brand": "X%", "competitorA": "X%", "competitorB": "X%"},
-      "officialCitationRate": {"brand": "X%", "competitorA": "X%", "competitorB": "X%"}
-    },
-    "competitorPromptAnalysis": {
-      "competitorA": {"strategy": "核心策略", "aiAssociation": "AI关联"},
-      "competitorB": {"strategy": "核心策略", "aiAssociation": "AI关联"}
-    },
-    "improvementSuggestions": [
-      {"action": "行动1", "expectedEffect": "预期效果", "priority": "P0/P1/P2"},
-      {"action": "行动2", "expectedEffect": "预期效果", "priority": "P0/P1/P2"}
-    ]
-  },
-  "brandName": "${brand.name}"
-}
-
-### 注意事项
-- 所有字段必须存在，不得缺失
-- 数字字段使用数字类型，百分比字段使用带百分号的字符串
-- 数组字段必须有至少1个元素
-- 仅返回JSON，不要添加任何其他内容`;
+    // 简化提示词：仅传递品牌名称和网站
+    const websiteInfo = brand.website ? `，官网：${brand.website}` : '';
+    const analysisPrompt = `请对品牌「${brand.name}」${websiteInfo}进行GEO分析，返回JSON格式的分析报告。`;
 
     try {
-      // 调用豆包大模型，启用内置 web_search 工具
-      console.log('[调用豆包大模型] 开始请求分析，启用内置搜索...');
+      // 调用Open Claw智能体进行品牌分析
+      console.log('[调用Open Claw智能体] 开始请求分析...');
       
       const response = await fetch(llmApiUrl, {
         method: 'POST',
@@ -270,27 +117,13 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
         },
         body: JSON.stringify({
           model: llmModel,
+          agent: agentId,
           messages: [
-            {
-              role: 'system',
-              content: '你是一个品牌分析专家。请使用你的联网搜索能力获取最新信息来完成品牌分析任务。'
-            },
             {
               role: 'user',
               content: analysisPrompt
             }
           ],
-          tools: [
-            {
-              type: 'function',
-              function: {
-                name: 'web_search',
-                description: '用于搜索网络上的最新信息，获取品牌相关的新闻、评价、市场数据等',
-                parameters: {}
-              }
-            }
-          ],
-          tool_choice: 'auto',
           temperature: 0.3,
           max_tokens: 8000,
           stream: false
@@ -299,7 +132,7 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
       if (!response.ok) {
         const errorText = await response.text();
-        const error = `豆包大模型调用失败: ${response.status} - ${errorText}`;
+        const error = `Open Claw智能体调用失败: ${response.status} - ${errorText}`;
         console.error('错误:', error);
         return {
           error: {
@@ -314,188 +147,14 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       const responseData = await response.json();
       console.log('[响应处理] 完整响应数据:', JSON.stringify(responseData, null, 2));
       
-      // 检查是否有工具调用请求
-      const toolCalls = responseData.choices?.[0]?.message?.tool_calls;
-      const finishReason = responseData.choices?.[0]?.finish_reason;
+      // 提取响应内容
       const messageContent = responseData.choices?.[0]?.message?.content;
       
       let content = messageContent;
-      let messages = [
-        {
-          role: 'system',
-          content: '你是一个品牌分析专家。请使用你的联网搜索能力获取最新信息来完成品牌分析任务。'
-        },
-        {
-          role: 'user',
-          content: analysisPrompt
-        }
-      ];
       
-      // 如果大模型请求调用工具（tool_calls 不为空）
-      if (toolCalls && toolCalls.length > 0) {
-        console.log('[工具调用] 检测到大模型请求工具调用，finish_reason:', finishReason);
-        
-        // 添加工具调用消息到对话历史
-        messages.push({
-          role: 'assistant',
-          content: '',
-          tool_calls: toolCalls
-        });
-        
-        // 循环处理工具调用，直到获取到实际内容
-        let currentToolCalls = toolCalls;
-        let maxIterations = 5;
-        let iteration = 0;
-        
-        while (currentToolCalls && currentToolCalls.length > 0 && iteration < maxIterations) {
-          iteration++;
-          console.log(`[工具调用] 第 ${iteration} 轮工具调用处理...`);
-          
-          // 提取工具调用信息
-          const toolCall = currentToolCalls[0];
-          const functionName = toolCall.function?.name;
-          const functionArgs = toolCall.function?.arguments;
-          const toolCallId = toolCall.id;
-          
-          console.log('[工具调用] 函数名:', functionName);
-          console.log('[工具调用] 参数:', functionArgs);
-          console.log('[工具调用] 调用ID:', toolCallId);
-          
-          if (functionName === 'web_search') {
-            // 调用豆包获取搜索结果（直接传递对话历史，豆包会自动处理搜索）
-            console.log('[工具调用] 正在调用豆包处理搜索...');
-            
-            const searchResponse = await fetch(llmApiUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${llmApiKey}`
-              },
-              body: JSON.stringify({
-                model: llmModel,
-                messages: messages,
-                tools: [
-                  {
-                    type: 'function',
-                    function: {
-                      name: 'web_search',
-                      description: '用于搜索网络上的最新信息，获取品牌相关的新闻、评价、市场数据等',
-                      parameters: {}
-                    }
-                  }
-                ],
-                tool_choice: 'auto',
-                temperature: 0.3,
-                max_tokens: 8000,
-                stream: false
-              })
-            });
-            
-            if (!searchResponse.ok) {
-              const errorText = await searchResponse.text();
-              const error = `豆包大模型搜索调用失败: ${searchResponse.status} - ${errorText}`;
-              console.error('错误:', error);
-              return {
-                error: {
-                  module: 'aiService.performAIAnalysis',
-                  function: 'fetch (search)',
-                  message: error,
-                  details: `HTTP状态码: ${searchResponse.status}`
-                }
-              };
-            }
-            
-            const searchData = await searchResponse.json();
-            console.log('[工具调用] 搜索响应:', JSON.stringify(searchData, null, 2));
-            
-            // 检查响应
-            const searchToolCalls = searchData.choices?.[0]?.message?.tool_calls;
-            const searchContent = searchData.choices?.[0]?.message?.content;
-            const searchFinishReason = searchData.choices?.[0]?.finish_reason;
-            
-            if (searchContent && searchContent.trim()) {
-              // 获取到内容，结束循环
-              content = searchContent;
-              console.log(`[工具调用] 第 ${iteration} 轮获取到内容，长度: ${content.length}`);
-              break;
-            } else if (searchToolCalls && searchToolCalls.length > 0) {
-              // 还有工具调用，继续循环
-              console.log(`[工具调用] 第 ${iteration} 轮仍有工具调用，继续...`);
-              currentToolCalls = searchToolCalls;
-              messages.push({
-                role: 'assistant',
-                content: '',
-                tool_calls: searchToolCalls
-              });
-            } else if (searchFinishReason === 'stop') {
-              // finish_reason 是 stop 但内容为空，发送空消息触发总结
-              console.log('[工具调用] finish_reason 是 stop 但内容为空，发送总结请求...');
-              messages.push({
-                role: 'user',
-                content: '请根据搜索结果，按照要求的JSON格式输出品牌分析报告。'
-              });
-              
-              const finalResponse = await fetch(llmApiUrl, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${llmApiKey}`
-                },
-                body: JSON.stringify({
-                  model: llmModel,
-                  messages: messages,
-                  temperature: 0.3,
-                  max_tokens: 8000,
-                  stream: false
-                })
-              });
-              
-              if (!finalResponse.ok) {
-                const errorText = await finalResponse.text();
-                const error = `豆包大模型总结调用失败: ${finalResponse.status} - ${errorText}`;
-                console.error('错误:', error);
-                return {
-                  error: {
-                    module: 'aiService.performAIAnalysis',
-                    function: 'fetch (summary)',
-                    message: error,
-                    details: `HTTP状态码: ${finalResponse.status}`
-                  }
-                };
-              }
-              
-              const finalData = await finalResponse.json();
-              content = finalData.choices?.[0]?.message?.content || finalData.content || finalData.result;
-              break;
-            } else {
-              // 无法继续，退出循环
-              console.log('[工具调用] 无法继续，退出循环');
-              break;
-            }
-          } else {
-            // 未知的工具调用，退出循环
-            console.log('[工具调用] 未知的工具调用:', functionName);
-            break;
-          }
-        }
-      }
-      
-      // 只有在没有工具调用或者工具调用完成后，才检查内容是否为空
+      // 检查内容是否为空
       if (!content) {
-        // 如果有工具调用但内容为空，可能是正常的，不要报错
-        if (toolCalls && toolCalls.length > 0) {
-          const error = '工具调用后大模型返回内容为空';
-          console.error('错误:', error);
-          return {
-            error: {
-              module: 'aiService.performAIAnalysis',
-              function: 'response processing',
-              message: error,
-              details: '工具调用完成后大模型未返回任何内容'
-            }
-          };
-        }
-        const error = '豆包大模型返回内容为空';
+        const error = 'Open Claw智能体返回内容为空';
         console.error('错误:', error);
         console.log('完整响应:', JSON.stringify(responseData));
         return {
@@ -503,17 +162,17 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
             module: 'aiService.performAIAnalysis',
             function: 'response processing',
             message: error,
-            details: '大模型未返回任何内容'
+            details: '智能体未返回任何内容'
           }
         };
       }
 
-      console.log('豆包大模型返回内容已接收，开始解析...');
+      console.log('Open Claw智能体返回内容已接收，开始解析...');
       console.log(`返回内容长度: ${content.length} 字符`);
       
-      // 打印豆包大模型返回的原始内容
+      // 打印智能体返回的原始内容
       console.log('----------------------------------------');
-      console.log('[豆包大模型原始返回内容]');
+      console.log('[Open Claw智能体原始返回内容]');
       console.log('----------------------------------------');
       if (content.length > 5000) {
         console.log(`[内容过长，显示前5000字符]`);
@@ -727,13 +386,13 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
     } catch (error) {
       console.log('========================================');
-      console.error(`[错误] 调用豆包大模型失败: ${error.message}`);
+      console.error(`[错误] 调用Open Claw智能体失败: ${error.message}`);
       console.log('========================================');
       return {
         error: {
           module: 'aiService.performAIAnalysis',
           function: 'API call',
-          message: '调用豆包大模型失败',
+          message: '调用Open Claw智能体失败',
           details: error.message
         }
       };
@@ -773,7 +432,7 @@ async function performPromptAnalysis(brandId, brandInfo, prompts, customAgentId 
   console.log(`Agent ID: ${agentId}`);
 
   if (!llmApiKey || !llmApiUrl || !llmModel) {
-    const error = '大模型API配置未完成';
+    const error = 'Open Claw API配置未完成';
     console.error('错误:', error);
     return {
       error: {
@@ -877,15 +536,15 @@ async function generateArticle(brandId, brandInfo, articleRequirements, customAg
   console.log(`文章需求: ${JSON.stringify(articleRequirements)}`);
 
   if (!llmApiKey || !llmApiUrl || !llmModel) {
-    return { error: { message: '大模型API配置未完成' } };
-  }
+    return { error: { message: 'Open Claw API配置未完成' } };
+    }
 
-  let brand = brandInfo || await brandModel.getBrandById(brandId);
-  if (!brand) {
-    return { error: { message: '品牌不存在' } };
-  }
+    let brand = brandInfo || await brandModel.getBrandById(brandId);
+    if (!brand) {
+      return { error: { message: '品牌不存在' } };
+    }
 
-  const { title, topic, style, length } = articleRequirements;
+    const { title, topic, style, length } = articleRequirements;
   const articleRequest = `请为"${brand.name}"品牌生成一篇SEO优化的文章。
 
 品牌信息：
@@ -965,7 +624,7 @@ async function aiChat(question, context = {}, customAgentId = '') {
   console.log(`问题: ${question}`);
 
   if (!llmApiKey || !llmApiUrl || !llmModel) {
-    return { error: { message: '大模型API配置未完成' } };
+    return { error: { message: 'Open Claw API配置未完成' } };
   }
 
   const contextInfo = Object.keys(context).length > 0
@@ -2146,7 +1805,7 @@ async function getPromptAnswer(question, context = {}, customAgentId = '') {
 
   if (!llmApiKey || !llmApiUrl || !llmModel) {
     return {
-      error: { message: '大模型API配置未完成' }
+      error: { message: 'Open Claw API配置未完成' }
     };
   }
 
