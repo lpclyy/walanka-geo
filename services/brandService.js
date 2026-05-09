@@ -85,23 +85,34 @@ async function saveAnalysisResult(brandId, analysisData) {
     return JSON.stringify(value);
   };
 
+  // 兼容新的GEO模板结构
+  // 新模板字段: data_overview, brand_overview, brand_visibility, brand_perception, topic_analysis, citation_analysis, prompts_with_snapshots, improvement_suggestions
+  const overview = analysisData?.data_overview || analysisData?.brand_overview || analysisData?.overview || {};
+  const visibility = analysisData?.brand_visibility || analysisData?.visibility || {};
+  const perception = analysisData?.brand_perception || analysisData?.perception || {};
+  const topics = analysisData?.topic_analysis || analysisData?.topics || {};
+  const citations = analysisData?.citation_analysis || analysisData?.citations || {};
+  const snapshots = analysisData?.prompts_with_snapshots || analysisData?.snapshots || [];
+  const suggestions = analysisData?.improvement_suggestions || analysisData?.suggestions || {};
+  const competition = analysisData?.competitor_brand_analysis || analysisData?.competition || {};
+
   const [result] = await db.execute(
     `INSERT INTO brand_analysis
     (brand_id, overview, visibility, perception, strengths, opportunities, competition, risks, topics, citations, snapshots, suggestions)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       brandId,
-      getValue(analysisData?.overview),
-      getValue(analysisData?.visibility),
-      getValue(analysisData?.perception),
+      getValue(overview),
+      getValue(visibility),
+      getValue(perception),
       getValue(analysisData?.strengths, []),
       getValue(analysisData?.opportunities, []),
-      getValue(analysisData?.competition, {}),
+      getValue(competition),
       getValue(analysisData?.risks, []),
-      getValue(analysisData?.topics, []),
-      getValue(analysisData?.citations, []),
-      getValue(analysisData?.snapshots, []),
-      getValue(analysisData?.suggestions, [])
+      getValue(topics),
+      getValue(citations),
+      getValue(snapshots),
+      getValue(suggestions)
     ]
   );
 
@@ -116,7 +127,40 @@ async function saveAnalysisResult(brandId, analysisData) {
 async function getAnalysisByBrandId(brandId) {
   const db = database.getDB();
   const [analysis] = await db.execute('SELECT * FROM brand_analysis WHERE brand_id = ?', [brandId]);
-  return analysis.length > 0 ? analysis[0] : null;
+  
+  if (analysis.length === 0) return null;
+  
+  const result = analysis[0];
+  
+  // 解析JSON字段并转换为新的GEO模板结构
+  try {
+    const parsedResult = {
+      data_overview: result.overview ? JSON.parse(result.overview) : {},
+      brand_visibility: result.visibility ? JSON.parse(result.visibility) : {},
+      brand_perception: result.perception ? JSON.parse(result.perception) : {},
+      topic_analysis: result.topics ? JSON.parse(result.topics) : {},
+      citation_analysis: result.citations ? JSON.parse(result.citations) : {},
+      prompts_with_snapshots: result.snapshots ? JSON.parse(result.snapshots) : [],
+      improvement_suggestions: result.suggestions ? JSON.parse(result.suggestions) : {},
+      competitor_brand_analysis: result.competition ? JSON.parse(result.competition) : {},
+      // 保留原始字段以便兼容
+      overview: result.overview,
+      visibility: result.visibility,
+      perception: result.perception,
+      topics: result.topics,
+      citations: result.citations,
+      snapshots: result.snapshots,
+      suggestions: result.suggestions,
+      competition: result.competition,
+      strengths: result.strengths,
+      opportunities: result.opportunities,
+      risks: result.risks
+    };
+    return parsedResult;
+  } catch (e) {
+    console.error('解析分析结果失败:', e.message);
+    return result;
+  }
 }
 
 /**
