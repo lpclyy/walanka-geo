@@ -96,7 +96,7 @@ function generateGeoSystemPrompt(brandName, brandWebsite = '') {
 通过联网搜索收集该品牌在各AI平台（ChatGPT、DeepSeek、豆包、Kimi、Gemini等）上的表现数据，返回完整的JSON格式分析报告。
 
 【输出要求】
-1. 返回纯JSON格式，不要包含任何其他文字、markdown标记或解释
+1. 请严格按照标准 JSON 格式返回，不要包含任何额外文字、注释或说明，数组和对象末尾不要加逗号，字符串中的双引号请转义。
 2. JSON必须严格遵循以下12个模块的结构和字段名
 3. 所有数值字段使用数字类型（不用字符串）
 4. 没有数据的字段设为 null，数组设为 []
@@ -440,16 +440,11 @@ function cleanJsonResponse(text) {
     cleaned = cleaned.replace(prefix, '');
   }
 
-  // 移除开头的自然语言描述（直到遇到第一个 { 或 [）
-  const firstBrace = cleaned.indexOf('{');
-  const firstBracket = cleaned.indexOf('[');
-  const firstStart = Math.min(
-    firstBrace === -1 ? Infinity : firstBrace,
-    firstBracket === -1 ? Infinity : firstBracket
-  );
-
-  if (firstStart !== Infinity && firstStart > 0) {
-    cleaned = cleaned.substring(firstStart);
+  // 查找JSON真正的开始位置（跳过标签内的 {）
+  // 使用状态机来跟踪是否在标签内
+  const jsonStart = findJsonStart(cleaned);
+  if (jsonStart > 0) {
+    cleaned = cleaned.substring(jsonStart);
   }
 
   // 移除结尾的多余内容（从最后一个 } 或 ] 之后的内容）
@@ -462,6 +457,108 @@ function cleanJsonResponse(text) {
   }
 
   return cleaned.trim();
+}
+
+/**
+ * 查找JSON真正的开始位置（跳过标签、字符串中的特殊字符）
+ * @param {string} text - 原始文本
+ * @returns {number} JSON开始位置
+ */
+function findJsonStart(text) {
+  if (!text || typeof text !== 'string') return 0;
+
+  let i = 0;
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  let inTag = false;
+  let tagDepth = 0;
+
+  while (i < text.length) {
+    const char = text[i];
+    const nextChar = text[i + 1] || '';
+
+    // 处理转义
+    if (escape) {
+      escape = false;
+      i++;
+      continue;
+    }
+
+    // 处理转义字符
+    if (char === '\\' && inString) {
+      escape = true;
+      i++;
+      continue;
+    }
+
+    // 处理标签（<thinking>、<script>等）
+    if (!inString && char === '<') {
+      // 检查是否是标签开始
+      if (text.substring(i).match(/^<(thinking|thought|reasoning|script|style)[\s>]/i)) {
+        inTag = true;
+        tagDepth = 1;
+        i += 8; // 跳过 <thinking>
+        continue;
+      }
+      // 检查是否是标签结束
+      if (text.substring(i).match(/^<\/(thinking|thought|reasoning|script|style)>/i)) {
+        inTag = false;
+        i += 10; // 跳过 </thinking>
+        continue;
+      }
+    }
+
+    // 如果在标签内，继续跳过
+    if (inTag) {
+      i++;
+      continue;
+    }
+
+    // 处理字符串
+    if (char === '"') {
+      inString = !inString;
+      i++;
+      continue;
+    }
+
+    // 如果在字符串内，跳过
+    if (inString) {
+      i++;
+      continue;
+    }
+
+    // 处理注释
+    if (char === '/' && nextChar === '/') {
+      // 单行注释，跳到行尾
+      while (i < text.length && text[i] !== '\n') {
+        i++;
+      }
+      continue;
+    }
+
+    if (char === '/' && nextChar === '*') {
+      // 多行注释
+      i += 2;
+      while (i < text.length - 1) {
+        if (text[i] === '*' && text[i + 1] === '/') {
+          i += 2;
+          break;
+        }
+        i++;
+      }
+      continue;
+    }
+
+    // 找到了JSON开始
+    if (char === '{' || char === '[') {
+      return i;
+    }
+
+    i++;
+  }
+
+  return 0;
 }
 
 /**
