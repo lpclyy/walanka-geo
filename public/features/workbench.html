@@ -1146,38 +1146,74 @@
                     <div class="workbench-mode" id="brand-overview" style="display: none;">
                         <div class="brand-overview-container">
                             <h3 style="color: #333; margin-bottom: 20px;">品牌概览</h3>
+                            <!-- 核心指标卡片 -->
                             <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary-color);">
-                                        <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">品牌提及率</h4>
-                                        <p style="margin: 0; font-size: 24px; font-weight: bold; color: #999;">--</p>
-                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">暂无数据</p>
+                                        <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">AI可见度得分</h4>
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: var(--primary-color);" id="overview-ai-score">--</p>
+                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">满分100分</p>
                                     </div>
                                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                                        <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">品牌可见度</h4>
-                                        <p style="margin: 0; font-size: 24px; font-weight: bold; color: #999;">--</p>
-                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">暂无数据</p>
+                                        <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">综合提及率</h4>
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: #3b82f6;" id="overview-visibility-rate">--</p>
+                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #999; font-family: monospace;" id="overview-visibility-denominator">-</p>
                                     </div>
                                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #22c55e;">
-                                        <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">品牌好感度</h4>
-                                        <p style="margin: 0; font-size: 24px; font-weight: bold; color: #999;">--</p>
-                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">暂无数据</p>
+                                        <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">平均位置</h4>
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: #22c55e;" id="overview-avg-position">--</p>
+                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">位置越前越好</p>
                                     </div>
                                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                        <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">品牌影响力</h4>
-                                        <p style="margin: 0; font-size: 24px; font-weight: bold; color: #999;">--</p>
-                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">暂无数据</p>
+                                        <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">品牌提及份额</h4>
+                                        <p style="margin: 0; font-size: 28px; font-weight: bold; color: #f59e0b;" id="overview-share-of-voice">--</p>
+                                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">对比竞品</p>
                                     </div>
                                 </div>
                             </div>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">品牌趋势分析</h4>
-                                <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; min-height: 280px; display: flex; align-items: center; justify-content: center;">
-                                    <p style="color: #999;">请先进行品牌分析以查看趋势数据</p>
+                            <!-- 情感分析饼图 -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <h4 style="margin: 0 0 15px 0; color: #333;">情感分布</h4>
+                                    <canvas id="overviewSentimentChart" height="200"></canvas>
                                 </div>
+                                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <h4 style="margin: 0 0 15px 0; color: #333;">情感指标详情</h4>
+                                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span style="width: 12px; height: 12px; background: #22c55e; border-radius: 50%;"></span>
+                                                <span style="font-size: 14px; color: #333;">正面情感</span>
+                                            </div>
+                                            <span style="font-size: 18px; font-weight: bold; color: #22c55e;" id="overview-positive-ratio">--</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span style="width: 12px; height: 12px; background: #eab308; border-radius: 50%;"></span>
+                                                <span style="font-size: 14px; color: #333;">中立情感</span>
+                                            </div>
+                                            <span style="font-size: 18px; font-weight: bold; color: #eab308;" id="overview-neutral-ratio">--</span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%;"></span>
+                                                <span style="font-size: 14px; color: #333;">负面情感</span>
+                                            </div>
+                                            <span style="font-size: 18px; font-weight: bold; color: #ef4444;" id="overview-negative-ratio">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 洞察分析 -->
+                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <h4 style="margin: 0 0 15px 0; color: #333;">品牌洞察分析</h4>
+                                <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #666; text-align: justify;" id="overview-insight">
+                                    请先进行品牌分析以查看洞察报告
+                                </p>
                                 <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                                     <p style="margin: 0; font-size: 14px; color: #666;">
-                                        <strong>分析时间：</strong><span id="analysisTime">未分析</span>
+                                        <strong>分析时间：</strong><span id="overviewAnalysisTime">未分析</span>
                                     </p>
                                 </div>
                             </div>
@@ -4035,17 +4071,115 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             const brandOverviewEl = document.querySelector('#brand-overview .brand-overview-container');
             if (!brandOverviewEl) return;
             
-            const score = brandOverview?.ai_visibility_score || fallback?.overallScore || 0;
+            // 从模板数据中获取值
+            const aiScore = brandOverview?.ai_visibility_score || fallback?.overallScore || 0;
             const visibilityRate = brandOverview?.visibility_rate || fallback?.overallVisibility || 0;
+            const visibilityDenominator = brandOverview?.visibility_rate_denominator || '';
+            const avgPosition = brandOverview?.avg_position || fallback?.avgPosition || null;
+            const shareOfVoice = brandOverview?.share_of_voice || null;
             const positiveRatio = brandOverview?.positive_ratio || fallback?.positive || 0;
+            const neutralRatio = brandOverview?.neutral_ratio || fallback?.neutral || 0;
+            const negativeRatio = brandOverview?.negative_ratio || fallback?.negative || 0;
+            const insight = brandOverview?.insight || '暂无洞察分析';
             
-            const overviewCards = brandOverviewEl.querySelectorAll('div[style*="background: #f8f9fa"]');
-            if (overviewCards.length > 0) {
-                if (overviewCards[0]) overviewCards[0].querySelector('p:nth-child(2)').textContent = `${Math.round(positiveRatio)}%`;
-                if (overviewCards[1]) overviewCards[1].querySelector('p:nth-child(2)').textContent = `${Math.round(visibilityRate)}%`;
-                if (overviewCards[2]) overviewCards[2].querySelector('p:nth-child(2)').textContent = `${Math.round(positiveRatio)}%`;
-                if (overviewCards[3]) overviewCards[3].querySelector('p:nth-child(2)').textContent = `${Math.round(score)}%`;
+            // 更新核心指标卡片
+            const aiScoreEl = document.getElementById('overview-ai-score');
+            if (aiScoreEl) aiScoreEl.textContent = `${Math.round(aiScore)}/100`;
+            
+            const visibilityRateEl = document.getElementById('overview-visibility-rate');
+            if (visibilityRateEl) visibilityRateEl.textContent = `${visibilityRate?.toFixed(1) || '0'}%`;
+            
+            const visibilityDenominatorEl = document.getElementById('overview-visibility-denominator');
+            if (visibilityDenominatorEl) visibilityDenominatorEl.textContent = visibilityDenominator || '-';
+            
+            const avgPositionEl = document.getElementById('overview-avg-position');
+            if (avgPositionEl) avgPositionEl.textContent = avgPosition?.toFixed(2) || '-';
+            
+            const shareOfVoiceEl = document.getElementById('overview-share-of-voice');
+            if (shareOfVoiceEl) shareOfVoiceEl.textContent = shareOfVoice ? `${shareOfVoice.toFixed(1)}%` : '-';
+            
+            // 更新情感指标详情
+            const positiveRatioEl = document.getElementById('overview-positive-ratio');
+            if (positiveRatioEl) positiveRatioEl.textContent = `${positiveRatio?.toFixed(1) || '0'}%`;
+            
+            const neutralRatioEl = document.getElementById('overview-neutral-ratio');
+            if (neutralRatioEl) neutralRatioEl.textContent = `${neutralRatio?.toFixed(1) || '0'}%`;
+            
+            const negativeRatioEl = document.getElementById('overview-negative-ratio');
+            if (negativeRatioEl) negativeRatioEl.textContent = `${negativeRatio?.toFixed(1) || '0'}%`;
+            
+            // 更新洞察分析
+            const insightEl = document.getElementById('overview-insight');
+            if (insightEl) insightEl.textContent = insight;
+            
+            // 更新分析时间
+            const analysisTimeEl = document.getElementById('overviewAnalysisTime');
+            if (analysisTimeEl) {
+                const now = new Date();
+                analysisTimeEl.textContent = now.toLocaleString();
             }
+            
+            // 创建情感分析饼图
+            createOverviewSentimentChart(positiveRatio, neutralRatio, negativeRatio);
+        }
+        
+        // 创建品牌概览情感饼图
+        function createOverviewSentimentChart(positive, neutral, negative) {
+            const ctx = document.getElementById('overviewSentimentChart');
+            if (!ctx) return;
+            
+            // 销毁旧图表
+            if (window.overviewSentimentChart) {
+                window.overviewSentimentChart.destroy();
+            }
+            
+            window.overviewSentimentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['正面情感', '中立情感', '负面情感'],
+                    datasets: [{
+                        data: [
+                            positive || 0,
+                            neutral || 0,
+                            negative || 0
+                        ],
+                        backgroundColor: [
+                            'rgba(34, 197, 94, 0.8)',   // 绿色
+                            'rgba(234, 179, 8, 0.8)',   // 黄色
+                            'rgba(239, 68, 68, 0.8)'    // 红色
+                        ],
+                        borderColor: [
+                            'rgba(34, 197, 94, 1)',
+                            'rgba(234, 179, 8, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
         }
         
         // 更新品牌可见度模块
