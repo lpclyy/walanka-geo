@@ -1296,49 +1296,65 @@
                     
                     <!-- 品牌可见度模式 -->
                     <div class="workbench-mode" id="brand-visibility" style="display: none;">
-                        <div class="brand-visibility-container">
-                            <h3 style="color: #333; margin-bottom: 20px;">品牌可见度</h3>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">可见度分布</h4>
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                                        <h5 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">AI平台可见度</h5>
-                                        <div style="display: flex; align-items: center; gap: 10px;">
-                                            <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
-                                                <div id="aiVisibilityBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-color), var(--primary-light)); border-radius: 4px;"></div>
-                                            </div>
-                                            <span id="aiVisibilityValue" style="font-size: 14px; font-weight: bold; color: #999;">--</span>
-                                        </div>
+                        <div class="brand-visibility-container" style="padding: 24px;">
+                            <!-- 头部 -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <h2 style="font-size: 24px; font-weight: 600; color: #1a1a2e; margin: 0;">品牌可见度</h2>
+                                <span style="font-size: 14px; color: #888;" id="visibilityAnalysisTime">未分析</span>
+                            </div>
+
+                            <!-- 核心指标卡片 -->
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+                                <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <p style="font-size: 13px; color: #888; margin: 0 0 8px 0;">总提及次数</p>
+                                    <p style="font-size: 32px; font-weight: 700; color: #1a1a2e; margin: 0;" id="mentionCount">--</p>
+                                    <p style="font-size: 12px; color: #22c55e; margin: 8px 0 0 0;" id="weeklyChange">--</p>
+                                </div>
+                                <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <p style="font-size: 13px; color: #888; margin: 0 0 8px 0;">总查询次数</p>
+                                    <p style="font-size: 32px; font-weight: 700; color: #1a1a2e; margin: 0;" id="totalQueries">--</p>
+                                    <p style="font-size: 12px; color: #666; margin: 8px 0 0 0;">测试覆盖</p>
+                                </div>
+                                <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <p style="font-size: 13px; color: #888; margin: 0 0 8px 0;">AI平台可见度</p>
+                                    <p style="font-size: 32px; font-weight: 700; color: #1a1a2e; margin: 0;" id="aiVisibilityValue">--</p>
+                                    <div style="margin-top: 8px; height: 4px; background: #f0f0f0; border-radius: 2px;">
+                                        <div id="aiVisibilityBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 2px; transition: width 0.5s;"></div>
                                     </div>
-                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                                        <h5 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">搜索引擎可见度</h5>
-                                        <div style="display: flex; align-items: center; gap: 10px;">
-                                            <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
-                                                <div id="searchVisibilityBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 4px;"></div>
-                                            </div>
-                                            <span id="searchVisibilityValue" style="font-size: 14px; font-weight: bold; color: #999;">--</span>
-                                        </div>
-                                    </div>
-                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                                        <h5 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">社交媒体可见度</h5>
-                                        <div style="display: flex; align-items: center; gap: 10px;">
-                                            <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
-                                                <div id="socialVisibilityBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #22c55e, #4ade80); border-radius: 4px;"></div>
-                                            </div>
-                                            <span id="socialVisibilityValue" style="font-size: 14px; font-weight: bold; color: #999;">--</span>
-                                        </div>
-                                    </div>
+                                </div>
+                                <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <p style="font-size: 13px; color: #888; margin: 0 0 8px 0;">覆盖平台数</p>
+                                    <p style="font-size: 32px; font-weight: 700; color: #1a1a2e; margin: 0;" id="platformCount">--</p>
+                                    <p style="font-size: 12px; color: #666; margin: 8px 0 0 0;">个AI平台</p>
                                 </div>
                             </div>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">可见度趋势</h4>
-                                <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; min-height: 280px; display: flex; align-items: center; justify-content: center;">
-                                    <p style="color: #999;">请先进行品牌分析以查看趋势数据</p>
+
+                            <!-- 图表区域 -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                                <!-- 平台对比柱状图 -->
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">各平台可见度对比</h3>
+                                        <span style="font-size: 12px; color: #888;">提及率 %</span>
+                                    </div>
+                                    <canvas id="visibilityPlatformChart" height="200"></canvas>
                                 </div>
-                                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                                    <p style="margin: 0; font-size: 14px; color: #666;">
-                                        <strong>分析时间：</strong><span id="visibilityAnalysisTime">未分析</span>
-                                    </p>
+
+                                <!-- 平台表现雷达图 -->
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">平台综合能力雷达</h3>
+                                        <span style="font-size: 12px; color: #888;">多维度评估</span>
+                                    </div>
+                                    <canvas id="visibilityRadarChart" height="200"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- 平台分布详情 -->
+                            <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 20px 0;">平台分布详情</h3>
+                                <div id="platformDistribution" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+                                    <!-- 动态生成 -->
                                 </div>
                             </div>
                         </div>
@@ -1346,58 +1362,107 @@
                     
                     <!-- 品牌感知模式 -->
                     <div class="workbench-mode" id="brand-perception" style="display: none;">
-                        <div class="brand-perception-container">
-                            <h3 style="color: #333; margin-bottom: 20px;">品牌感知</h3>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">品牌关键词云</h4>
-                                <div style="height: 300px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <div class="brand-perception-container" style="padding: 24px;">
+                            <!-- 头部 -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <h2 style="font-size: 24px; font-weight: 600; color: #1a1a2e; margin: 0;">品牌感知</h2>
+                                <span style="font-size: 14px; color: #888;" id="perceptionAnalysisTime">未分析</span>
+                            </div>
+
+                            <!-- 情感指标卡片 -->
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+                                <div style="background: linear-gradient(135deg, #22c55e 0%, #10b981 100%); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(34,197,94,0.3);">
+                                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); margin: 0 0 8px 0;">正面情感</p>
+                                    <p style="font-size: 36px; font-weight: 700; color: white; margin: 0;" id="positiveSentiment">--</p>
+                                    <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin: 8px 0 0 0;">用户好评占比</p>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(234,179,8,0.3);">
+                                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); margin: 0 0 8px 0;">中性情感</p>
+                                    <p style="font-size: 36px; font-weight: 700; color: white; margin: 0;" id="neutralSentiment">--</p>
+                                    <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin: 8px 0 0 0;">客观评价占比</p>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(239,68,68,0.3);">
+                                    <p style="font-size: 14px; color: rgba(255,255,255,0.8); margin: 0 0 8px 0;">负面情感</p>
+                                    <p style="font-size: 36px; font-weight: 700; color: white; margin: 0;" id="negativeSentiment">--</p>
+                                    <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin: 8px 0 0 0;">需要关注改进</p>
+                                </div>
+                            </div>
+
+                            <!-- 图表区域 -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                                <!-- 情感分布饼图 -->
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">情感分布</h3>
+                                        <span style="font-size: 12px; color: #888;">基于AI分析</span>
+                                    </div>
+                                    <canvas id="perceptionSentimentChart" height="220"></canvas>
+                                </div>
+
+                                <!-- 关键词频次柱状图 -->
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">热门关键词TOP10</h3>
+                                        <span style="font-size: 12px; color: #888;">提及频次</span>
+                                    </div>
+                                    <canvas id="perceptionKeywordsChart" height="220"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- 关键词云区域 -->
+                            <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px;">
+                                <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 20px 0;">品牌关键词云</h3>
+                                <div id="keywordCloud" style="min-height: 200px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 12px;">
                                     <p style="color: #999;">请先进行品牌分析以生成关键词云</p>
                                 </div>
                             </div>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">品牌情感分析</h4>
-                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-                                    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; min-height: 280px; display: flex; align-items: center; justify-content: center;">
-                                        <p style="color: #999;">请先进行品牌分析以查看情感数据</p>
-                                    </div>
-                                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ccc;">
-                                            <h5 style="margin: 0 0 10px 0; color: #666; font-size: 14px;">正面情感</h5>
-                                            <p id="positiveSentiment" style="margin: 0; font-size: 24px; font-weight: bold; color: #999;">--</p>
-                                        </div>
-                                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ccc;">
-                                            <h5 style="margin: 0 0 10px 0; color: #666; font-size: 14px;">中性情感</h5>
-                                            <p id="neutralSentiment" style="margin: 0; font-size: 24px; font-weight: bold; color: #999;">--</p>
-                                        </div>
-                                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ccc;">
-                                            <h5 style="margin: 0 0 10px 0; color: #666; font-size: 14px;">负面情感</h5>
-                                            <p id="negativeSentiment" style="margin: 0; font-size: 24px; font-weight: bold; color: #999;">--</p>
-                                        </div>
-                                    </div>
+
+                            <!-- 情感趋势分析 -->
+                            <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                    <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">情感趋势对比</h3>
+                                    <span style="font-size: 12px; color: #888;">各维度情感分布</span>
                                 </div>
-                                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                                    <p style="margin: 0; font-size: 14px; color: #666;">
-                                        <strong>分析时间：</strong><span id="perceptionAnalysisTime">未分析</span>
-                                    </p>
-                                </div>
+                                <canvas id="perceptionTrendChart" height="200"></canvas>
                             </div>
                         </div>
                     </div>
                     
                     <!-- 主题分析模式 -->
                     <div class="workbench-mode" id="topic-analysis" style="display: none;">
-                        <div class="topic-analysis-container">
-                            <h3 style="color: #333; margin-bottom: 20px;">主题分析</h3>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">热门主题分布</h4>
-                                <div style="height: 300px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                    <p style="color: #999;">请先进行品牌分析以查看主题分布</p>
+                        <div class="topic-analysis-container" style="padding: 24px;">
+                            <!-- 头部 -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <h2 style="font-size: 24px; font-weight: 600; color: #1a1a2e; margin: 0;">主题分析</h2>
+                                <span style="font-size: 14px; color: #888;" id="topicAnalysisTime">未分析</span>
+                            </div>
+
+                            <!-- 图表区域 -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                                <!-- 主题分布饼图 -->
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">热门主题分布</h3>
+                                        <span style="font-size: 12px; color: #888;">基于提及率</span>
+                                    </div>
+                                    <canvas id="topicDistributionChart" height="250"></canvas>
+                                </div>
+
+                                <!-- 主题热度柱状图 -->
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">主题热度TOP8</h3>
+                                        <span style="font-size: 12px; color: #888;">提及次数</span>
+                                    </div>
+                                    <canvas id="topicHeatChart" height="250"></canvas>
                                 </div>
                             </div>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">主题趋势</h4>
-                                <div id="topicDetails" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+
+                            <!-- 主题详情卡片 -->
+                            <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 20px 0;">主题详情</h3>
+                                <div id="topicDetails" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 20px; border-radius: 12px; border: 1px solid #f0f0f0;">
                                         <h5 style="margin: 0 0 10px 0; color: #666; font-size: 14px;">产品质量</h5>
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
@@ -1406,7 +1471,7 @@
                                             <span style="font-size: 14px; font-weight: bold; color: #999;">--</span>
                                         </div>
                                     </div>
-                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 20px; border-radius: 12px; border: 1px solid #f0f0f0;">
                                         <h5 style="margin: 0 0 10px 0; color: #666; font-size: 14px;">客户服务</h5>
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
@@ -1415,7 +1480,7 @@
                                             <span style="font-size: 14px; font-weight: bold; color: #999;">--</span>
                                         </div>
                                     </div>
-                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 20px; border-radius: 12px; border: 1px solid #f0f0f0;">
                                         <h5 style="margin: 0 0 10px 0; color: #666; font-size: 14px;">价格优势</h5>
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
@@ -1424,7 +1489,7 @@
                                             <span style="font-size: 14px; font-weight: bold; color: #999;">--</span>
                                         </div>
                                     </div>
-                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 20px; border-radius: 12px; border: 1px solid #f0f0f0;">
                                         <h5 style="margin: 0 0 10px 0; color: #666; font-size: 14px;">品牌形象</h5>
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
@@ -1440,19 +1505,43 @@
                     
                     <!-- 引用分析模式 -->
                     <div class="workbench-mode" id="reference-analysis" style="display: none;">
-                        <div class="reference-analysis-container">
-                            <h3 style="color: #333; margin-bottom: 20px;">引用分析</h3>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">引用来源分布</h4>
-                                <div style="height: 300px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                    <p style="color: #999;">请先进行品牌分析以查看引用来源分布</p>
+                        <div class="reference-analysis-container" style="padding: 24px;">
+                            <!-- 头部 -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <h2 style="font-size: 24px; font-weight: 600; color: #1a1a2e; margin: 0;">引用分析</h2>
+                                <span style="font-size: 14px; color: #888;" id="citationAnalysisTime">未分析</span>
+                            </div>
+
+                            <!-- 图表区域 -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                                <!-- 来源类型饼图 -->
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">引用来源类型</h3>
+                                        <span style="font-size: 12px; color: #888;">域名分类</span>
+                                    </div>
+                                    <canvas id="citationSourceChart" height="250"></canvas>
+                                </div>
+
+                                <!-- 域名统计柱状图 -->
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">引用域名TOP10</h3>
+                                        <span style="font-size: 12px; color: #888;">引用次数</span>
+                                    </div>
+                                    <canvas id="citationDomainChart" height="250"></canvas>
                                 </div>
                             </div>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">热门引用内容</h4>
-                                <div id="citationDetails" style="display: flex; flex-direction: column; gap: 15px;">
-                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ccc; text-align: center;">
-                                        <p style="margin: 0; color: #999;">暂无引用数据，请先进行品牌分析</p>
+
+                            <!-- 热门引用页面列表 -->
+                            <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                    <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">热门引用页面</h3>
+                                    <span style="font-size: 12px; color: #888;">按引用次数排序</span>
+                                </div>
+                                <div id="citationDetails" style="display: flex; flex-direction: column; gap: 12px;">
+                                    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 20px; border-radius: 12px; border: 1px solid #f0f0f0; text-align: center;">
+                                        <p style="margin: 0; color: #888;">暂无引用数据，请先进行品牌分析</p>
                                     </div>
                                 </div>
                             </div>
@@ -4044,6 +4133,14 @@
                 window.currentAnalysis = analysis;
                 window.rawAnalysisData = JSON.parse(JSON.stringify(analysis));
                 
+                // 保存分析数据到本地存储，以便刷新后恢复
+                try {
+                    
+                    localStorage.setItem('currentAnalysisData', JSON.stringify(analysis));
+                } catch (e) {
+                    console.warn('分析数据太大，无法保存到本地存储');
+                }
+                
                 // 解析新模板数据结构
                 const parseModule = (key) => {
                     if (!analysis[key]) return null;
@@ -4357,7 +4454,7 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             });
             const overallRate = totalQueries > 0 ? (totalMentions / totalQueries * 100).toFixed(1) : (fallback?.overallVisibility || 0);
             
-            // 更新AI平台可见度
+            // 更新核心指标
             const aiVisibilityBar = brandVisibilityEl.querySelector('#aiVisibilityBar');
             const aiVisibilityValue = brandVisibilityEl.querySelector('#aiVisibilityValue');
             if (aiVisibilityBar && aiVisibilityValue) {
@@ -4368,8 +4465,19 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             // 更新提及次数
             const mentionCount = brandVisibilityEl.querySelector('#mentionCount');
             const weeklyChange = brandVisibilityEl.querySelector('#weeklyChange');
-            if (mentionCount) mentionCount.textContent = totalMentions;
-            if (weeklyChange) weeklyChange.textContent = `共查询${totalQueries}次`;
+            const totalQueriesEl = brandVisibilityEl.querySelector('#totalQueries');
+            const platformCountEl = brandVisibilityEl.querySelector('#platformCount');
+            
+            if (mentionCount) mentionCount.textContent = totalMentions.toLocaleString();
+            if (weeklyChange) weeklyChange.textContent = `共查询${totalQueries.toLocaleString()}次`;
+            if (totalQueriesEl) totalQueriesEl.textContent = totalQueries.toLocaleString();
+            if (platformCountEl) platformCountEl.textContent = byPlatform.length;
+            
+            // 创建平台对比柱状图
+            createVisibilityPlatformChart(byPlatform);
+            
+            // 创建雷达图
+            createVisibilityRadarChart(byPlatform);
             
             // 更新平台分布
             const platformDistribution = brandVisibilityEl.querySelector('#platformDistribution');
@@ -4377,15 +4485,158 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                 platformDistribution.innerHTML = '';
                 byPlatform.forEach(platform => {
                     const rate = platform.mention_rate ? platform.mention_rate.toFixed(1) : 0;
+                    const mentions = platform.mentions || 0;
+                    const queries = platform.queries || 0;
+                    
                     const platformItem = document.createElement('div');
-                    platformItem.style.cssText = 'background: #f8f9fa; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px;';
+                    platformItem.style.cssText = 'background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f0f0f0;';
                     platformItem.innerHTML = `
-                        <span style="font-size: 14px; color: #666;">${platform.platform}</span>
-                        <span style="font-size: 14px; font-weight: 500; color: var(--primary-color);">${rate}%</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 600; color: #1a1a2e;">${platform.platform}</span>
+                            <span style="font-size: 18px; font-weight: 700; color: #667eea;">${rate}%</span>
+                        </div>
+                        <div style="display: flex; gap: 12px; font-size: 12px; color: #888;">
+                            <span>提及: ${mentions}</span>
+                            <span>查询: ${queries}</span>
+                        </div>
+                        <div style="margin-top: 8px; height: 4px; background: #f0f0f0; border-radius: 2px; overflow: hidden;">
+                            <div style="height: 100%; width: ${rate}%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 2px;"></div>
+                        </div>
                     `;
                     platformDistribution.appendChild(platformItem);
                 });
             }
+        }
+        
+        // 创建平台可见度柱状图
+        function createVisibilityPlatformChart(platformData) {
+            const ctx = document.getElementById('visibilityPlatformChart');
+            if (!ctx || !platformData || platformData.length === 0) return;
+            
+            if (window.visibilityPlatformChart && typeof window.visibilityPlatformChart.destroy === 'function') {
+                window.visibilityPlatformChart.destroy();
+            }
+            
+            const labels = platformData.map(p => p.platform);
+            const data = platformData.map(p => p.mention_rate || 0);
+            const colors = [
+                'rgba(102, 126, 234, 0.8)',
+                'rgba(118, 75, 162, 0.8)',
+                'rgba(34, 197, 94, 0.8)',
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(239, 68, 68, 0.8)',
+                'rgba(168, 85, 247, 0.8)',
+                'rgba(236, 72, 153, 0.8)'
+            ];
+            
+            window.visibilityPlatformChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '提及率',
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `提及率: ${context.raw.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 创建平台能力雷达图
+        function createVisibilityRadarChart(platformData) {
+            const ctx = document.getElementById('visibilityRadarChart');
+            if (!ctx || !platformData || platformData.length === 0) return;
+            
+            if (window.visibilityRadarChart && typeof window.visibilityRadarChart.destroy === 'function') {
+                window.visibilityRadarChart.destroy();
+            }
+            
+            // 计算各维度平均值作为雷达图数据
+            const avgMentionRate = platformData.reduce((sum, p) => sum + (p.mention_rate || 0), 0) / platformData.length;
+            const avgPosition = platformData.reduce((sum, p) => sum + (p.avg_position || 0), 0) / platformData.length;
+            const maxMentions = Math.max(...platformData.map(p => p.mentions || 0));
+            const avgMentionsRatio = platformData.reduce((sum, p) => sum + ((p.mentions || 0) / maxMentions * 100), 0) / platformData.length;
+            
+            // 计算总提及和查询次数
+            const totalMentions = platformData.reduce((sum, p) => sum + (p.mentions || 0), 0);
+            const totalQueries = platformData.reduce((sum, p) => sum + (p.queries || 0), 0);
+            
+            // 归一化位置得分（位置越靠前得分越高）
+            const positionScore = Math.max(0, 100 - (avgPosition * 10));
+            
+            window.visibilityRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['提及率', '覆盖度', '位置得分', '活跃度', '影响力'],
+                    datasets: [{
+                        label: '平台综合表现',
+                        data: [
+                            avgMentionRate,
+                            avgMentionsRatio,
+                            positionScore,
+                            Math.min(100, platformData.length * 15),
+                            Math.min(100, (totalMentions / Math.max(1, totalQueries)) * 150)
+                        ],
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20,
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // 更新品牌感知模块
@@ -4398,6 +4649,7 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             const neutral = aggregate.neutral_ratio || fallback?.neutral || 0;
             const negative = aggregate.negative_ratio || fallback?.negative || 0;
             
+            // 更新情感指标卡片
             const positiveSentiment = brandPerceptionEl.querySelector('#positiveSentiment');
             const neutralSentiment = brandPerceptionEl.querySelector('#neutralSentiment');
             const negativeSentiment = brandPerceptionEl.querySelector('#negativeSentiment');
@@ -4405,6 +4657,212 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             if (positiveSentiment) positiveSentiment.textContent = `${positive.toFixed ? positive.toFixed(1) : positive}%`;
             if (neutralSentiment) neutralSentiment.textContent = `${neutral.toFixed ? neutral.toFixed(1) : neutral}%`;
             if (negativeSentiment) negativeSentiment.textContent = `${negative.toFixed ? negative.toFixed(1) : negative}%`;
+            
+            // 创建情感分布饼图
+            createPerceptionSentimentChart(positive, neutral, negative);
+            
+            // 创建关键词柱状图
+            const keywords = brandPerception?.keywords || fallback?.keywords || [];
+            createPerceptionKeywordsChart(keywords);
+            
+            // 更新关键词云
+            updateKeywordCloud(keywords);
+            
+            // 创建情感趋势图
+            createPerceptionTrendChart(brandPerception?.trends || []);
+        }
+        
+        // 创建品牌感知情感饼图
+        function createPerceptionSentimentChart(positive, neutral, negative) {
+            const ctx = document.getElementById('perceptionSentimentChart');
+            if (!ctx) return;
+            
+            if (window.perceptionSentimentChart && typeof window.perceptionSentimentChart.destroy === 'function') {
+                window.perceptionSentimentChart.destroy();
+            }
+            
+            window.perceptionSentimentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['正面', '中立', '负面'],
+                    datasets: [{
+                        data: [positive || 0, neutral || 0, negative || 0],
+                        backgroundColor: [
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(234, 179, 8, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(34, 197, 94, 1)',
+                            'rgba(234, 179, 8, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 15, font: { size: 12 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+        
+        // 创建关键词频次柱状图
+        function createPerceptionKeywordsChart(keywords) {
+            const ctx = document.getElementById('perceptionKeywordsChart');
+            if (!ctx || !keywords || keywords.length === 0) return;
+            
+            if (window.perceptionKeywordsChart && typeof window.perceptionKeywordsChart.destroy === 'function') {
+                window.perceptionKeywordsChart.destroy();
+            }
+            
+            // 取前10个关键词
+            const topKeywords = keywords.slice(0, 10);
+            const labels = topKeywords.map(k => k.keyword || k.word || '-');
+            const data = topKeywords.map(k => k.count || k.frequency || 0);
+            
+            window.perceptionKeywordsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '提及频次',
+                        data: data,
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        y: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 更新关键词云
+        function updateKeywordCloud(keywords) {
+            const cloudEl = document.getElementById('keywordCloud');
+            if (!cloudEl || !keywords || keywords.length === 0) return;
+            
+            const maxCount = Math.max(...keywords.map(k => k.count || k.frequency || 0));
+            const colors = ['#667eea', '#764ba2', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6'];
+            
+            cloudEl.innerHTML = keywords.slice(0, 30).map((k, i) => {
+                const keyword = k.keyword || k.word || '-';
+                const count = k.count || k.frequency || 0;
+                const size = Math.max(14, Math.min(32, (count / maxCount) * 20 + 14));
+                const color = colors[i % colors.length];
+                const opacity = 0.6 + (count / maxCount) * 0.4;
+                
+                return `<span style="font-size: ${size}px; color: ${color}; opacity: ${opacity}; padding: 4px 8px; border-radius: 4px; background: rgba(102,126,234,0.05); cursor: default; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${keyword}</span>`;
+            }).join('');
+        }
+        
+        // 创建情感趋势图
+        function createPerceptionTrendChart(trends) {
+            const ctx = document.getElementById('perceptionTrendChart');
+            if (!ctx) return;
+            
+            if (window.perceptionTrendChart && typeof window.perceptionTrendChart.destroy === 'function') {
+                window.perceptionTrendChart.destroy();
+            }
+            
+            // 如果没有趋势数据，显示一个示例对比图
+            if (!trends || trends.length === 0) {
+                trends = [
+                    { dimension: '产品质量', positive: 65, neutral: 25, negative: 10 },
+                    { dimension: '客户服务', positive: 55, neutral: 30, negative: 15 },
+                    { dimension: '价格', positive: 45, neutral: 35, negative: 20 },
+                    { dimension: '品牌形象', positive: 70, neutral: 20, negative: 10 },
+                    { dimension: '创新性', positive: 60, neutral: 28, negative: 12 }
+                ];
+            }
+            
+            const labels = trends.map(t => t.dimension || t.label);
+            const positiveData = trends.map(t => t.positive || 0);
+            const neutralData = trends.map(t => t.neutral || 0);
+            const negativeData = trends.map(t => t.negative || 0);
+            
+            window.perceptionTrendChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '正面',
+                            data: positiveData,
+                            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                            borderRadius: 4
+                        },
+                        {
+                            label: '中立',
+                            data: neutralData,
+                            backgroundColor: 'rgba(234, 179, 8, 0.8)',
+                            borderRadius: 4
+                        },
+                        {
+                            label: '负面',
+                            data: negativeData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 15, usePointStyle: true }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { display: false }
+                        },
+                        y: {
+                            stacked: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        }
+                    }
+                }
+            });
         }
         
         // 更新主题分析模块
@@ -4413,8 +4871,15 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             if (!topicAnalysisEl) return;
             
             const clusters = topicAnalysis?.clusters || fallbackTopics || [];
-            const topicDetails = topicAnalysisEl.querySelector('#topicDetails');
             
+            // 创建主题分布饼图
+            createTopicDistributionChart(clusters);
+            
+            // 创建主题热度柱状图
+            createTopicHeatChart(clusters);
+            
+            // 更新主题详情
+            const topicDetails = topicAnalysisEl.querySelector('#topicDetails');
             if (topicDetails && clusters.length > 0) {
                 topicDetails.innerHTML = '';
                 clusters.forEach((topic, index) => {
@@ -4424,17 +4889,124 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                     const sentiment = topic.dominant_sentiment || topic.trend || '-';
                     
                     const topicItem = document.createElement('div');
-                    topicItem.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px;';
+                    topicItem.style.cssText = 'background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 20px; border-radius: 12px; border: 1px solid #f0f0f0;';
                     topicItem.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h5 style="margin: 0; color: #333; font-size: 14px;">${name}</h5>
-                            <span style="font-size: 12px; color: #10b981;">${sentiment}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h5 style="margin: 0; color: #1a1a2e; font-size: 14px; font-weight: 600;">${name}</h5>
+                            <span style="font-size: 12px; color: ${sentiment === '正面' ? '#22c55e' : sentiment === '负面' ? '#ef4444' : '#888'}; background: ${sentiment === '正面' ? 'rgba(34,197,94,0.1)' : sentiment === '负面' ? 'rgba(239,68,68,0.1)' : 'rgba(136,136,136,0.1)'}; padding: 4px 10px; border-radius: 12px;">${sentiment}</span>
                         </div>
-                        <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">提及次数: ${count} (${rate}%)</p>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; width: ${rate}%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px;"></div>
+                            </div>
+                            <span style="font-size: 14px; font-weight: 600; color: #667eea; min-width: 60px; text-align: right;">${count}次 (${rate}%)</span>
+                        </div>
                     `;
                     topicDetails.appendChild(topicItem);
                 });
             }
+        }
+        
+        // 创建主题分布饼图
+        function createTopicDistributionChart(clusters) {
+            const ctx = document.getElementById('topicDistributionChart');
+            if (!ctx || !clusters || clusters.length === 0) return;
+            
+            if (window.topicDistributionChart && typeof window.topicDistributionChart.destroy === 'function') {
+                window.topicDistributionChart.destroy();
+            }
+            
+            const labels = clusters.map(c => c.cluster_name || c.name || '-');
+            const data = clusters.map(c => c.mention_rate || 0);
+            const colors = [
+                'rgba(102, 126, 234, 0.8)',
+                'rgba(118, 75, 162, 0.8)',
+                'rgba(34, 197, 94, 0.8)',
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(239, 68, 68, 0.8)',
+                'rgba(168, 85, 247, 0.8)',
+                'rgba(236, 72, 153, 0.8)'
+            ];
+            
+            window.topicDistributionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels.slice(0, 8),
+                    datasets: [{
+                        data: data.slice(0, 8),
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { padding: 10, font: { size: 11 }, boxWidth: 12 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+        
+        // 创建主题热度柱状图
+        function createTopicHeatChart(clusters) {
+            const ctx = document.getElementById('topicHeatChart');
+            if (!ctx || !clusters || clusters.length === 0) return;
+            
+            if (window.topicHeatChart && typeof window.topicHeatChart.destroy === 'function') {
+                window.topicHeatChart.destroy();
+            }
+            
+            // 按提及次数排序，取前8个
+            const sortedClusters = [...clusters].sort((a, b) => 
+                (b.total_mentions || b.mentions || b.count || 0) - (a.total_mentions || a.mentions || a.count || 0)
+            ).slice(0, 8);
+            
+            const labels = sortedClusters.map(c => c.cluster_name || c.name || '-');
+            const data = sortedClusters.map(c => c.total_mentions || c.mentions || c.count || 0);
+            
+            window.topicHeatChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '提及次数',
+                        data: data,
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        y: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
         }
         
         // 更新引用分析模块
@@ -4442,11 +5014,9 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             const referenceAnalysisEl = document.getElementById('reference-analysis');
             if (!referenceAnalysisEl) return;
             
-            const citationDetails = referenceAnalysisEl.querySelector('#citationDetails');
-            if (!citationDetails) return;
-            
-            // 构建引用数据列表
+            // 构建引用数据
             const citations = [];
+            let domainBreakdown = {};
             
             // 添加most_cited_pages
             if (citationAnalysis?.most_cited_pages) {
@@ -4457,8 +5027,11 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             
             // 添加domain_breakdown
             if (citationAnalysis?.domain_breakdown) {
-                Object.entries(citationAnalysis.domain_breakdown).forEach(([domain, count]) => {
-                    citations.push({ source: domain, count: count });
+                domainBreakdown = citationAnalysis.domain_breakdown;
+                Object.entries(domainBreakdown).forEach(([domain, count]) => {
+                    if (!citations.find(c => c.source === domain)) {
+                        citations.push({ source: domain, count: count });
+                    }
                 });
             }
             
@@ -4467,21 +5040,155 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                 fallback.forEach(c => citations.push(c));
             }
             
-            if (citations.length > 0) {
+            // 创建来源类型饼图
+            createCitationSourceChart(domainBreakdown);
+            
+            // 创建域名统计柱状图
+            createCitationDomainChart(domainBreakdown);
+            
+            // 更新热门引用页面列表
+            const citationDetails = referenceAnalysisEl.querySelector('#citationDetails');
+            if (citationDetails && citations.length > 0) {
                 citationDetails.innerHTML = '';
-                citations.slice(0, 10).forEach(citation => {
+                citations.sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 10).forEach((citation, index) => {
                     const citationItem = document.createElement('div');
-                    citationItem.style.cssText = 'background: #f8f9fa; padding: 15px; border-radius: 8px;';
+                    citationItem.style.cssText = 'background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 20px; border-radius: 12px; border: 1px solid #f0f0f0;';
                     citationItem.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h5 style="margin: 0; color: #333; font-size: 14px; word-break: break-all;">${citation.source}</h5>
-                            <span style="font-size: 14px; font-weight: 500; color: var(--primary-color); margin-left: 10px;">${citation.count}次</span>
+                            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+                                <span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">${index + 1}</span>
+                                <h5 style="margin: 0; color: #1a1a2e; font-size: 14px; word-break: break-all; flex: 1;">${citation.source}</h5>
+                            </div>
+                            <span style="font-size: 14px; font-weight: 600; color: #667eea; margin-left: 10px; white-space: nowrap;">${citation.count}次</span>
                         </div>
-                        ${citation.url ? `<a href="${citation.url}" target="_blank" style="margin: 10px 0 0 0; font-size: 14px; color: #3b82f6; text-decoration: none;">查看来源</a>` : ''}
                     `;
                     citationDetails.appendChild(citationItem);
                 });
             }
+        }
+        
+        // 创建引用来源类型饼图
+        function createCitationSourceChart(domainBreakdown) {
+            const ctx = document.getElementById('citationSourceChart');
+            if (!ctx) return;
+            
+            if (window.citationSourceChart && typeof window.citationSourceChart.destroy === 'function') {
+                window.citationSourceChart.destroy();
+            }
+            
+            // 对域名进行分类
+            const categories = {
+                '新闻媒体': 0,
+                '社交媒体': 0,
+                '技术社区': 0,
+                '电商平台': 0,
+                '其他': 0
+            };
+            
+            const domainEntries = Object.entries(domainBreakdown);
+            if (domainEntries.length === 0) {
+                categories['其他'] = 100;
+            } else {
+                domainEntries.forEach(([domain, count]) => {
+                    const d = domain.toLowerCase();
+                    if (d.includes('news') || d.includes('media') || d.includes('press')) {
+                        categories['新闻媒体'] += count;
+                    } else if (d.includes('twitter') || d.includes('facebook') || d.includes('weibo') || d.includes('reddit')) {
+                        categories['社交媒体'] += count;
+                    } else if (d.includes('github') || d.includes('stackoverflow') || d.includes('zhihu')) {
+                        categories['技术社区'] += count;
+                    } else if (d.includes('amazon') || d.includes('taobao') || d.includes('jd')) {
+                        categories['电商平台'] += count;
+                    } else {
+                        categories['其他'] += count;
+                    }
+                });
+            }
+            
+            const labels = Object.keys(categories).filter(k => categories[k] > 0);
+            const data = labels.map(l => categories[l]);
+            const colors = [
+                'rgba(102, 126, 234, 0.8)',
+                'rgba(34, 197, 94, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(239, 68, 68, 0.8)',
+                'rgba(168, 85, 247, 0.8)'
+            ];
+            
+            window.citationSourceChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { padding: 10, font: { size: 11 }, boxWidth: 12 }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 创建引用域名统计柱状图
+        function createCitationDomainChart(domainBreakdown) {
+            const ctx = document.getElementById('citationDomainChart');
+            if (!ctx) return;
+            
+            if (window.citationDomainChart && typeof window.citationDomainChart.destroy === 'function') {
+                window.citationDomainChart.destroy();
+            }
+            
+            const domainEntries = Object.entries(domainBreakdown)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            if (domainEntries.length === 0) {
+                // 显示示例数据
+                domainEntries.push(['暂无数据', 0]);
+            }
+            
+            const labels = domainEntries.map(([domain]) => domain);
+            const data = domainEntries.map(([, count]) => count);
+            
+            window.citationDomainChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '引用次数',
+                        data: data,
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        y: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
         }
         
         // 切换步骤
@@ -4859,14 +5566,14 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             }
             
             container.innerHTML = brands.map(brand => `
-                <div class="brand-item">
-                    <div class="brand-info">
+                <div class="brand-item" onclick="selectBrand('${brand.id}', '${brand.name}')" style="cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                    <div class="brand-info" style="flex: 1;">
                         <div class="brand-name">${brand.name}</div>
                         <div class="brand-website">${brand.website}</div>
                     </div>
-                    <div class="brand-status">
+                    <div class="brand-status" style="display: flex; align-items: center;">
                         <span class="status-badge status-${brand.status}">${getStatusText(brand.status)}</span>
-                        <button onclick="deleteBrand('${brand.id}', '${brand.name}')" style="margin-left: 10px; background: #ef4444; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">删除</button>
+                        <button onclick="event.stopPropagation(); deleteBrand('${brand.id}', '${brand.name}')" style="margin-left: 10px; background: #ef4444; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">删除</button>
                     </div>
                 </div>
             `).join('');
@@ -4910,6 +5617,96 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             }
         }
         
+        // 选择品牌并加载分析数据
+        async function selectBrand(brandId, brandName) {
+            // 保存当前选中的品牌ID到本地存储
+            localStorage.setItem('selectedBrandId', brandId);
+            localStorage.setItem('selectedBrandName', brandName);
+            
+            // 更新UI选中状态
+            document.querySelectorAll('.brand-item').forEach(item => {
+                item.style.background = 'white';
+                item.style.borderLeft = 'none';
+            });
+            event.currentTarget.style.background = '#f0f7ff';
+            event.currentTarget.style.borderLeft = '4px solid var(--primary-color)';
+            
+            // 加载品牌分析数据
+            await loadBrandAnalysis(brandId);
+        }
+        
+        // 加载品牌分析数据
+        async function loadBrandAnalysis(brandId) {
+            try {
+                showToast('正在加载分析数据...', 'info');
+                
+                const response = await fetch(`/api/brands/${brandId}/analysis`);
+                const data = await response.json();
+                
+                if (data.success && data.data?.analysis) {
+                    // 显示分析结果
+                    displayAnalysisResult(data.data.analysis);
+                    showToast('分析数据加载成功', 'success');
+                    
+                    // 自动切换到分析结果页面
+                    goToStep(4);
+                } else {
+                    showToast('该品牌暂无分析数据', 'warning');
+                }
+            } catch (error) {
+                console.error('加载分析数据失败:', error);
+                showToast('加载分析数据失败', 'error');
+            }
+        }
+        
+        // 从本地存储恢复分析数据
+        function restoreAnalysisData() {
+            const savedAnalysis = localStorage.getItem('currentAnalysisData');
+            if (savedAnalysis) {
+                try {
+                    const analysis = JSON.parse(savedAnalysis);
+                    displayAnalysisResult(analysis);
+                    console.log('已从本地存储恢复分析数据');
+                    return true;
+                } catch (e) {
+                    console.error('恢复分析数据失败:', e);
+                    return false;
+                }
+            }
+            return false;
+        }
+        
+        // 恢复上次选中的品牌
+        async function restoreSelectedBrand() {
+            const selectedBrandId = localStorage.getItem('selectedBrandId');
+            const selectedBrandName = localStorage.getItem('selectedBrandName');
+            
+            if (selectedBrandId) {
+                // 等待品牌列表加载完成
+                setTimeout(async () => {
+                    const brandItem = document.querySelector(`.brand-item[onclick*="${selectedBrandId}"]`);
+                    if (brandItem) {
+                        brandItem.style.background = '#f0f7ff';
+                        brandItem.style.borderLeft = '4px solid var(--primary-color)';
+                    }
+                    
+                    // 优先从服务器加载最新数据
+                    try {
+                        await loadBrandAnalysis(selectedBrandId);
+                    } catch (e) {
+                        // 服务器加载失败，尝试从本地存储恢复
+                        console.log('服务器加载失败，尝试从本地恢复');
+                        if (restoreAnalysisData()) {
+                            showToast('已显示本地缓存的分析数据', 'info');
+                        }
+                    }
+                }, 500);
+            } else {
+                // 没有选中的品牌，尝试从本地存储恢复分析数据
+                restoreAnalysisData();
+            }
+        }
+        
         // 清空分析数据
         function clearAnalysisData() {
             // 清空品牌概览等数据栏
@@ -4920,11 +5717,20 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             if (summaryBrandName) summaryBrandName.textContent = '';
             if (summaryScore) summaryScore.textContent = '';
             if (summaryUpdateTime) summaryUpdateTime.textContent = '';
-            // 可以在这里添加更多清空逻辑
+            
+            // 清空localStorage中的选中状态和分析数据
+            localStorage.removeItem('selectedBrandId');
+            localStorage.removeItem('selectedBrandName');
+            localStorage.removeItem('currentAnalysisData');
+            
+            // 清空全局变量
+            window.currentAnalysis = null;
+            window.rawAnalysisData = null;
         }
         
-        // 页面加载时加载品牌列表
+        // 页面加载时加载品牌列表并恢复选中状态
         loadBrandList();
+        restoreSelectedBrand();
     </script>
 </body>
 </html>
