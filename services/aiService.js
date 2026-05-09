@@ -90,33 +90,89 @@ const GEO_TEMPLATE_STRUCTURE = {
 // 生成GEO格式的系统提示词
 function generateGeoSystemPrompt(brandName, brandWebsite = '') {
   const websiteInfo = brandWebsite ? `\n品牌官网：${brandWebsite}` : '';
-  return `你是品牌GEO分析专家。请对品牌「${brandName}」${websiteInfo}进行全面的AI平台品牌可见度分析。
+  return `你是品牌GEO（生成式引擎优化）分析专家。请对品牌「${brandName}」${websiteInfo}进行全面的AI平台品牌可见度分析。
 
-【严格要求】
+【核心任务】
+通过联网搜索收集该品牌在各AI平台（ChatGPT、DeepSeek、豆包、Kimi、Gemini等）上的表现数据，返回完整的JSON格式分析报告。
+
+【输出要求】
 1. 返回纯JSON格式，不要包含任何其他文字、markdown标记或解释
 2. JSON必须严格遵循以下12个模块的结构和字段名
 3. 所有数值字段使用数字类型（不用字符串）
 4. 没有数据的字段设为 null，数组设为 []
-5. insight字段需要根据字数要求填写实质性内容
+5. insight字段必须根据字数要求填写实质性分析内容，不能为空或省略
 
-【分析内容】
-请搜索该品牌在各AI平台（ChatGPT、DeepSeek、豆包、Kimi等）上的表现，收集足够数据后返回完整的JSON报告。
+【JSON模板结构】（必须严格遵守）
 
-返回格式（严格按照此结构）：
-{
-  "data_overview": { "report_id": "geo_<时间戳>", "brand_name": "", "brand_website": "", "generated_at": "ISO时间", "tested_platforms": [], "total_prompts": 数字, "total_queries": 数字, "total_mentions": 数字, "overall_mention_rate": 数字, "overall_mention_rate_denominator": "", "overall_avg_position": 数字, "insight": "200-300字" },
-  "brand_overview": { "ai_visibility_score": 数字, "share_of_voice": 数字, "visibility_rate": 数字, "visibility_rate_denominator": "", "avg_position": 数字, "positive_ratio": 数字, "neutral_ratio": 数字, "negative_ratio": 数字, "insight": "200-300字" },
-  "brand_visibility": { "by_platform": [{ "platform": "", "queries": 数字, "mentions": 数字, "mention_rate": 数字, "mention_rate_denominator": "", "avg_position": 数字, "citations": 数字, "citation_rate": 数字, "citation_rate_denominator": "" }], "by_topic": [{ "topic": "", "mentions": 数字, "mention_rate": 数字, "mention_rate_denominator": "" }], "insight": "250-400字" },
-  "brand_perception": { "aggregate": { "positive_count": 数字, "neutral_count": 数字, "negative_count": 数字, "positive_ratio": 数字, "neutral_ratio": 数字, "negative_ratio": 数字 }, "by_platform": [{ "platform": "", "positive": 数字, "neutral": 数字, "negative": 数字 }], "sample_quotes": [{ "platform": "", "prompt": "", "sentiment": "", "quote": "" }], "insight": "250-400字" },
-  "topic_analysis": { "clusters": [{ "cluster_name": "", "prompts_count": 数字, "total_mentions": 数字, "mention_rate": 数字, "mention_rate_denominator": "", "avg_position": 数字, "dominant_sentiment": "" }], "insight": "300-500字" },
-  "citation_analysis": { "total_unique_urls": 数字, "unique_urls": [], "domain_breakdown": {}, "brand_domain_citations": 数字, "third_party_citations": 数字, "third_party_ratio": 数字, "most_cited_pages": [{ "url": "", "count": 数字 }], "insight": "200-300字" },
-  "prompts_with_snapshots": [{ "prompt_text": "", "platform": "", "brand_mentioned": false, "position": null, "has_citation": false, "cited_urls": [], "sentiment": null, "accuracy": null, "response_snapshot": "", "full_response_length": 0 }],
-  "improvement_suggestions": { "total_gaps": 数字, "suggestions": [{ "gap_type": "", "prompt_text": "", "platform": "", "current_status": "", "recommendation": "80-150字", "priority": "" }], "overall_summary": "200-300字" },
-  "competitor_brand_analysis": { "competitors": [{ "name": "", "website": "", "visibility_score": 数字, "total_mentions": 数字, "mention_rate": 数字, "avg_position": 数字, "positive_ratio": 数字, "share_of_voice": 数字 }], "insight": "200-300字或'无竞品数据'" },
-  "competitor_prompt_analysis": [{ "prompt_text": "", "platform": "", "brand_performance": [{ "brand_name": "", "mentioned": false, "position": null, "sentiment": null }] }],
-  "competitor_settings": { "auto_discovered": false, "competitor_list": [], "comparison_basis": "same_prompts_and_platforms" },
-  "errors": []
-}
+1. data_overview（数据总览）
+   - report_id: 字符串，格式"geo_<时间戳>"
+   - brand_name: 品牌名称
+   - brand_website: 官网URL
+   - generated_at: ISO 8601时间格式
+   - tested_platforms: 数组，实际测试的平台名称列表如["ChatGPT","DeepSeek","豆包"]
+   - total_prompts: 整数，测试使用的提示词总数（建议50-100个）
+   - total_queries: 整数，总提问次数=total_prompts×平台数
+   - total_mentions: 整数，所有平台中品牌被提及的总次数
+   - overall_mention_rate: 小数，总体提及率(%)=(total_mentions/total_queries)*100
+   - overall_mention_rate_denominator: 字符串，格式"312/1020"
+   - overall_avg_position: 小数，被提及时的平均位置（1.0=首位）
+   - insight: 200-300字，从整体维度解读测试结果，必须引用具体数字
+
+2. brand_overview（品牌概览）
+   - ai_visibility_score: 整数0-100，AI可见度综合得分
+   - share_of_voice: 小数，品牌提及份额（%）
+   - visibility_rate: 小数，综合提及率(%)
+   - visibility_rate_denominator: 字符串"312/1020"
+   - avg_position: 小数，品牌在所有提及中的平均位置
+   - positive_ratio/neutral_ratio/negative_ratio: 小数，正面/中立/负面情感占比(%)
+   - insight: 200-300字，解读AI可见度得分、提及率、情感分布
+
+3. brand_visibility（品牌可见度-分平台分主题）
+   - by_platform: 数组，每个平台包含platform/queries/mentions/mention_rate/mention_rate_denominator/avg_position/citations/citation_rate/citation_rate_denominator
+   - by_topic: 数组，每个主题包含topic/mentions/mention_rate/mention_rate_denominator
+   - insight: 250-400字，分平台和主题分析表现
+
+4. brand_perception（品牌感知-情感分析）
+   - aggregate: 包含positive_count/neutral_count/negative_count及各自ratio
+   - by_platform: 每个平台的情感分布
+   - sample_quotes: 数组，包含platform/prompt/sentiment/quote（不超过100字）
+   - insight: 250-400字，引用至少2个正面和2个负面语录
+
+5. topic_analysis（主题分析）
+   - clusters: 数组，每个主题包含cluster_name/prompts_count/total_mentions/mention_rate/mention_rate_denominator/avg_position/dominant_sentiment
+   - insight: 300-500字，对每个主题逐一分析
+
+6. citation_analysis（引用分析）
+   - total_unique_urls: 整数
+   - unique_urls: 数组
+   - domain_breakdown: 对象如{"yunchuang.com":15}
+   - brand_domain_citations/third_party_citations: 整数
+   - third_party_ratio: 小数(%)
+   - most_cited_pages: 数组[{url,count}]
+   - insight: 200-300字
+
+7. prompts_with_snapshots（提示词列表+答案快照）
+   - 数组，每个元素包含prompt_text/platform/brand_mentioned/position/has_citation/cited_urls/sentiment/accuracy/response_snapshot/full_response_length
+
+8. improvement_suggestions（改进建议）
+   - total_gaps: 整数
+   - suggestions: 数组，每个包含gap_type/prompt_text/platform/current_status/recommendation(80-150字)/priority
+   - overall_summary: 200-300字
+
+9. competitor_brand_analysis（竞品品牌分析）
+   - competitors: 数组，每个竞品包含name/website/visibility_score/total_mentions/mention_rate/avg_position/positive_ratio/share_of_voice
+   - insight: 200-300字或"无竞品数据"
+
+10. competitor_prompt_analysis（竞品提示词分析）
+    - 数组，每个元素包含prompt_text/platform/brand_performance
+
+11. competitor_settings（竞品设置）
+    - auto_discovered: 布尔值
+    - competitor_list: 数组
+    - comparison_basis: "same_prompts_and_platforms"
+
+12. errors（错误日志）
+    - 数组，每个元素包含platform/error_type/message
 
 请直接返回JSON，不要有任何前缀或解释。`;
 }
@@ -217,7 +273,8 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       const requestBody = {
         model: llmModel,
         messages: [
-          { role: 'user', content: systemPrompt + '\n\n' + userPrompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
         ],
         temperature: 0.1,
         max_tokens: 16000
@@ -238,15 +295,30 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
       const responseData = response.data;
       console.log('[调用大模型] 响应数据:', JSON.stringify(responseData, null, 2).substring(0, 500));
 
-      // 提取响应内容
-      let content = responseData.choices?.[0]?.message?.content;
+      // 提取响应内容（MiniMax可能在reasoning_details中包含思考过程）
+      const message = responseData.choices?.[0]?.message || {};
+      let content = message.content;
+
+      // 如果content为空但有reasoning_details，尝试从中提取内容
+      if (!content && message.reasoning_details && message.reasoning_details.length > 0) {
+        console.log('[调用大模型] content为空，检查reasoning_details');
+        const reasoningText = message.reasoning_details.map(r => r.text || r).join('\n');
+        console.log('[调用大模型] reasoning_details长度:', reasoningText.length, '字符');
+      }
+
+      // MiniMax M2.7模型可能包含<thinking>标签，需要清理
+      content = cleanThinkingTags(content);
 
       if (!content) {
+        // 如果仍然没有content，返回错误
+        console.error('[错误] 大模型返回内容为空');
+        console.log('[错误] 完整响应:', JSON.stringify(responseData));
         return { error: { module: 'aiService.performAIAnalysis', message: '大模型返回内容为空', details: JSON.stringify(responseData) } };
       }
 
       console.log('[解析] 返回内容长度:', content.length, '字符');
-      console.log('[解析] 返回内容前200字符:', content.substring(0, 200));
+      console.log('[解析] 返回内容前500字符:', content.substring(0, 500));
+      console.log('[解析] 返回内容后200字符:', content.substring(Math.max(0, content.length - 200)));
 
       // 清理可能的前缀（非JSON内容）
       content = cleanJsonResponse(content);
@@ -257,10 +329,12 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 
       if (!parsedData) {
         console.error('[错误] 无法从返回内容中提取有效JSON');
+        console.error('[错误] 清理后内容:', content);
         return { error: { module: 'aiService.performAIAnalysis', message: 'JSON解析失败', details: '无法提取有效JSON' } };
       }
 
       console.log('[解析] 成功提取JSON，字段数量:', Object.keys(parsedData).length);
+      console.log('[解析] JSON字段列表:', Object.keys(parsedData).join(', '));
 
       // 验证并补充缺失字段
       parsedData = validateAndFillGeoData(parsedData, brand.name, brand.website);
@@ -300,6 +374,46 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 }
 
 /**
+ * 清理MiniMax模型返回的<thinking>标签内容
+ * @param {string} text - 原始响应文本
+ * @returns {string} 清理后的文本
+ */
+function cleanThinkingTags(text) {
+  if (!text || typeof text !== 'string') return text || '';
+
+  let cleaned = text;
+
+  // 处理Unicode转义的标签（如 \u003cthinking\u003e）
+  cleaned = cleaned.replace(/\\u003c(thinking|thought|reasoning)\\u003e[\s\S]*?\\u003c\/\1\\u003e/gi, '');
+  cleaned = cleaned.replace(/\\u003c(thinking|thought|reasoning)\\u003e[\s\S]*?/gi, '');
+  cleaned = cleaned.replace(/\\u003c\/(thinking|thought|reasoning)\\u003e/gi, '');
+
+  // 移除 <thinking>...</thinking> 标签及其内容
+  cleaned = cleaned.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+
+  // 移除 <thought>...</thought> 标签及其内容（某些模型使用）
+  cleaned = cleaned.replace(/<thought>[\s\S]*?<\/thought>/gi, '');
+
+  // 移除 <reasoning>...</reasoning> 标签及其内容
+  cleaned = cleaned.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, '');
+
+  // 移除独立的 <thinking> 类型的标签（自闭合或未闭合）
+  cleaned = cleaned.replace(/<thinking\s*\/?>/gi, '');
+  cleaned = cleaned.replace(/<thought\s*\/?>/gi, '');
+  cleaned = cleaned.replace(/<reasoning\s*\/?>/gi, '');
+
+  // 移除HTML实体编码的标签
+  cleaned = cleaned.replace(/&lt;(thinking|thought|reasoning)&gt;[\s\S]*?&lt;\/\1&gt;/gi, '');
+  cleaned = cleaned.replace(/&lt;(thinking|thought|reasoning)&gt;[\s\S]*?/gi, '');
+  cleaned = cleaned.replace(/&lt;\/(thinking|thought|reasoning)&gt;/gi, '');
+
+  // 清理多余的空白
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
+
+  return cleaned;
+}
+
+/**
  * 清理JSON响应中的非JSON前缀
  * @param {string} text - 原始响应文本
  * @returns {string} 清理后的文本
@@ -307,17 +421,67 @@ async function performAIAnalysis(brandId, brandInfo, customAgentId = '') {
 function cleanJsonResponse(text) {
   if (!text || typeof text !== 'string') return '';
 
+  let cleaned = text.trim();
+
   // 移除 markdown 代码块标记
-  let cleaned = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '');
+  cleaned = cleaned.replace(/^```json\s*/i, '').replace(/^```\s*/i, '');
   cleaned = cleaned.replace(/\s*```$/i, '');
 
-  // 移除前言（如 "这是分析结果：" 或 "以下是JSON："）
-  const jsonStartMatch = cleaned.match(/\{/);
-  if (jsonStartMatch && jsonStartMatch.index > 0) {
-    cleaned = cleaned.substring(jsonStartMatch.index);
+  // 移除常见的非JSON前缀
+  const prefixes = [
+    /^(以下是|根据|分析|结果|报告)[:：]\s*/i,
+    /^(here is|here's|this is|according to)[:：]\s*/i,
+    /^(JSON|json|data|分析结果)[:：]\s*/i,
+    /^\s*解析[:：]\s*/i,
+    /^\s*分析[:：]\s*/
+  ];
+
+  for (const prefix of prefixes) {
+    cleaned = cleaned.replace(prefix, '');
+  }
+
+  // 移除开头的自然语言描述（直到遇到第一个 { 或 [）
+  const firstBrace = cleaned.indexOf('{');
+  const firstBracket = cleaned.indexOf('[');
+  const firstStart = Math.min(
+    firstBrace === -1 ? Infinity : firstBrace,
+    firstBracket === -1 ? Infinity : firstBracket
+  );
+
+  if (firstStart !== Infinity && firstStart > 0) {
+    cleaned = cleaned.substring(firstStart);
+  }
+
+  // 移除结尾的多余内容（从最后一个 } 或 ] 之后的内容）
+  const lastBrace = cleaned.lastIndexOf('}');
+  const lastBracket = cleaned.lastIndexOf(']');
+  const lastEnd = Math.max(lastBrace, lastBracket);
+
+  if (lastEnd > 0 && lastEnd < cleaned.length - 1) {
+    cleaned = cleaned.substring(0, lastEnd + 1);
   }
 
   return cleaned.trim();
+}
+
+/**
+ * 从文本中提取完整的JSON对象或数组
+ * @param {string} text - 原始文本
+ * @returns {Object|null} 解析后的JSON对象或数组或null
+ */
+function extractJsonFromText(text) {
+  if (!text || typeof text !== 'string') return null;
+
+  const trimmed = text.trim();
+  if (!trimmed.includes('{') && !trimmed.includes('[')) return null;
+
+  // 优先处理数组格式（prompts_with_snapshots可能是数组）
+  if (trimmed.startsWith('[')) {
+    return extractJsonArray(trimmed);
+  }
+
+  // 处理对象格式
+  return extractJsonObject(trimmed);
 }
 
 /**
@@ -325,15 +489,24 @@ function cleanJsonResponse(text) {
  * @param {string} text - 原始文本
  * @returns {Object|null} 解析后的JSON对象或null
  */
-function extractJsonFromText(text) {
+function extractJsonObject(text) {
   if (!text || typeof text !== 'string') return null;
   if (!text.includes('{')) return null;
 
-  // 找到第一个 { 的位置
+  // 尝试直接解析（最常见情况）
+  try {
+    const direct = JSON.parse(text);
+    if (typeof direct === 'object' && !Array.isArray(direct)) {
+      return direct;
+    }
+  } catch (e) {
+    // 继续尝试提取
+  }
+
+  // 从第一个 { 开始查找匹配的 }
   const firstBrace = text.indexOf('{');
   const substring = text.substring(firstBrace);
 
-  // 使用深度计数器找配对的 }
   let depth = 0;
   let endIndex = -1;
   let inString = false;
@@ -347,6 +520,13 @@ function extractJsonFromText(text) {
       continue;
     }
 
+    // 处理转义的引号
+    if (char === '\\' && inString) {
+      escape = true;
+      continue;
+    }
+
+    // 处理字符串
     if (char === '"' && !escape) {
       inString = !inString;
     } else if (!inString) {
@@ -360,10 +540,6 @@ function extractJsonFromText(text) {
         }
       }
     }
-
-    if (char === '\\') {
-      escape = true;
-    }
   }
 
   if (endIndex === -1) return null;
@@ -373,7 +549,82 @@ function extractJsonFromText(text) {
   try {
     return JSON.parse(jsonStr);
   } catch (e) {
-    console.log('[extractJsonFromText] JSON解析失败:', e.message);
+    console.log('[extractJsonObject] JSON解析失败:', e.message);
+    // 尝试修复常见的JSON问题
+    return tryFixAndParseJson(jsonStr);
+  }
+}
+
+/**
+ * 尝试修复并解析JSON
+ * @param {string} jsonStr - JSON字符串
+ * @returns {Object|null} 解析后的对象或null
+ */
+function tryFixAndParseJson(jsonStr) {
+  if (!jsonStr) return null;
+
+  // 移除尾部的逗号
+  let fixed = jsonStr.replace(/,(\s*[}\]])/g, '$1');
+
+  // 尝试解析
+  try {
+    return JSON.parse(fixed);
+  } catch (e) {
+    console.log('[tryFixAndParseJson] 修复后仍解析失败');
+    return null;
+  }
+}
+
+/**
+ * 从文本中提取完整的JSON数组
+ * @param {string} text - 原始文本
+ * @returns {Array|null} 解析后的数组或null
+ */
+function extractJsonArray(text) {
+  if (!text || typeof text !== 'string') return null;
+  if (!text.startsWith('[')) return null;
+
+  let depth = 0;
+  let endIndex = -1;
+  let inString = false;
+  let escape = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (escape) {
+      escape = false;
+      continue;
+    }
+
+    if (char === '\\' && inString) {
+      escape = true;
+      continue;
+    }
+
+    if (char === '"' && !escape) {
+      inString = !inString;
+    } else if (!inString) {
+      if (char === '[') {
+        depth++;
+      } else if (char === ']') {
+        depth--;
+        if (depth === 0) {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+  }
+
+  if (endIndex === -1) return null;
+
+  const jsonStr = text.substring(0, endIndex + 1);
+
+  try {
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    console.log('[extractJsonArray] JSON数组解析失败:', e.message);
     return null;
   }
 }
