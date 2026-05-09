@@ -1332,21 +1332,25 @@
                             <!-- 图表区域 -->
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
                                 <!-- 平台对比柱状图 -->
-                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 320px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                         <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">各平台可见度对比</h3>
                                         <span style="font-size: 12px; color: #888;">提及率 %</span>
                                     </div>
-                                    <canvas id="visibilityPlatformChart" height="200"></canvas>
+                                    <div style="height: 240px; position: relative;">
+                                        <canvas id="visibilityPlatformChart"></canvas>
+                                    </div>
                                 </div>
 
                                 <!-- 平台表现雷达图 -->
-                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 320px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                         <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">平台综合能力雷达</h3>
                                         <span style="font-size: 12px; color: #888;">多维度评估</span>
                                     </div>
-                                    <canvas id="visibilityRadarChart" height="200"></canvas>
+                                    <div style="height: 240px; position: relative;">
+                                        <canvas id="visibilityRadarChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1391,39 +1395,45 @@
                             <!-- 图表区域 -->
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
                                 <!-- 情感分布饼图 -->
-                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 340px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                         <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">情感分布</h3>
                                         <span style="font-size: 12px; color: #888;">基于AI分析</span>
                                     </div>
-                                    <canvas id="perceptionSentimentChart" height="220"></canvas>
+                                    <div style="height: 260px; position: relative;">
+                                        <canvas id="perceptionSentimentChart"></canvas>
+                                    </div>
                                 </div>
 
                                 <!-- 关键词频次柱状图 -->
-                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 340px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                         <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">热门关键词TOP10</h3>
                                         <span style="font-size: 12px; color: #888;">提及频次</span>
                                     </div>
-                                    <canvas id="perceptionKeywordsChart" height="220"></canvas>
+                                    <div style="height: 260px; position: relative;">
+                                        <canvas id="perceptionKeywordsChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- 关键词云区域 -->
                             <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px;">
                                 <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 20px 0;">品牌关键词云</h3>
-                                <div id="keywordCloud" style="min-height: 200px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 12px;">
+                                <div id="keywordCloud" style="min-height: 180px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 12px;">
                                     <p style="color: #999;">请先进行品牌分析以生成关键词云</p>
                                 </div>
                             </div>
 
                             <!-- 情感趋势分析 -->
-                            <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 320px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                     <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">情感趋势对比</h3>
                                     <span style="font-size: 12px; color: #888;">各维度情感分布</span>
                                 </div>
-                                <canvas id="perceptionTrendChart" height="200"></canvas>
+                                <div style="height: 240px; position: relative;">
+                                    <canvas id="perceptionTrendChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1440,21 +1450,25 @@
                             <!-- 图表区域 -->
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
                                 <!-- 主题分布饼图 -->
-                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 360px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                         <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">热门主题分布</h3>
                                         <span style="font-size: 12px; color: #888;">基于提及率</span>
                                     </div>
-                                    <canvas id="topicDistributionChart" height="250"></canvas>
+                                    <div style="height: 280px; position: relative;">
+                                        <canvas id="topicDistributionChart"></canvas>
+                                    </div>
                                 </div>
 
                                 <!-- 主题热度柱状图 -->
-                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 360px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                         <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">主题热度TOP8</h3>
                                         <span style="font-size: 12px; color: #888;">提及次数</span>
                                     </div>
-                                    <canvas id="topicHeatChart" height="250"></canvas>
+                                    <div style="height: 280px; position: relative;">
+                                        <canvas id="topicHeatChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1515,21 +1529,25 @@
                             <!-- 图表区域 -->
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
                                 <!-- 来源类型饼图 -->
-                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 360px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                         <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">引用来源类型</h3>
                                         <span style="font-size: 12px; color: #888;">域名分类</span>
                                     </div>
-                                    <canvas id="citationSourceChart" height="250"></canvas>
+                                    <div style="height: 280px; position: relative;">
+                                        <canvas id="citationSourceChart"></canvas>
+                                    </div>
                                 </div>
 
                                 <!-- 域名统计柱状图 -->
-                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 360px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                         <h3 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0;">引用域名TOP10</h3>
                                         <span style="font-size: 12px; color: #888;">引用次数</span>
                                     </div>
-                                    <canvas id="citationDomainChart" height="250"></canvas>
+                                    <div style="height: 280px; position: relative;">
+                                        <canvas id="citationDomainChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
 
