@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>瓦兰卡工作台 - 品牌AI表现监测与优化工具</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/chart.js"></script>
     <style>
         /* Toast通知样式 */
         .toast {
@@ -4128,8 +4128,8 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             const ctx = document.getElementById('overviewSentimentChart');
             if (!ctx) return;
             
-            // 销毁旧图表
-            if (window.overviewSentimentChart) {
+            // 销毁旧图表（确保是有效的Chart实例）
+            if (window.overviewSentimentChart && typeof window.overviewSentimentChart.destroy === 'function') {
                 window.overviewSentimentChart.destroy();
             }
             
