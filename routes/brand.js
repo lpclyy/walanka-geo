@@ -160,7 +160,7 @@ router.post('/:id/analyze', async (req, res) => {
     }
 
     // 保存分析结果到数据库
-    if (analysisResult && analysisResult.brandName) {
+    if (analysisResult && analysisResult.data_overview?.brand_name) {
       console.log('保存分析结果到数据库...');
       try {
         await brandService.saveAnalysisResult(id, analysisResult);
