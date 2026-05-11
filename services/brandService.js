@@ -135,7 +135,9 @@ async function getAnalysisByBrandId(brandId) {
   // 返回原始数据（字符串形式），让前端根据需要解析
   // 这样可以避免重复解析导致的 "[object Object]" 错误
   return {
+    // 新模板字段（前端期望的字段名）
     data_overview: result.overview || '{}',
+    brand_overview: result.overview || '{}',  // overview 存储的是品牌概览数据
     brand_visibility: result.visibility || '{}',
     brand_perception: result.perception || '{}',
     topic_analysis: result.topics || '{}',

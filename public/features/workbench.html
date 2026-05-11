@@ -3637,7 +3637,20 @@
             
             // 尝试恢复之前选择的品牌分析数据
             await restoreBrandAnalysis();
+            
+            // 初始化竞品分析模块的品牌列表
+            await initializeCompetitorModule();
         };
+        
+        // 初始化竞品分析模块
+        async function initializeCompetitorModule() {
+            const brandId = localStorage.getItem('selectedBrandId');
+            if (brandId) {
+                console.log('初始化竞品分析模块，品牌ID:', brandId);
+                // 加载品牌列表
+                await loadAnalyzedBrandsForCompetitor();
+            }
+        }
         
         // 恢复品牌分析数据
         async function restoreBrandAnalysis() {
@@ -6739,26 +6752,46 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                 
                 if (data.success && data.analysis) {
                     const analysis = data.analysis;
-                    const visibility = analysis.visibility || analysis.data_overview || {};
+                    
+                    // 解析JSON字符串
+                    let visibilityData = {};
+                    let overviewData = {};
+                    
+                    try {
+                        const visibilityRaw = analysis.brand_visibility || analysis.visibility || '{}';
+                        visibilityData = typeof visibilityRaw === 'string' ? JSON.parse(visibilityRaw) : visibilityRaw;
+                    } catch (e) {
+                        console.warn('解析visibility失败:', e);
+                    }
+                    
+                    try {
+                        const overviewRaw = analysis.data_overview || analysis.overview || '{}';
+                        overviewData = typeof overviewRaw === 'string' ? JSON.parse(overviewRaw) : overviewRaw;
+                    } catch (e) {
+                        console.warn('解析overview失败:', e);
+                    }
                     
                     // 显示品牌信息
                     document.getElementById('selected-brand-info').style.display = 'block';
                     document.getElementById('selected-brand-name').textContent = brandName;
-                    document.getElementById('selected-brand-score').textContent = visibility.ai_visibility_score || visibility.score || visibility.overall_score || '-';
-                    document.getElementById('selected-brand-mention').textContent = (visibility.visibility_rate || visibility.mention_rate || '-') + '%';
-                    document.getElementById('selected-brand-sentiment').textContent = (visibility.positive_sentiment_rate || visibility.positive_ratio || visibility.positive_sentiment || '-') + '%';
+                    document.getElementById('selected-brand-score').textContent = 
+                        visibilityData.ai_visibility_score || visibilityData.score || overviewData.overallScore || '-';
+                    document.getElementById('selected-brand-mention').textContent = 
+                        (visibilityData.visibility_rate || visibilityData.mention_rate || overviewData.overallMentionRate || '-') + '%';
+                    document.getElementById('selected-brand-sentiment').textContent = 
+                        (visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || visibilityData.positive_sentiment || '-') + '%';
                     
                     // 保存到全局变量供图表使用
                     window.currentAnalysis = analysis;
                 }
                 
                 // 加载竞品列表
-                loadCompetitors(brandId);
+                await loadCompetitors(brandId);
                 
             } catch (error) {
                 console.error('加载品牌分析数据失败:', error);
                 // 仍然加载竞品列表
-                loadCompetitors(brandId);
+                await loadCompetitors(brandId);
             }
         }
         
