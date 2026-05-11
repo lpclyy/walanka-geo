@@ -13,6 +13,10 @@ router.post('/', async (req, res) => {
   try {
     const { userId, brandId, name, website } = req.body;
 
+    if (!userId) {
+      return res.status(400).json({ success: false, message: '用户ID不能为空' });
+    }
+    
     if (!brandId || !name) {
       return res.status(400).json({ success: false, message: '缺少必要参数' });
     }

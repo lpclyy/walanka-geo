@@ -4204,8 +4204,16 @@
         function getUserId() {
             const user = localStorage.getItem('user');
             if (user) {
-                const userObj = JSON.parse(user);
-                return userObj.id;
+                try {
+                    const userObj = JSON.parse(user);
+                    // 尝试获取id、phone、name或其他可能的用户标识字段
+                    const userId = userObj.id || userObj.phone || userObj.name || userObj.userId;
+                    console.log('获取用户ID:', userId, '用户对象:', userObj);
+                    return userId;
+                } catch (e) {
+                    console.error('解析用户信息失败:', e);
+                    return null;
+                }
             }
             return null;
         }
@@ -6069,6 +6077,12 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             
             const brandId = localStorage.getItem('selectedBrandId');
             const userId = getUserId();
+            
+            if (!userId) {
+                showToast('请先登录账号', 'error');
+                return;
+            }
+            
             if (!brandId) {
                 showToast('请先选择一个品牌', 'warning');
                 return;

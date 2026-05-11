@@ -57,7 +57,15 @@ router.post('/register', async (req, res) => {
     const user = await userService.createUser({ name, phone, password, role: 'user' });
     const token = generateToken({ id: user.id, phone: user.phone });
 
-    return sendSuccess(res, { user, token }, '注册成功');
+    // 明确返回用户数据，排除密码
+    const userData = {
+      id: user.id,
+      name: user.name,
+      phone: user.phone,
+      role: user.role
+    };
+
+    return sendSuccess(res, { user: userData, token }, '注册成功');
   } catch (error) {
     console.error('注册失败:', error);
     return sendError(res, '注册失败，请稍后重试');
@@ -87,7 +95,15 @@ router.post('/login', async (req, res) => {
 
     const token = generateToken({ id: user.id, phone: user.phone });
 
-    return sendSuccess(res, { user, token }, '登录成功');
+    // 明确返回用户ID和其他必要字段，排除密码
+    const userData = {
+      id: user.id,
+      name: user.name,
+      phone: user.phone,
+      role: user.role
+    };
+
+    return sendSuccess(res, { user: userData, token }, '登录成功');
   } catch (error) {
     console.error('登录失败:', error);
     return sendError(res, '登录失败，请稍后重试');
