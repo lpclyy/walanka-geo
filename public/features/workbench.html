@@ -4504,10 +4504,11 @@
                     console.warn('分析数据太大，无法保存到本地存储');
                 }
                 
-                // 解析新模板数据结构
+                // 解析新模板数据结构（后端已返回解析后的对象，直接使用）
                 const parseModule = (key) => {
                     if (!analysis[key]) return null;
-                    return typeof analysis[key] === 'string' ? JSON.parse(analysis[key]) : analysis[key];
+                    // 后端已解析为对象，直接返回
+                    return analysis[key];
                 };
                 
                 const dataOverview = parseModule('data_overview');
@@ -6448,25 +6449,9 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                         const analysis = data.data?.analysis || data.analysis || {};
                         console.log('主品牌分析数据:', analysis);
                         
-                        // 尝试多种字段名获取数据
-                        let visibilityData = {};
-                        let overviewData = {};
-                        
-                        // 尝试解析 visibility / brand_visibility
-                        const visibilityRaw = analysis.brand_visibility || analysis.visibility || '{}';
-                        try {
-                            visibilityData = typeof visibilityRaw === 'string' ? JSON.parse(visibilityRaw) : visibilityRaw;
-                        } catch (e) {
-                            console.warn('解析visibility失败:', e);
-                        }
-                        
-                        // 尝试解析 overview / brand_overview / data_overview
-                        const overviewRaw = analysis.brand_overview || analysis.overview || analysis.data_overview || '{}';
-                        try {
-                            overviewData = typeof overviewRaw === 'string' ? JSON.parse(overviewRaw) : overviewRaw;
-                        } catch (e) {
-                            console.warn('解析overview失败:', e);
-                        }
+                        // 后端已返回解析后的对象，直接使用
+                        const visibilityData = analysis.brand_visibility || analysis.visibility || {};
+                        const overviewData = analysis.brand_overview || analysis.overview || analysis.data_overview || {};
                         
                         console.log('visibilityData:', visibilityData);
                         console.log('overviewData:', overviewData);
@@ -6753,23 +6738,9 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                 if (data.success && data.analysis) {
                     const analysis = data.analysis;
                     
-                    // 解析JSON字符串
-                    let visibilityData = {};
-                    let overviewData = {};
-                    
-                    try {
-                        const visibilityRaw = analysis.brand_visibility || analysis.visibility || '{}';
-                        visibilityData = typeof visibilityRaw === 'string' ? JSON.parse(visibilityRaw) : visibilityRaw;
-                    } catch (e) {
-                        console.warn('解析visibility失败:', e);
-                    }
-                    
-                    try {
-                        const overviewRaw = analysis.data_overview || analysis.overview || '{}';
-                        overviewData = typeof overviewRaw === 'string' ? JSON.parse(overviewRaw) : overviewRaw;
-                    } catch (e) {
-                        console.warn('解析overview失败:', e);
-                    }
+                    // 后端已返回解析后的对象，直接使用
+                    const visibilityData = analysis.brand_visibility || analysis.visibility || {};
+                    const overviewData = analysis.data_overview || analysis.overview || {};
                     
                     // 显示品牌信息
                     document.getElementById('selected-brand-info').style.display = 'block';

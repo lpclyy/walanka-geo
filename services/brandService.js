@@ -124,6 +124,32 @@ async function saveAnalysisResult(brandId, analysisData) {
  * @param {number} brandId - 品牌ID
  * @returns {Promise<Object|null>} 分析结果或null
  */
+/**
+ * 安全解析JSON字符串
+ * @param {string} jsonString - JSON字符串
+ * @param {*} defaultValue - 解析失败时的默认值
+ * @returns {*} 解析后的对象或默认值
+ */
+function safeJsonParse(jsonString, defaultValue = {}) {
+  if (!jsonString || jsonString === 'null' || jsonString === 'undefined') {
+    return defaultValue;
+  }
+  if (typeof jsonString === 'object') {
+    return jsonString;
+  }
+  try {
+    return JSON.parse(jsonString);
+  } catch (e) {
+    console.warn('JSON解析失败:', e.message, '原始数据:', jsonString.substring(0, 100));
+    return defaultValue;
+  }
+}
+
+/**
+ * 从数据库获取品牌分析结果（返回解析后的对象）
+ * @param {number} brandId - 品牌ID
+ * @returns {Promise<Object|null>} 解析后的分析结果对象
+ */
 async function getAnalysisByBrandId(brandId) {
   const db = database.getDB();
   const [analysis] = await db.execute('SELECT * FROM brand_analysis WHERE brand_id = ?', [brandId]);
@@ -132,31 +158,30 @@ async function getAnalysisByBrandId(brandId) {
   
   const result = analysis[0];
   
-  // 返回原始数据（字符串形式），让前端根据需要解析
-  // 这样可以避免重复解析导致的 "[object Object]" 错误
+  // 在后端解析JSON，前端直接使用对象
   return {
-    // 新模板字段（前端期望的字段名）
-    data_overview: result.overview || '{}',
-    brand_overview: result.overview || '{}',  // overview 存储的是品牌概览数据
-    brand_visibility: result.visibility || '{}',
-    brand_perception: result.perception || '{}',
-    topic_analysis: result.topics || '{}',
-    citation_analysis: result.citations || '{}',
-    prompts_with_snapshots: result.snapshots || '[]',
-    improvement_suggestions: result.suggestions || '{}',
-    competitor_brand_analysis: result.competition || '{}',
+    // 新模板字段（前端期望的字段名）- 直接返回解析后的对象
+    data_overview: safeJsonParse(result.overview, {}),
+    brand_overview: safeJsonParse(result.overview, {}),
+    brand_visibility: safeJsonParse(result.visibility, {}),
+    brand_perception: safeJsonParse(result.perception, {}),
+    topic_analysis: safeJsonParse(result.topics, {}),
+    citation_analysis: safeJsonParse(result.citations, {}),
+    prompts_with_snapshots: safeJsonParse(result.snapshots, []),
+    improvement_suggestions: safeJsonParse(result.suggestions, {}),
+    competitor_brand_analysis: safeJsonParse(result.competition, {}),
     // 保留原始字段以便兼容
-    overview: result.overview || '{}',
-    visibility: result.visibility || '{}',
-    perception: result.perception || '{}',
-    topics: result.topics || '{}',
-    citations: result.citations || '{}',
-    snapshots: result.snapshots || '[]',
-    suggestions: result.suggestions || '{}',
-    competition: result.competition || '{}',
-    strengths: result.strengths || '[]',
-    opportunities: result.opportunities || '[]',
-    risks: result.risks || '[]'
+    overview: safeJsonParse(result.overview, {}),
+    visibility: safeJsonParse(result.visibility, {}),
+    perception: safeJsonParse(result.perception, {}),
+    topics: safeJsonParse(result.topics, {}),
+    citations: safeJsonParse(result.citations, {}),
+    snapshots: safeJsonParse(result.snapshots, []),
+    suggestions: safeJsonParse(result.suggestions, {}),
+    competition: safeJsonParse(result.competition, {}),
+    strengths: safeJsonParse(result.strengths, []),
+    opportunities: safeJsonParse(result.opportunities, []),
+    risks: safeJsonParse(result.risks, [])
   };
 }
 
