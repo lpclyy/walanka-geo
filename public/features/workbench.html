@@ -3654,8 +3654,19 @@
                     if (data.success) {
                         const analysis = data.data?.analysis || data.analysis;
                         if (analysis) {
-                            displayAnalysisResult(analysis);
-                            console.log('品牌分析数据恢复成功');
+                            // 使用window.displayAnalysisResult确保调用全局函数
+                            if (typeof window.displayAnalysisResult === 'function') {
+                                window.displayAnalysisResult(analysis);
+                                console.log('品牌分析数据恢复成功');
+                            } else {
+                                // 如果函数还未定义，延迟100ms重试
+                                setTimeout(() => {
+                                    if (typeof window.displayAnalysisResult === 'function') {
+                                        window.displayAnalysisResult(analysis);
+                                        console.log('品牌分析数据恢复成功（延迟）');
+                                    }
+                                }, 100);
+                            }
                         }
                     }
                 } catch (error) {
@@ -4467,7 +4478,7 @@
         }
 
         // 显示分析结果 - 根据新GEO模板重构
-        function displayAnalysisResult(analysis) {
+        window.displayAnalysisResult = function displayAnalysisResult(analysis) {
             try {
                 window.currentAnalysis = analysis;
                 window.rawAnalysisData = JSON.parse(JSON.stringify(analysis));
@@ -4573,6 +4584,11 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
 
                 goToStep(4);
                 loadBrandList();
+                
+                // 更新竞品分析页面的品牌列表
+                if (typeof window.loadAnalyzedBrandsForCompetitor === 'function') {
+                    window.loadAnalyzedBrandsForCompetitor();
+                }
             } catch (error) {
                 console.error('解析分析结果失败:', error);
                 alert('解析分析结果失败，请稍后重试');
@@ -6202,7 +6218,7 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                 if (data.success) {
                     displayCompetitorList(data.data);
                     displayCompetitorComparisonTable(data.data);
-                    updateCompetitorCharts(data.data);
+                    await updateCompetitorCharts(data.data);
                 }
             } catch (error) {
                 console.error('加载竞品列表失败:', error);
@@ -6398,21 +6414,41 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
         }
         
         // 更新竞品对比图表
-        function updateCompetitorCharts(competitors) {
-            // 获取当前品牌数据
-            const currentAnalysis = window.currentAnalysis || {};
-            const visibilityData = currentAnalysis.visibility || {};
-            
-            // 准备主品牌数据
-            const brandName = localStorage.getItem('selectedBrandName') || '我的品牌';
-            const brandData = {
-                name: brandName,
-                visibility_score: visibilityData.ai_visibility_score || visibilityData.score || 0,
-                mention_rate: visibilityData.visibility_rate || visibilityData.mention_rate || 0,
-                avg_position: visibilityData.avg_position || 0,
-                positive_ratio: visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || 0,
-                share_of_voice: visibilityData.share_of_voice || 0
+        async function updateCompetitorCharts(competitors) {
+            // 从数据库获取当前品牌分析数据
+            const brandId = localStorage.getItem('selectedBrandId');
+            let brandData = {
+                name: localStorage.getItem('selectedBrandName') || '我的品牌',
+                visibility_score: 0,
+                mention_rate: 0,
+                avg_position: 0,
+                positive_ratio: 0,
+                share_of_voice: 0
             };
+            
+            if (brandId) {
+                try {
+                    const response = await fetch(`/api/brands/${brandId}/analysis`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const analysis = data.data?.analysis || data.analysis || {};
+                        const visibilityData = typeof analysis.visibility === 'string' ? JSON.parse(analysis.visibility) : (analysis.visibility || {});
+                        const overviewData = typeof analysis.overview === 'string' ? JSON.parse(analysis.overview) : (analysis.overview || {});
+                        
+                        brandData = {
+                            name: localStorage.getItem('selectedBrandName') || '我的品牌',
+                            visibility_score: visibilityData.ai_visibility_score || visibilityData.score || overviewData.overallScore || 0,
+                            mention_rate: visibilityData.visibility_rate || visibilityData.mention_rate || 0,
+                            avg_position: visibilityData.avg_position || 0,
+                            positive_ratio: visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || 0,
+                            share_of_voice: visibilityData.share_of_voice || 0
+                        };
+                    }
+                } catch (error) {
+                    console.error('获取主品牌分析数据失败:', error);
+                }
+            }
             
             // 合并数据
             const allData = [brandData, ...competitors];
