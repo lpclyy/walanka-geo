@@ -6,6 +6,7 @@
 
 const competitorModel = require('../models/competitor');
 const axios = require('axios');
+const { cleanThinkingTags, cleanJsonResponse } = require('./aiService');
 require('dotenv').config();
 
 /**
@@ -189,16 +190,22 @@ async function analyzeCompetitor(competitorName, competitorWebsite = '') {
       return { error: { message: '大模型返回内容为空' } };
     }
 
-    // 清理并解析JSON
-    let cleanedContent = content.trim();
-    cleanedContent = cleanedContent.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
+    console.log('大模型返回原始内容:', content);
+
+    // 使用aiService中的清理函数处理内容
+    let cleanedContent = cleanThinkingTags(content);
+    cleanedContent = cleanJsonResponse(cleanedContent);
+    
+    console.log('清理后的内容:', cleanedContent);
     
     try {
       const result = JSON.parse(cleanedContent);
       return { success: true, data: result };
     } catch (e) {
       console.error('解析竞品分析JSON失败:', e);
-      return { error: { message: '解析结果失败', details: e.message } };
+      console.error('原始内容:', content);
+      console.error('清理后的内容:', cleanedContent);
+      return { error: { message: '解析结果失败', details: e.message, rawContent: content.substring(0, 500) } };
     }
 
   } catch (error) {

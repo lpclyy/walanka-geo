@@ -2516,5 +2516,7 @@ module.exports = {
   getPromptAnswer,
   getBatchPromptAnswers,
   transformToGeoFormat,
-  PRESET_PROMPT_TEMPLATES
+  PRESET_PROMPT_TEMPLATES,
+  cleanThinkingTags,
+  cleanJsonResponse
 };
