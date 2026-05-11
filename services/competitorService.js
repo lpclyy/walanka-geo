@@ -41,6 +41,20 @@ async function getCompetitors(brandId) {
 }
 
 /**
+ * 根据ID获取竞品
+ * @param {number} competitorId - 竞品ID
+ * @returns {Promise<Object|null>} 竞品对象
+ */
+async function getCompetitorById(competitorId) {
+  try {
+    return await competitorModel.getCompetitorById(competitorId);
+  } catch (error) {
+    console.error('获取竞品失败:', error);
+    return null;
+  }
+}
+
+/**
  * 删除竞品
  * @param {number} competitorId - 竞品ID
  * @returns {Promise<Object>} 删除结果
@@ -69,6 +83,21 @@ async function updateCompetitor(competitorId, name, website) {
   } catch (error) {
     console.error('更新竞品失败:', error);
     return { success: false, message: '更新竞品失败', error: error.message };
+  }
+}
+
+/**
+ * 更新竞品分析数据
+ * @param {number} competitorId - 竞品ID
+ * @param {Object} analysisData - 分析数据
+ * @returns {Promise<void>}
+ */
+async function updateCompetitorAnalysis(competitorId, analysisData) {
+  try {
+    await competitorModel.updateCompetitorAnalysis(competitorId, analysisData);
+  } catch (error) {
+    console.error('更新竞品分析数据失败:', error);
+    throw error;
   }
 }
 
@@ -251,9 +280,11 @@ ${competitorsText}
 module.exports = {
   addCompetitor,
   getCompetitors,
+  getCompetitorById,
   removeCompetitor,
   updateCompetitor,
   analyzeCompetitor,
   analyzeCompetitors,
+  updateCompetitorAnalysis,
   generateCompetitorInsight
 };

@@ -2231,7 +2231,7 @@
                                     <svg style="width: 18px; height: 18px; margin-right: 8px; display: inline;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                     </svg>
-                                    批量分析竞品
+                                    分析全部待分析竞品
                                 </button>
                             </div>
                             
@@ -6068,6 +6068,7 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             }
             
             const brandId = localStorage.getItem('selectedBrandId');
+            const userId = getUserId();
             if (!brandId) {
                 showToast('请先选择一个品牌', 'warning');
                 return;
@@ -6079,7 +6080,7 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ brandId, name, website })
+                    body: JSON.stringify({ userId, brandId, name, website })
                 });
                 
                 const data = await response.json();
@@ -6169,11 +6170,41 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                             </div>
                         ` : ''}
                         <div style="display: flex; gap: 8px;">
+                            ${competitor.status === 'pending' ? `<button onclick="analyzeSingleCompetitor(${competitor.id})" style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">开始分析</button>` : ''}
                             <button onclick="deleteCompetitor(${competitor.id})" style="background: #f87171; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">删除</button>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+        
+        // 分析单个竞品
+        async function analyzeSingleCompetitor(competitorId) {
+            try {
+                showToast('正在分析竞品...', 'info');
+                
+                const response = await fetch(`/api/competitors/analyze/${competitorId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('竞品分析完成', 'success');
+                    const brandId = localStorage.getItem('selectedBrandId');
+                    if (brandId) {
+                        loadCompetitors(brandId);
+                    }
+                } else {
+                    showToast('分析失败: ' + (data.error?.message || data.message), 'error');
+                }
+            } catch (error) {
+                console.error('分析竞品失败:', error);
+                showToast('分析竞品失败，请稍后重试', 'error');
+            }
         }
         
         // 删除竞品

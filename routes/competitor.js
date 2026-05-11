@@ -11,13 +11,13 @@ const competitorService = require('../services/competitorService');
 // 添加竞品品牌
 router.post('/', async (req, res) => {
   try {
-    const { brandId, name, website } = req.body;
+    const { userId, brandId, name, website } = req.body;
 
     if (!brandId || !name) {
       return res.status(400).json({ success: false, message: '缺少必要参数' });
     }
 
-    const result = await competitorService.addCompetitor(null, brandId, name, website);
+    const result = await competitorService.addCompetitor(userId, brandId, name, website);
     res.json(result);
   } catch (error) {
     console.error('添加竞品失败:', error);
@@ -67,13 +67,19 @@ router.put('/:id', async (req, res) => {
 router.post('/analyze/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const competitor = await competitorService.getCompetitorsByBrandId(id);
+    const competitor = await competitorService.getCompetitorById(id);
     
-    if (!competitor || competitor.length === 0) {
+    if (!competitor) {
       return res.status(404).json({ success: false, message: '竞品不存在' });
     }
 
-    const result = await competitorService.analyzeCompetitor(competitor[0].name, competitor[0].website);
+    const result = await competitorService.analyzeCompetitor(competitor.name, competitor.website);
+    
+    if (result.success) {
+      // 保存分析结果到数据库
+      await competitorService.updateCompetitorAnalysis(id, result.data);
+    }
+    
     res.json(result);
   } catch (error) {
     console.error('分析竞品失败:', error);
