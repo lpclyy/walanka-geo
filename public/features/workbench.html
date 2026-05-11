@@ -3652,31 +3652,73 @@
             }
         }
         
-        // 恢复品牌分析数据
+        // 恢复品牌分析数据（优化版：优先使用本地缓存）
         async function restoreBrandAnalysis() {
             const brandId = localStorage.getItem('selectedBrandId');
             const brandName = localStorage.getItem('selectedBrandName');
             
             if (brandId && brandName) {
                 console.log('恢复品牌分析数据:', brandId, brandName);
+                
                 try {
-                    // 从数据库加载品牌分析数据
+                    // 1. 优先从 localStorage 读取缓存数据
+                    const cachedAnalysis = localStorage.getItem('currentAnalysisData');
+                    const cachedBrandId = localStorage.getItem('currentAnalysisBrandId');
+                    
+                    if (cachedAnalysis && cachedBrandId === brandId) {
+                        try {
+                            const analysis = JSON.parse(cachedAnalysis);
+                            console.log('[缓存命中] 从 localStorage 恢复分析数据');
+                            
+                            // 使用window.displayAnalysisResult确保调用全局函数
+                            if (typeof window.displayAnalysisResult === 'function') {
+                                window.displayAnalysisResult(analysis);
+                                console.log('品牌分析数据从本地缓存恢复成功');
+                            } else {
+                                // 如果函数还未定义，延迟100ms重试
+                                setTimeout(() => {
+                                    if (typeof window.displayAnalysisResult === 'function') {
+                                        window.displayAnalysisResult(analysis);
+                                        console.log('品牌分析数据从本地缓存恢复成功（延迟）');
+                                    }
+                                }, 100);
+                            }
+                            // 同时后台静默刷新最新数据（不阻塞UI）
+                            refreshAnalysisDataSilently(brandId);
+                            return; // 缓存命中，直接返回
+                        } catch (e) {
+                            console.error('解析本地缓存失败:', e);
+                            localStorage.removeItem('currentAnalysisData');
+                            localStorage.removeItem('currentAnalysisBrandId');
+                        }
+                    }
+                    
+                    // 2. 缓存未命中或失效，从服务器获取
+                    console.log('[缓存未命中] 从服务器获取分析数据');
                     const response = await fetch(`/api/brands/${brandId}/analysis`);
                     const data = await response.json();
                     
                     if (data.success) {
                         const analysis = data.data?.analysis || data.analysis;
                         if (analysis) {
+                            // 更新本地缓存
+                            try {
+                                localStorage.setItem('currentAnalysisData', JSON.stringify(analysis));
+                                localStorage.setItem('currentAnalysisBrandId', brandId);
+                            } catch (e) {
+                                console.warn('分析数据太大，无法保存到本地存储');
+                            }
+                            
                             // 使用window.displayAnalysisResult确保调用全局函数
                             if (typeof window.displayAnalysisResult === 'function') {
                                 window.displayAnalysisResult(analysis);
-                                console.log('品牌分析数据恢复成功');
+                                console.log('品牌分析数据从服务器恢复成功');
                             } else {
                                 // 如果函数还未定义，延迟100ms重试
                                 setTimeout(() => {
                                     if (typeof window.displayAnalysisResult === 'function') {
                                         window.displayAnalysisResult(analysis);
-                                        console.log('品牌分析数据恢复成功（延迟）');
+                                        console.log('品牌分析数据从服务器恢复成功（延迟）');
                                     }
                                 }, 100);
                             }
@@ -3685,6 +3727,30 @@
                 } catch (error) {
                     console.error('恢复品牌分析数据失败:', error);
                 }
+            }
+        }
+        
+        // 后台静默刷新分析数据（不阻塞UI）
+        async function refreshAnalysisDataSilently(brandId) {
+            try {
+                const response = await fetch(`/api/brands/${brandId}/analysis`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const analysis = data.data?.analysis || data.analysis;
+                    if (analysis) {
+                        // 更新本地缓存
+                        try {
+                            localStorage.setItem('currentAnalysisData', JSON.stringify(analysis));
+                            localStorage.setItem('currentAnalysisBrandId', brandId);
+                        } catch (e) {
+                            console.warn('分析数据太大，无法保存到本地存储');
+                        }
+                        console.log('[后台刷新] 分析数据已更新');
+                    }
+                }
+            } catch (error) {
+                console.warn('[后台刷新] 刷新失败:', error);
             }
         }
         

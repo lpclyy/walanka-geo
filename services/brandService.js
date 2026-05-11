@@ -6,6 +6,59 @@
 
 const database = require('../models/database');
 
+// 内存缓存，用于存储已解析的品牌分析数据
+// 结构: { brandId: { data: 解析后的数据, timestamp: 时间戳 } }
+const analysisCache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 缓存5分钟
+
+/**
+ * 从缓存获取分析数据
+ * @param {number} brandId - 品牌ID
+ * @returns {Object|null} 缓存的数据或null
+ */
+function getCachedAnalysis(brandId) {
+  const cached = analysisCache.get(brandId);
+  if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+    console.log(`[缓存命中] 品牌 ${brandId} 的分析数据`);
+    return cached.data;
+  }
+  // 缓存过期或不存在，删除旧缓存
+  if (cached) {
+    analysisCache.delete(brandId);
+  }
+  return null;
+}
+
+/**
+ * 将分析数据存入缓存
+ * @param {number} brandId - 品牌ID
+ * @param {Object} data - 分析数据
+ */
+function setCachedAnalysis(brandId, data) {
+  analysisCache.set(brandId, {
+    data,
+    timestamp: Date.now()
+  });
+  console.log(`[缓存更新] 品牌 ${brandId} 的分析数据已缓存`);
+}
+
+/**
+ * 清除品牌的缓存数据
+ * @param {number} brandId - 品牌ID
+ */
+function clearAnalysisCache(brandId) {
+  analysisCache.delete(brandId);
+  console.log(`[缓存清除] 品牌 ${brandId} 的缓存已清除`);
+}
+
+/**
+ * 清除所有缓存
+ */
+function clearAllCache() {
+  analysisCache.clear();
+  console.log('[缓存清除] 所有品牌分析缓存已清除');
+}
+
 /**
  * 创建新品牌
  * @param {Object} brandData - 品牌数据
@@ -116,6 +169,10 @@ async function saveAnalysisResult(brandId, analysisData) {
     ]
   );
 
+  // 保存新数据后清除该品牌的缓存，确保下次读取的是最新数据
+  clearAnalysisCache(brandId);
+  console.log(`[保存] 品牌 ${brandId} 的分析结果已保存，缓存已清除`);
+
   return result.insertId > 0;
 }
 
@@ -147,19 +204,36 @@ function safeJsonParse(jsonString, defaultValue = {}) {
 
 /**
  * 从数据库获取品牌分析结果（返回解析后的对象）
+ * 支持缓存机制，避免重复解析JSON数据
  * @param {number} brandId - 品牌ID
+ * @param {boolean} [useCache=true] - 是否使用缓存
  * @returns {Promise<Object|null>} 解析后的分析结果对象
  */
-async function getAnalysisByBrandId(brandId) {
-  const db = database.getDB();
-  const [analysis] = await db.execute('SELECT * FROM brand_analysis WHERE brand_id = ?', [brandId]);
+async function getAnalysisByBrandId(brandId, useCache = true) {
+  // 1. 首先尝试从缓存获取
+  if (useCache) {
+    const cached = getCachedAnalysis(brandId);
+    if (cached) {
+      return cached;
+    }
+  }
   
-  if (analysis.length === 0) return null;
+  // 2. 从数据库查询
+  const db = database.getDB();
+  const [analysis] = await db.execute(
+    'SELECT * FROM brand_analysis WHERE brand_id = ? ORDER BY created_at DESC LIMIT 1', 
+    [brandId]
+  );
+  
+  if (analysis.length === 0) {
+    console.log(`[数据库] 品牌 ${brandId} 无分析记录`);
+    return null;
+  }
   
   const result = analysis[0];
   
-  // 在后端解析JSON，前端直接使用对象
-  return {
+  // 3. 解析JSON数据（只解析一次）
+  const parsedData = {
     // 新模板字段（前端期望的字段名）- 直接返回解析后的对象
     data_overview: safeJsonParse(result.overview, {}),
     brand_overview: safeJsonParse(result.overview, {}),
@@ -181,8 +255,37 @@ async function getAnalysisByBrandId(brandId) {
     competition: safeJsonParse(result.competition, {}),
     strengths: safeJsonParse(result.strengths, []),
     opportunities: safeJsonParse(result.opportunities, []),
-    risks: safeJsonParse(result.risks, [])
+    risks: safeJsonParse(result.risks, []),
+    // 元数据
+    _metadata: {
+      id: result.id,
+      brandId: result.brand_id,
+      createdAt: result.created_at,
+      cachedAt: new Date().toISOString()
+    }
   };
+  
+  // 4. 存入缓存
+  if (useCache) {
+    setCachedAnalysis(brandId, parsedData);
+  }
+  
+  console.log(`[数据库] 品牌 ${brandId} 的分析数据已从数据库加载并解析`);
+  return parsedData;
+}
+
+/**
+ * 检查品牌是否有分析数据（仅检查，不解析）
+ * @param {number} brandId - 品牌ID
+ * @returns {Promise<boolean>} 是否存在分析数据
+ */
+async function hasAnalysisData(brandId) {
+  const db = database.getDB();
+  const [rows] = await db.execute(
+    'SELECT 1 FROM brand_analysis WHERE brand_id = ? LIMIT 1', 
+    [brandId]
+  );
+  return rows.length > 0;
 }
 
 /**
@@ -278,9 +381,13 @@ module.exports = {
   updateBrandStatus,
   saveAnalysisResult,
   getAnalysisByBrandId,
+  hasAnalysisData,
   getPromptListByBrandId,
   addPromptToList,
   deletePromptFromList,
   deleteBrand,
-  getBrandStatusInfo
+  getBrandStatusInfo,
+  // 缓存相关函数
+  clearAnalysisCache,
+  clearAllCache
 };

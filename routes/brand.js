@@ -217,48 +217,86 @@ router.get('/:id/analysis-status', async (req, res) => {
 /**
  * GET /api/brands/:id/analysis
  * 获取分析结果
+ * 优先从数据库读取已分析的数据，避免重复调用AI
  */
 router.get('/:id/analysis', async (req, res) => {
   try {
     const { id } = req.params;
-    let analysis = await brandService.getAnalysisByBrandId(id);
+    const { forceRefresh } = req.query; // 可选：强制刷新，从数据库重新读取
 
+    console.log(`[GET /api/brands/${id}/analysis] 请求分析数据，forceRefresh=${forceRefresh}`);
+
+    // 1. 优先从数据库/缓存获取已分析的数据
+    let analysis = await brandService.getAnalysisByBrandId(id, !forceRefresh);
+
+    // 2. 如果数据库中没有，分析数据可能在 localStorage（首次分析后前端保存的）
     if (!analysis) {
-      console.log(`未找到品牌 ${id} 的分析记录，执行实时分析...`);
-      const analysisResult = await aiService.performAIAnalysis(id);
+      console.log(`[GET /api/brands/${id}/analysis] 数据库中无数据，检查是否有待分析记录`);
       
-      // 检查分析结果是否有效
-      const hasValidData = analysisResult && !analysisResult.error && (
-        analysisResult.data_overview?.brand_name || 
-        analysisResult.overview?.brand_name ||
-        analysisResult.brand_overview?.brand_name ||
-        analysisResult.visibility ||
-        analysisResult.brand_visibility
-      );
-      
-      if (hasValidData) {
-        // 保存分析结果
-        await brandService.saveAnalysisResult(id, analysisResult);
-        await brandService.updateBrandStatus(id, 'completed');
-        analysis = analysisResult;
+      // 检查品牌是否存在且状态为已完成
+      const brand = await brandService.getBrandById(id);
+      if (brand && brand.status === 'completed') {
+        // 品牌状态是已完成，但数据库中没有数据，可能是数据不一致
+        console.log(`[GET /api/brands/${id}/analysis] 品牌状态为completed但无分析数据，尝试重新分析`);
+      } else {
+        // 品牌还没有被分析过
+        console.log(`[GET /api/brands/${id}/analysis] 品牌尚未分析`);
       }
     }
+
+    // 3. 如果有数据，直接返回（这是二次解析的主要优化）
+    if (analysis) {
+      console.log(`[GET /api/brands/${id}/analysis] 从数据库返回已分析数据`);
+      return sendSuccess(res, {
+        analysis,
+        brandId: id,
+        source: 'database',
+        message: '从数据库读取'
+      });
+    }
+
+    // 4. 没有数据，返回提示
+    console.log(`[GET /api/brands/${id}/analysis] 无分析数据`);
+    return sendSuccess(res, {
+      analysis: null,
+      brandId: id,
+      source: 'none',
+      message: '暂无分析数据，请先进行品牌分析'
+    });
+
+  } catch (error) {
+    console.error('获取分析结果失败:', error);
+    return sendError(res, '获取分析结果失败');
+  }
+});
+
+/**
+ * POST /api/brands/:id/analysis/refresh
+ * 强制刷新分析数据（从数据库重新读取）
+ */
+router.post('/:id/analysis/refresh', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log(`[POST /api/brands/${id}/analysis/refresh] 强制刷新分析数据`);
+
+    // 强制从数据库重新读取（不使用缓存）
+    const analysis = await brandService.getAnalysisByBrandId(id, false);
 
     if (!analysis) {
       return sendNotFound(res, '分析结果');
     }
 
-    // 确保返回的数据结构符合前端期望
-    const result = {
-      analysis: analysis,
+    return sendSuccess(res, {
+      analysis,
       brandId: id,
-      success: true
-    };
+      source: 'database',
+      message: '已强制刷新'
+    });
 
-    return sendSuccess(res, result);
   } catch (error) {
-    console.error('获取分析结果失败:', error);
-    return sendError(res, '获取分析结果失败');
+    console.error('刷新分析结果失败:', error);
+    return sendError(res, '刷新分析结果失败');
   }
 });
 
