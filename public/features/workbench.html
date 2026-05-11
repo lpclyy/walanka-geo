@@ -3617,7 +3617,7 @@
     <script src="script.js"></script>
     <script>
         // 检查登录状态并显示用户信息和管理员按钮
-        window.onload = function() {
+        window.onload = async function() {
             const user = localStorage.getItem('user');
             if (!user) {
                 window.location.href = 'login.html';
@@ -3634,7 +3634,35 @@
                     document.getElementById('adminLink').style.display = 'block';
                 }
             }
+            
+            // 尝试恢复之前选择的品牌分析数据
+            await restoreBrandAnalysis();
         };
+        
+        // 恢复品牌分析数据
+        async function restoreBrandAnalysis() {
+            const brandId = localStorage.getItem('selectedBrandId');
+            const brandName = localStorage.getItem('selectedBrandName');
+            
+            if (brandId && brandName) {
+                console.log('恢复品牌分析数据:', brandId, brandName);
+                try {
+                    // 从数据库加载品牌分析数据
+                    const response = await fetch(`/api/brands/${brandId}/analysis`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const analysis = data.data?.analysis || data.analysis;
+                        if (analysis) {
+                            displayAnalysisResult(analysis);
+                            console.log('品牌分析数据恢复成功');
+                        }
+                    }
+                } catch (error) {
+                    console.error('恢复品牌分析数据失败:', error);
+                }
+            }
+        }
         
         // 退出功能
         document.getElementById('logoutLink').addEventListener('click', function(e) {
@@ -4342,6 +4370,10 @@
                 console.log('分析响应数据:', data);
 
                 if (data.success) {
+                    // 保存品牌信息到localStorage，以便刷新后恢复
+                    localStorage.setItem('selectedBrandId', currentBrandId.toString());
+                    localStorage.setItem('selectedBrandName', currentBrandInfo.name);
+                    
                     if (data.data?.analysis || data.analysis) {
                         showAnalysisResultDirectly(data.data?.analysis || data.analysis);
                     } else {
@@ -5813,6 +5845,10 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                 console.log('分析响应数据:', data);
 
                 if (data.success) {
+                    // 保存品牌信息到localStorage，以便刷新后恢复
+                    localStorage.setItem('selectedBrandId', currentBrandId.toString());
+                    localStorage.setItem('selectedBrandName', currentBrandInfo.name);
+                    
                     if (data.data?.analysis || data.analysis) {
                         showAnalysisResultDirectly(data.data?.analysis || data.analysis);
                     } else {
