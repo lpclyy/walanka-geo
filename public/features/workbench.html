@@ -6433,8 +6433,30 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                     
                     if (data.success) {
                         const analysis = data.data?.analysis || data.analysis || {};
-                        const visibilityData = typeof analysis.visibility === 'string' ? JSON.parse(analysis.visibility) : (analysis.visibility || {});
-                        const overviewData = typeof analysis.overview === 'string' ? JSON.parse(analysis.overview) : (analysis.overview || {});
+                        console.log('主品牌分析数据:', analysis);
+                        
+                        // 尝试多种字段名获取数据
+                        let visibilityData = {};
+                        let overviewData = {};
+                        
+                        // 尝试解析 visibility / brand_visibility
+                        const visibilityRaw = analysis.brand_visibility || analysis.visibility || '{}';
+                        try {
+                            visibilityData = typeof visibilityRaw === 'string' ? JSON.parse(visibilityRaw) : visibilityRaw;
+                        } catch (e) {
+                            console.warn('解析visibility失败:', e);
+                        }
+                        
+                        // 尝试解析 overview / brand_overview / data_overview
+                        const overviewRaw = analysis.brand_overview || analysis.overview || analysis.data_overview || '{}';
+                        try {
+                            overviewData = typeof overviewRaw === 'string' ? JSON.parse(overviewRaw) : overviewRaw;
+                        } catch (e) {
+                            console.warn('解析overview失败:', e);
+                        }
+                        
+                        console.log('visibilityData:', visibilityData);
+                        console.log('overviewData:', overviewData);
                         
                         brandData = {
                             name: localStorage.getItem('selectedBrandName') || '我的品牌',
@@ -6444,6 +6466,8 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                             positive_ratio: visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || 0,
                             share_of_voice: visibilityData.share_of_voice || 0
                         };
+                        
+                        console.log('主品牌数据:', brandData);
                     }
                 } catch (error) {
                     console.error('获取主品牌分析数据失败:', error);

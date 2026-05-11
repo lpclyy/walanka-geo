@@ -160,7 +160,16 @@ router.post('/:id/analyze', async (req, res) => {
     }
 
     // 保存分析结果到数据库
-    if (analysisResult && analysisResult.data_overview?.brand_name) {
+    // 检查分析结果是否有效（有多种可能的字段结构）
+    const hasValidData = analysisResult && (
+      analysisResult.data_overview?.brand_name || 
+      analysisResult.overview?.brand_name ||
+      analysisResult.brand_overview?.brand_name ||
+      analysisResult.visibility ||
+      analysisResult.brand_visibility
+    );
+    
+    if (hasValidData) {
       console.log('保存分析结果到数据库...');
       try {
         await brandService.saveAnalysisResult(id, analysisResult);
@@ -217,7 +226,17 @@ router.get('/:id/analysis', async (req, res) => {
     if (!analysis) {
       console.log(`未找到品牌 ${id} 的分析记录，执行实时分析...`);
       const analysisResult = await aiService.performAIAnalysis(id);
-      if (analysisResult && !analysisResult.error) {
+      
+      // 检查分析结果是否有效
+      const hasValidData = analysisResult && !analysisResult.error && (
+        analysisResult.data_overview?.brand_name || 
+        analysisResult.overview?.brand_name ||
+        analysisResult.brand_overview?.brand_name ||
+        analysisResult.visibility ||
+        analysisResult.brand_visibility
+      );
+      
+      if (hasValidData) {
         // 保存分析结果
         await brandService.saveAnalysisResult(id, analysisResult);
         await brandService.updateBrandStatus(id, 'completed');
