@@ -1283,6 +1283,25 @@
                                 </div>
 
                                 <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; overflow: hidden;">
+                                    <div style="position: absolute; top: 0; right: 0; width: 80px; height: 80px; background: linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(126,34,206,0.1) 100%); border-radius: 0 16px 0 100%;"></div>
+                                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                            <svg style="width: 20px; height: 20px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                            </svg>
+                                        </div>
+                                        <span style="font-size: 13px; color: #888; font-weight: 500;">美誉度</span>
+                                    </div>
+                                    <div style="display: flex; align-items: baseline; gap: 4px;">
+                                        <span style="font-size: 32px; font-weight: 700; color: #1a1a2e;" id="overview-reputation-score">--</span>
+                                        <span style="font-size: 14px; color: #888;">/100</span>
+                                    </div>
+                                    <div style="margin-top: 12px; height: 4px; background: #f0f0f0; border-radius: 2px; overflow: hidden;">
+                                        <div id="overview-reputation-score-bar" style="height: 100%; background: linear-gradient(90deg, #a855f7, #7e22ce); border-radius: 2px; transition: width 0.5s ease;"></div>
+                                    </div>
+                                </div>
+
+                                <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; overflow: hidden;">
                                     <div style="position: absolute; top: 0; right: 0; width: 80px; height: 80px; background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(234,88,12,0.1) 100%); border-radius: 0 16px 0 100%;"></div>
                                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                                         <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
@@ -2171,22 +2190,46 @@
                                 
                                 <!-- 已选品牌信息展示 -->
                                 <div id="selected-brand-info" style="display: none; margin-top: 16px; padding: 16px; background: rgba(255,255,255,0.15); border-radius: 12px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                         <span style="color: white; font-weight: 600; font-size: 16px;" id="selected-brand-name"></span>
                                         <span style="background: rgba(255,255,255,0.3); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">主品牌</span>
                                     </div>
-                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                                        <div style="text-align: center; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                                            <div style="font-size: 20px; font-weight: bold; color: white;" id="selected-brand-score">-</div>
+                                    <!-- 核心指标 -->
+                                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px;">
+                                        <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                            <div style="font-size: 22px; font-weight: bold; color: white;" id="selected-brand-score">-</div>
                                             <div style="font-size: 11px; color: rgba(255,255,255,0.8);">可见度得分</div>
                                         </div>
-                                        <div style="text-align: center; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                                            <div style="font-size: 20px; font-weight: bold; color: white;" id="selected-brand-mention">-</div>
+                                        <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                            <div style="font-size: 22px; font-weight: bold; color: white;" id="selected-brand-mention">-</div>
                                             <div style="font-size: 11px; color: rgba(255,255,255,0.8);">提及率</div>
                                         </div>
-                                        <div style="text-align: center; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                                            <div style="font-size: 20px; font-weight: bold; color: white;" id="selected-brand-sentiment">-</div>
-                                            <div style="font-size: 11px; color: rgba(255,255,255,0.8);">正面情感</div>
+                                        <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                            <div style="font-size: 22px; font-weight: bold; color: white;" id="selected-brand-position">-</div>
+                                            <div style="font-size: 11px; color: rgba(255,255,255,0.8);">平均排名</div>
+                                        </div>
+                                        <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                            <div style="font-size: 22px; font-weight: bold; color: white;" id="selected-brand-share">-</div>
+                                            <div style="font-size: 11px; color: rgba(255,255,255,0.8);">提及份额</div>
+                                        </div>
+                                        <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                                            <div style="font-size: 22px; font-weight: bold; color: white;" id="selected-brand-reputation">-</div>
+                                            <div style="font-size: 11px; color: rgba(255,255,255,0.8);">美誉度</div>
+                                        </div>
+                                    </div>
+                                    <!-- 数据概览 -->
+                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                                        <div style="text-align: center; padding: 10px; background: rgba(255,255,255,0.08); border-radius: 8px;">
+                                            <div style="font-size: 18px; font-weight: 600; color: #4ade80;" id="selected-brand-total-mentions">-</div>
+                                            <div style="font-size: 11px; color: rgba(255,255,255,0.7);">总提及次数</div>
+                                        </div>
+                                        <div style="text-align: center; padding: 10px; background: rgba(255,255,255,0.08); border-radius: 8px;">
+                                            <div style="font-size: 18px; font-weight: 600; color: #60a5fa;" id="selected-brand-total-queries">-</div>
+                                            <div style="font-size: 11px; color: rgba(255,255,255,0.7);">总查询次数</div>
+                                        </div>
+                                        <div style="text-align: center; padding: 10px; background: rgba(255,255,255,0.08); border-radius: 8px;">
+                                            <div style="font-size: 18px; font-weight: 600; color: #fbbf24;" id="selected-brand-platforms">-</div>
+                                            <div style="font-size: 11px; color: rgba(255,255,255,0.7);">测试平台数</div>
                                         </div>
                                     </div>
                                 </div>
@@ -2280,7 +2323,7 @@
                                                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">可见度得分</th>
                                                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">提及率</th>
                                                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">平均位置</th>
-                                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">正面情感</th>
+                                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">美誉度</th>
                                                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">提及份额</th>
                                                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">状态</th>
                                                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">操作</th>
@@ -4586,6 +4629,9 @@
                 const improvementSuggestions = parseModule('improvement_suggestions');
                 const competitorBrandAnalysis = parseModule('competitor_brand_analysis');
                 
+                // 获取关键指标（从数据库直接读取）
+                const metrics = analysis._metrics || null;
+                
                 // 兼容旧数据结构
                 const overview = dataOverview || brandOverview || {};
                 const visibility = brandVisibility || {};
@@ -4644,8 +4690,8 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                     analysisSummary.textContent = summaryText;
                 }
 
-                // 更新品牌概览模块
-                updateBrandOverviewModule(brandOverview, overview, brandVisibility, dataOverview);
+                // 更新品牌概览模块（传入从数据库获取的关键指标）
+                updateBrandOverviewModule(brandOverview, overview, brandVisibility, dataOverview, metrics);
                 
                 // 更新品牌可见度模块
                 updateBrandVisibilityModule(brandVisibility, visibility);
@@ -4676,33 +4722,37 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
         }
         
         // 更新品牌概览模块
-        function updateBrandOverviewModule(brandOverview, fallback, brandVisibility, dataOverview) {
+        function updateBrandOverviewModule(brandOverview, fallback, brandVisibility, dataOverview, metrics) {
             const brandOverviewEl = document.querySelector('#brand-overview .brand-overview-container');
             if (!brandOverviewEl) return;
             
+            // 优先从 _metrics 获取关键指标（从数据库直接读取）
+            const hasMetrics = metrics && typeof metrics === 'object';
+            
             // 从 brand_overview 获取值
-            const aiScore = brandOverview?.ai_visibility_score || fallback?.overallScore || 0;
-            const visibilityRate = brandOverview?.visibility_rate || fallback?.overallVisibility || 0;
+            const aiScore = hasMetrics ? (metrics.visibilityScore || 0) : (brandOverview?.ai_visibility_score || fallback?.overallScore || 0);
+            const visibilityRate = hasMetrics ? (metrics.mentionRate || 0) : (brandOverview?.visibility_rate || fallback?.overallVisibility || 0);
             const visibilityDenominator = brandOverview?.visibility_rate_denominator || '';
-            const avgPosition = brandOverview?.avg_position || fallback?.avgPosition || null;
-            const shareOfVoice = brandOverview?.share_of_voice || null;
-            const positiveRatio = brandOverview?.positive_ratio || fallback?.positive || 0;
-            const neutralRatio = brandOverview?.neutral_ratio || fallback?.neutral || 0;
-            const negativeRatio = brandOverview?.negative_ratio || fallback?.negative || 0;
+            const avgPosition = hasMetrics ? (metrics.avgPosition || null) : (brandOverview?.avg_position || fallback?.avgPosition || null);
+            const shareOfVoice = hasMetrics ? (metrics.shareOfVoice || null) : (brandOverview?.share_of_voice || null);
+            const reputationScore = hasMetrics ? (metrics.reputationScore || 0) : 0;
+            const positiveRatio = hasMetrics ? (metrics.positiveSentimentRatio || 0) : (brandOverview?.positive_ratio || fallback?.positive || 0);
+            const neutralRatio = hasMetrics ? (metrics.neutralSentimentRatio || 0) : (brandOverview?.neutral_ratio || fallback?.neutral || 0);
+            const negativeRatio = hasMetrics ? (metrics.negativeSentimentRatio || 0) : (brandOverview?.negative_ratio || fallback?.negative || 0);
             const insight = brandOverview?.insight || '暂无洞察分析';
             const brandName = dataOverview?.brand_name || fallback?.brand_name || fallback?.brandName || '品牌概览';
             const brandWebsite = dataOverview?.brand_website || '';
             const reportId = dataOverview?.report_id || '';
             const generatedAt = dataOverview?.generated_at || '';
             
-            // 从 data_overview 获取值
+            // 从 data_overview 获取值（优先从metrics获取）
             const testedPlatforms = dataOverview?.tested_platforms || [];
             const totalPrompts = dataOverview?.total_prompts || 0;
-            const totalQueries = dataOverview?.total_queries || 0;
-            const totalMentions = dataOverview?.total_mentions || 0;
-            const overallMentionRate = dataOverview?.overall_mention_rate || 0;
+            const totalQueries = hasMetrics ? (metrics.totalQueries || 0) : (dataOverview?.total_queries || 0);
+            const totalMentions = hasMetrics ? (metrics.totalMentions || 0) : (dataOverview?.total_mentions || 0);
+            const overallMentionRate = hasMetrics ? (metrics.mentionRate || 0) : (dataOverview?.overall_mention_rate || 0);
             const overallMentionRateDenominator = dataOverview?.overall_mention_rate_denominator || '';
-            const overallAvgPosition = dataOverview?.overall_avg_position || null;
+            const overallAvgPosition = hasMetrics ? (metrics.avgPosition || null) : (dataOverview?.overall_avg_position || null);
             const dataInsight = dataOverview?.insight || '';
             
             // 更新报告头部信息
@@ -4783,6 +4833,13 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             
             const shareOfVoiceEl = document.getElementById('overview-share-of-voice');
             if (shareOfVoiceEl) shareOfVoiceEl.textContent = shareOfVoice ? `${shareOfVoice.toFixed(1)}%` : '-';
+            
+            // 更新美誉度指标
+            const reputationScoreEl = document.getElementById('overview-reputation-score');
+            if (reputationScoreEl) reputationScoreEl.textContent = `${Math.round(reputationScore)}`;
+            
+            const reputationScoreBarEl = document.getElementById('overview-reputation-score-bar');
+            if (reputationScoreBarEl) reputationScoreBarEl.style.width = `${Math.min(reputationScore, 100)}%`;
             
             // 更新情感指标详情
             const positiveRatioEl = document.getElementById('overview-positive-ratio');
@@ -6296,12 +6353,19 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                 const data = await response.json();
                 
                 if (data.success) {
-                    displayCompetitorList(data.data);
-                    displayCompetitorComparisonTable(data.data);
-                    await updateCompetitorCharts(data.data);
+                    const competitors = data.data || [];
+                    displayCompetitorList(competitors);
+                    displayCompetitorComparisonTable(competitors);
+                    // 即使没有竞品，也要显示主品牌数据
+                    await updateCompetitorCharts(competitors);
+                } else {
+                    // 即使请求失败，也尝试显示主品牌数据
+                    await updateCompetitorCharts([]);
                 }
             } catch (error) {
                 console.error('加载竞品列表失败:', error);
+                // 即使请求失败，也尝试显示主品牌数据
+                await updateCompetitorCharts([]);
             }
         }
         
@@ -6494,58 +6558,88 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
         }
         
         // 更新竞品对比图表
-        async function updateCompetitorCharts(competitors) {
-            // 从数据库获取当前品牌分析数据
+        async function updateCompetitorCharts(competitors = []) {
+            // 获取当前品牌分析数据（优先从全局变量获取，避免重复请求）
             const brandId = localStorage.getItem('selectedBrandId');
             let brandData = {
                 name: localStorage.getItem('selectedBrandName') || '我的品牌',
                 visibility_score: 0,
                 mention_rate: 0,
                 avg_position: 0,
-                positive_ratio: 0,
+                reputation_score: 0,
                 share_of_voice: 0
             };
             
-            if (brandId) {
+            // 优先使用已加载的分析数据
+            if (window.currentAnalysis) {
+                const analysis = window.currentAnalysis;
+                const metrics = analysis._metrics || {};
+                const visibilityData = analysis.brand_visibility || analysis.visibility || {};
+                const overviewData = analysis.brand_overview || analysis.overview || analysis.data_overview || {};
+                
+                // 优先从metrics获取数据（从数据库直接读取）
+                const hasMetrics = Object.keys(metrics).length > 0;
+                
+                brandData = {
+                    name: localStorage.getItem('selectedBrandName') || '我的品牌',
+                    visibility_score: hasMetrics ? (metrics.visibilityScore || 0) : 
+                        (visibilityData.ai_visibility_score || visibilityData.score || overviewData.overallScore || 0),
+                    mention_rate: hasMetrics ? (metrics.mentionRate || 0) : 
+                        (visibilityData.visibility_rate || visibilityData.mention_rate || 0),
+                    avg_position: hasMetrics ? (metrics.avgPosition || 0) : 
+                        (visibilityData.avg_position || 0),
+                    reputation_score: hasMetrics ? (metrics.reputationScore || 0) : 
+                        (visibilityData.reputation_score || visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || 0),
+                    share_of_voice: hasMetrics ? (metrics.shareOfVoice || 0) : 
+                        (visibilityData.share_of_voice || 0)
+                };
+            } else if (brandId) {
+                // 如果没有缓存，从服务器获取
                 try {
                     const response = await fetch(`/api/brands/${brandId}/analysis`);
                     const data = await response.json();
                     
                     if (data.success) {
                         const analysis = data.data?.analysis || data.analysis || {};
-                        console.log('主品牌分析数据:', analysis);
-                        
-                        // 后端已返回解析后的对象，直接使用
+                        const metrics = analysis._metrics || {};
                         const visibilityData = analysis.brand_visibility || analysis.visibility || {};
                         const overviewData = analysis.brand_overview || analysis.overview || analysis.data_overview || {};
                         
-                        console.log('visibilityData:', visibilityData);
-                        console.log('overviewData:', overviewData);
+                        const hasMetrics = Object.keys(metrics).length > 0;
                         
                         brandData = {
                             name: localStorage.getItem('selectedBrandName') || '我的品牌',
-                            visibility_score: visibilityData.ai_visibility_score || visibilityData.score || overviewData.overallScore || 0,
-                            mention_rate: visibilityData.visibility_rate || visibilityData.mention_rate || 0,
-                            avg_position: visibilityData.avg_position || 0,
-                            positive_ratio: visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || 0,
-                            share_of_voice: visibilityData.share_of_voice || 0
+                            visibility_score: hasMetrics ? (metrics.visibilityScore || 0) : 
+                                (visibilityData.ai_visibility_score || visibilityData.score || overviewData.overallScore || 0),
+                            mention_rate: hasMetrics ? (metrics.mentionRate || 0) : 
+                                (visibilityData.visibility_rate || visibilityData.mention_rate || 0),
+                            avg_position: hasMetrics ? (metrics.avgPosition || 0) : 
+                                (visibilityData.avg_position || 0),
+                            reputation_score: hasMetrics ? (metrics.reputationScore || 0) : 
+                                (visibilityData.reputation_score || visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || 0),
+                            share_of_voice: hasMetrics ? (metrics.shareOfVoice || 0) : 
+                                (visibilityData.share_of_voice || 0)
                         };
                         
-                        console.log('主品牌数据:', brandData);
+                        // 保存到全局变量
+                        window.currentAnalysis = analysis;
                     }
                 } catch (error) {
                     console.error('获取主品牌分析数据失败:', error);
                 }
             }
             
-            // 合并数据
+            // 合并数据（主品牌 + 竞品）
             const allData = [brandData, ...competitors];
             
-            // 更新柱状图
+            // 更新柱状图（即使只有主品牌也显示）
             updateBarChart(allData);
             
-            // 更新雷达图
+            // 更新雷达图（即使只有主品牌也显示）
             updateRadarChart(allData);
+            
+            // 更新对比表格（即使只有主品牌也显示）
+            updateCompetitorComparisonTable(brandData, competitors);
         }
         
         // 更新柱状图
@@ -6616,7 +6710,7 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                 data: [
                     item.visibility_score || 0,
                     item.mention_rate || 0,
-                    item.positive_ratio || 0,
+                    item.reputation_score || item.positive_ratio || 0,
                     100 - (item.avg_position || 50),
                     item.share_of_voice || 0
                 ],
@@ -6632,7 +6726,7 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             competitorRadarChart = new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: ['可见度得分', '提及率', '正面情感', '排名位置', '提及份额'],
+                    labels: ['可见度得分', '提及率', '美誉度', '排名位置', '提及份额'],
                     datasets: datasets
                 },
                 options: {
@@ -6672,7 +6766,67 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             });
         }
         
-        // 显示竞品对比表格
+        // 更新竞品对比表格（支持只有主品牌的情况）
+        function updateCompetitorComparisonTable(brandData, competitors) {
+            const tableBody = document.getElementById('competitor-comparison-table');
+            if (!tableBody) return;
+            
+            // 构建表格数据（主品牌 + 竞品）
+            const allData = [{
+                id: 'main',
+                name: brandData.name,
+                visibility_score: brandData.visibility_score,
+                mention_rate: brandData.mention_rate,
+                avg_position: brandData.avg_position,
+                reputation_score: brandData.reputation_score,
+                share_of_voice: brandData.share_of_voice,
+                status: '主品牌',
+                is_main: true
+            }, ...competitors.map(c => ({
+                id: c.id,
+                name: c.name,
+                visibility_score: c.visibility_score || c.visibilityScore || 0,
+                mention_rate: c.mention_rate || c.mentionRate || 0,
+                avg_position: c.avg_position || c.avgPosition || 0,
+                reputation_score: c.reputation_score || c.positive_ratio || 0,
+                share_of_voice: c.share_of_voice || c.shareOfVoice || 0,
+                status: c.status === 'analyzed' ? '已分析' : c.status === 'pending' ? '分析中' : c.status === 'failed' ? '分析失败' : '未知',
+                is_main: false
+            }))];
+            
+            // 生成表格行
+            const rows = allData.map(item => `
+                <tr style="${item.is_main ? 'background: linear-gradient(90deg, rgba(102,126,234,0.1) 0%, transparent 100%); font-weight: 500;' : ''}">
+                    <td style="padding: 12px;">
+                        <span style="display: inline-flex; align-items: center; gap: 8px;">
+                            ${item.is_main ? '<span style="background: #667eea; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">主品牌</span>' : ''}
+                            ${item.name}
+                        </span>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">${item.visibility_score || '-'}</td>
+                    <td style="padding: 12px; text-align: center;">${item.mention_rate ? item.mention_rate + '%' : '-'}</td>
+                    <td style="padding: 12px; text-align: center;">${item.avg_position || '-'}</td>
+                    <td style="padding: 12px; text-align: center;">${item.reputation_score ? (item.is_main ? item.reputation_score + '/100' : item.reputation_score + '%') : '-'}</td>
+                    <td style="padding: 12px; text-align: center;">${item.share_of_voice ? item.share_of_voice + '%' : '-'}</td>
+                    <td style="padding: 12px; text-align: center;">
+                        <span style="color: ${item.status === '主品牌' ? '#667eea' : item.status === '已分析' ? '#10b981' : item.status === '分析中' ? '#f59e0b' : '#ef4444'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        ${item.is_main ? '-' : `
+                            <button onclick="deleteCompetitor(${item.id})" style="background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                删除
+                            </button>
+                        `}
+                    </td>
+                </tr>
+            `).join('');
+            
+            tableBody.innerHTML = rows;
+        }
+        
+        // 显示竞品对比表格（旧版本，保持兼容）
         function displayCompetitorComparisonTable(competitors) {
             const container = document.getElementById('competitor-comparison-table');
             if (!container) return;
@@ -6709,7 +6863,7 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                         <td style="padding: 12px; text-align: center; font-weight: 600; color: ${color};">${item.visibility_score || '-'}</td>
                         <td style="padding: 12px; text-align: center;">${item.mention_rate || '-'}%</td>
                         <td style="padding: 12px; text-align: center;">${item.avg_position || '-'}</td>
-                        <td style="padding: 12px; text-align: center;">${item.positive_ratio || '-'}%</td>
+                        <td style="padding: 12px; text-align: center;">${item.reputation_score || '-'}${item.reputation_score ? '/100' : ''}</td>
                         <td style="padding: 12px; text-align: center;">${item.share_of_voice || '-'}%</td>
                         <td style="padding: 12px; text-align: center;"><span style="padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; ${statusStyle}">${statusText}</span></td>
                         <td style="padding: 12px; text-align: center;">
@@ -6808,18 +6962,53 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                     const visibilityData = analysis.brand_visibility || analysis.visibility || {};
                     const overviewData = analysis.data_overview || analysis.overview || {};
                     
+                    // 优先从 _metrics 获取关键指标（从数据库直接读取）
+                    const metrics = analysis._metrics || {};
+                    const hasMetrics = Object.keys(metrics).length > 0;
+                    
                     // 显示品牌信息
                     document.getElementById('selected-brand-info').style.display = 'block';
                     document.getElementById('selected-brand-name').textContent = brandName;
-                    document.getElementById('selected-brand-score').textContent = 
-                        visibilityData.ai_visibility_score || visibilityData.score || overviewData.overallScore || '-';
-                    document.getElementById('selected-brand-mention').textContent = 
-                        (visibilityData.visibility_rate || visibilityData.mention_rate || overviewData.overallMentionRate || '-') + '%';
-                    document.getElementById('selected-brand-sentiment').textContent = 
-                        (visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || visibilityData.positive_sentiment || '-') + '%';
+                    
+                    // 可见度得分（优先从metrics获取）
+                    const visibilityScore = hasMetrics ? (metrics.visibilityScore || '-') : 
+                        (visibilityData.ai_visibility_score || visibilityData.score || overviewData.overallScore || '-');
+                    document.getElementById('selected-brand-score').textContent = visibilityScore;
+                    
+                    // 提及率（优先从metrics获取）
+                    const mentionRate = hasMetrics ? (metrics.mentionRate || '-') : 
+                        (visibilityData.visibility_rate || visibilityData.mention_rate || overviewData.overallMentionRate || '-');
+                    document.getElementById('selected-brand-mention').textContent = mentionRate === '-' ? '-' : mentionRate + '%';
+                    
+                    // 平均排名（优先从metrics获取）
+                    const avgPosition = hasMetrics ? (metrics.avgPosition || '-') : 
+                        (visibilityData.avg_position || visibilityData.average_position || overviewData.overall_avg_position || '-');
+                    document.getElementById('selected-brand-position').textContent = avgPosition;
+                    
+                    // 提及份额（优先从metrics获取）
+                    const shareOfVoice = hasMetrics ? (metrics.shareOfVoice || '-') : 
+                        (visibilityData.share_of_voice || visibilityData.sov || overviewData.share_of_voice || '-');
+                    document.getElementById('selected-brand-share').textContent = shareOfVoice === '-' ? '-' : shareOfVoice + '%';
+                    
+                    // 美誉度（优先从metrics获取）
+                    const reputationScore = hasMetrics ? (metrics.reputationScore || '-') : 
+                        (visibilityData.reputation_score || visibilityData.reputationScore || '-');
+                    document.getElementById('selected-brand-reputation').textContent = reputationScore === '-' ? '-' : reputationScore + '/100';
+                    
+                    // 数据概览（优先从metrics获取）
+                    document.getElementById('selected-brand-total-mentions').textContent = 
+                        hasMetrics ? (metrics.totalMentions || '-') : (overviewData.total_mentions || visibilityData.total_mentions || '-');
+                    document.getElementById('selected-brand-total-queries').textContent = 
+                        hasMetrics ? (metrics.totalQueries || '-') : (overviewData.total_queries || visibilityData.total_queries || '-');
+                    document.getElementById('selected-brand-platforms').textContent = 
+                        hasMetrics ? (metrics.testedPlatforms || '-') : 
+                        (overviewData.tested_platforms?.length || visibilityData.by_platform?.length || '-');
                     
                     // 保存到全局变量供图表使用
                     window.currentAnalysis = analysis;
+                    
+                    // 更新竞品分析图表
+                    updateCompetitorCharts();
                 }
                 
                 // 加载竞品列表
@@ -6833,8 +7022,18 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
         }
         
         // 当切换到竞品分析模块时加载
-        function loadCompetitorsOnShow() {
-            loadAnalyzedBrandsForCompetitor();
+        async function loadCompetitorsOnShow() {
+            await loadAnalyzedBrandsForCompetitor();
+            
+            // 如果已有选中的品牌，自动加载其数据
+            const selectedBrandId = localStorage.getItem('selectedBrandId');
+            if (selectedBrandId) {
+                const select = document.getElementById('competitor-brand-select');
+                // 设置选中状态
+                select.value = selectedBrandId;
+                // 触发加载品牌数据
+                await handleBrandSelectForCompetitor(selectedBrandId);
+            }
         }
         
         // 加载品牌列表
