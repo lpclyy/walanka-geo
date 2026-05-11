@@ -7,19 +7,17 @@
 const express = require('express');
 const router = express.Router();
 const competitorService = require('../services/competitorService');
-const { authenticate } = require('../middleware/auth');
 
 // 添加竞品品牌
-router.post('/', authenticate, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { brandId, name, website } = req.body;
-    const userId = req.user.id;
 
     if (!brandId || !name) {
       return res.status(400).json({ success: false, message: '缺少必要参数' });
     }
 
-    const result = await competitorService.addCompetitor(userId, brandId, name, website);
+    const result = await competitorService.addCompetitor(null, brandId, name, website);
     res.json(result);
   } catch (error) {
     console.error('添加竞品失败:', error);
@@ -28,7 +26,7 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 // 获取品牌的竞品列表
-router.get('/:brandId', authenticate, async (req, res) => {
+router.get('/:brandId', async (req, res) => {
   try {
     const { brandId } = req.params;
     const competitors = await competitorService.getCompetitors(brandId);
@@ -40,7 +38,7 @@ router.get('/:brandId', authenticate, async (req, res) => {
 });
 
 // 删除竞品
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const result = await competitorService.removeCompetitor(id);
@@ -52,7 +50,7 @@ router.delete('/:id', authenticate, async (req, res) => {
 });
 
 // 更新竞品信息
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { name, website } = req.body;
@@ -66,7 +64,7 @@ router.put('/:id', authenticate, async (req, res) => {
 });
 
 // 分析单个竞品
-router.post('/analyze/:id', authenticate, async (req, res) => {
+router.post('/analyze/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const competitor = await competitorService.getCompetitorsByBrandId(id);
@@ -84,7 +82,7 @@ router.post('/analyze/:id', authenticate, async (req, res) => {
 });
 
 // 批量分析竞品
-router.post('/batch-analyze/:brandId', authenticate, async (req, res) => {
+router.post('/batch-analyze/:brandId', async (req, res) => {
   try {
     const { brandId } = req.params;
     const competitors = await competitorService.getCompetitors(brandId);
@@ -102,7 +100,7 @@ router.post('/batch-analyze/:brandId', authenticate, async (req, res) => {
 });
 
 // 生成竞品对比洞察
-router.post('/insight/:brandId', authenticate, async (req, res) => {
+router.post('/insight/:brandId', async (req, res) => {
   try {
     const { brandId } = req.params;
     const { brandData } = req.body;

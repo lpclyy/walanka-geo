@@ -6553,16 +6553,16 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
                 const response = await fetch(`/api/brands/${brandId}/analysis`);
                 const data = await response.json();
                 
-                if (data.success && data.data?.analysis) {
-                    const analysis = data.data.analysis;
-                    const visibility = analysis.visibility || {};
+                if (data.success && data.analysis) {
+                    const analysis = data.analysis;
+                    const visibility = analysis.visibility || analysis.data_overview || {};
                     
                     // 显示品牌信息
                     document.getElementById('selected-brand-info').style.display = 'block';
                     document.getElementById('selected-brand-name').textContent = brandName;
-                    document.getElementById('selected-brand-score').textContent = visibility.ai_visibility_score || visibility.score || '-';
+                    document.getElementById('selected-brand-score').textContent = visibility.ai_visibility_score || visibility.score || visibility.overall_score || '-';
                     document.getElementById('selected-brand-mention').textContent = (visibility.visibility_rate || visibility.mention_rate || '-') + '%';
-                    document.getElementById('selected-brand-sentiment').textContent = (visibility.positive_sentiment_rate || visibility.positive_ratio || '-') + '%';
+                    document.getElementById('selected-brand-sentiment').textContent = (visibility.positive_sentiment_rate || visibility.positive_ratio || visibility.positive_sentiment || '-') + '%';
                     
                     // 保存到全局变量供图表使用
                     window.currentAnalysis = analysis;
