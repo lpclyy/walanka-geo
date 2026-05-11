@@ -32,6 +32,7 @@ app.use('/api/chat', routes.chat);
 app.use('/api/brands', routes.brand);
 app.use('/api/user-brands', routes.userBrand);
 app.use('/api/analysis', routes.analysis);
+app.use('/api/competitors', routes.competitor);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });

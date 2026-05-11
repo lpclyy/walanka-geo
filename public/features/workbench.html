@@ -2148,84 +2148,101 @@
                     <div class="workbench-mode" id="competitor-brand-analysis" style="display: none;">
                         <div class="competitor-brand-analysis-container">
                             <h3 style="color: #333; margin-bottom: 20px;">竞品品牌分析</h3>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                                <div style="margin-bottom: 20px; display: flex; gap: 10px;">
-                                    <select style="flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                        <option>选择竞品</option>
-                                        <option>竞品A</option>
-                                        <option>竞品B</option>
-                                        <option>竞品C</option>
-                                    </select>
-                                    <select style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
-                                        <option>最近7天</option>
-                                        <option>最近30天</option>
-                                        <option>最近90天</option>
-                                    </select>
-                                    <button style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px;">分析</button>
+                            
+                            <!-- 添加竞品表单 -->
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(102,126,234,0.3);">
+                                <h4 style="font-size: 16px; font-weight: 600; color: white; margin: 0 0 16px 0;">添加竞品品牌</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px;">
+                                    <input type="text" id="competitor-name-input" placeholder="竞品品牌名称" 
+                                           style="padding: 12px; border: none; border-radius: 8px; font-size: 14px;">
+                                    <input type="text" id="competitor-website-input" placeholder="竞品官网URL（可选）" 
+                                           style="padding: 12px; border: none; border-radius: 8px; font-size: 14px;">
+                                    <button id="add-competitor-btn" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                                        添加竞品
+                                    </button>
                                 </div>
                             </div>
-                            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                                <h4 style="margin: 0 0 15px 0; color: #333;">品牌对比分析</h4>
-                                <div style="height: 300px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                    <p style="color: #666;">品牌对比图表区域</p>
+                            
+                            <!-- 竞品列表 -->
+                            <div id="competitor-list-container" style="margin-bottom: 24px;">
+                                <h4 style="color: #333; margin: 0 0 16px 0;">竞品列表</h4>
+                                <div id="competitor-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                                    <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; text-align: center;">
+                                        <svg style="width: 48px; height: 48px; color: #ccc; margin-bottom: 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                                        </svg>
+                                        <p style="color: #999;">暂无竞品，请添加</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                    <h5 style="margin: 0 0 15px 0; color: #333;">品牌提及率对比</h5>
-                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                                        <div style="width: 120px; font-size: 14px; color: #333;">我们的品牌</div>
-                                        <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
-                                            <div style="height: 100%; width: 85%; background: linear-gradient(90deg, var(--primary-color), var(--primary-light)); border-radius: 4px;"></div>
-                                        </div>
-                                        <span style="font-size: 14px; font-weight: bold; color: #333;">85%</span>
+                            
+                            <!-- 分析按钮 -->
+                            <div style="text-align: center; margin-bottom: 24px;">
+                                <button id="analyze-competitors-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">
+                                    <svg style="width: 18px; height: 18px; margin-right: 8px; display: inline;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    批量分析竞品
+                                </button>
+                            </div>
+                            
+                            <!-- 竞品对比洞察 -->
+                            <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(59,130,246,0.3); margin-bottom: 24px;">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                                    <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                        <svg style="width: 20px; height: 20px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                                        <div style="width: 120px; font-size: 14px; color: #333;">竞品A</div>
-                                        <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
-                                            <div style="height: 100%; width: 78%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 4px;"></div>
-                                        </div>
-                                        <span style="font-size: 14px; font-weight: bold; color: #333;">78%</span>
-                                    </div>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <div style="width: 120px; font-size: 14px; color: #333;">竞品B</div>
-                                        <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px;">
-                                            <div style="height: 100%; width: 92%; background: linear-gradient(90deg, #22c55e, #4ade80); border-radius: 4px;"></div>
-                                        </div>
-                                        <span style="font-size: 14px; font-weight: bold; color: #333;">92%</span>
+                                    <h3 style="font-size: 16px; font-weight: 600; color: white; margin: 0;">竞品对比洞察</h3>
+                                </div>
+                                <p style="font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.9); text-align: justify; margin: 0;" id="competitor-insight">
+                                    请先添加竞品并进行分析以查看对比洞察
+                                </p>
+                            </div>
+                            
+                            <!-- 对比图表 -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 24px;">
+                                <!-- 可见度得分对比柱状图 -->
+                                <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <h4 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 20px 0;">可见度得分对比</h4>
+                                    <div style="height: 300px;">
+                                        <canvas id="competitorBarChart"></canvas>
                                     </div>
                                 </div>
-                                <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                    <h5 style="margin: 0 0 15px 0; color: #333;">品牌情感分析</h5>
-                                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                                        <div>
-                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                                <span style="font-size: 14px; color: #333;">我们的品牌</span>
-                                                <span style="font-size: 14px; font-weight: bold; color: #333;">正面: 82%</span>
-                                            </div>
-                                            <div style="height: 8px; background: #e2e8f0; border-radius: 4px;">
-                                                <div style="height: 100%; width: 82%; background: linear-gradient(90deg, #22c55e, #4ade80); border-radius: 4px;"></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                                <span style="font-size: 14px; color: #333;">竞品A</span>
-                                                <span style="font-size: 14px; font-weight: bold; color: #333;">正面: 75%</span>
-                                            </div>
-                                            <div style="height: 8px; background: #e2e8f0; border-radius: 4px;">
-                                                <div style="height: 100%; width: 75%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 4px;"></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                                <span style="font-size: 14px; color: #333;">竞品B</span>
-                                                <span style="font-size: 14px; font-weight: bold; color: #333;">正面: 79%</span>
-                                            </div>
-                                            <div style="height: 8px; background: #e2e8f0; border-radius: 4px;">
-                                                <div style="height: 100%; width: 79%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 4px;"></div>
-                                            </div>
-                                        </div>
+                                
+                                <!-- 多维对比雷达图 -->
+                                <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                    <h4 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 20px 0;">多维指标对比</h4>
+                                    <div style="height: 300px;">
+                                        <canvas id="competitorRadarChart"></canvas>
                                     </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 指标对比表格 -->
+                            <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                                <h4 style="font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 20px 0;">详细指标对比</h4>
+                                <div style="overflow-x: auto;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: #f8f9fa;">
+                                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">品牌</th>
+                                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">可见度得分</th>
+                                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">提及率</th>
+                                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">平均位置</th>
+                                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">正面情感</th>
+                                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">提及份额</th>
+                                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">状态</th>
+                                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e2e8f0;">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="competitor-comparison-table">
+                                            <tr>
+                                                <td colspan="8" style="padding: 40px; text-align: center; color: #999;">暂无数据，请添加竞品</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -5987,6 +6004,436 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
             document.body.appendChild(reportModal);
         }
         
+        // 竞品分析相关变量
+        let competitorBarChart = null;
+        let competitorRadarChart = null;
+        
+        // 添加竞品品牌
+        async function addCompetitor() {
+            const name = document.getElementById('competitor-name-input').value.trim();
+            const website = document.getElementById('competitor-website-input').value.trim();
+            
+            if (!name) {
+                showToast('请输入竞品品牌名称', 'warning');
+                return;
+            }
+            
+            const brandId = localStorage.getItem('selectedBrandId');
+            if (!brandId) {
+                showToast('请先选择一个品牌', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/competitors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ brandId, name, website })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('竞品添加成功', 'success');
+                    // 清空输入框
+                    document.getElementById('competitor-name-input').value = '';
+                    document.getElementById('competitor-website-input').value = '';
+                    // 刷新竞品列表
+                    loadCompetitors(brandId);
+                } else {
+                    showToast('添加竞品失败: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('添加竞品失败:', error);
+                showToast('添加竞品失败，请稍后重试', 'error');
+            }
+        }
+        
+        // 加载竞品列表
+        async function loadCompetitors(brandId) {
+            try {
+                const response = await fetch(`/api/competitors/${brandId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayCompetitorList(data.data);
+                    displayCompetitorComparisonTable(data.data);
+                    updateCompetitorCharts(data.data);
+                }
+            } catch (error) {
+                console.error('加载竞品列表失败:', error);
+            }
+        }
+        
+        // 显示竞品列表
+        function displayCompetitorList(competitors) {
+            const container = document.getElementById('competitor-list');
+            
+            if (!container) return;
+            
+            if (competitors.length === 0) {
+                container.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; text-align: center;">
+                        <svg style="width: 48px; height: 48px; color: #ccc; margin-bottom: 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                        </svg>
+                        <p style="color: #999;">暂无竞品，请添加</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const competitorColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+            
+            container.innerHTML = competitors.map((competitor, index) => {
+                const color = competitorColors[index % competitorColors.length];
+                const statusText = competitor.status === 'analyzed' ? '已分析' : competitor.status === 'failed' ? '分析失败' : '待分析';
+                const statusClass = competitor.status === 'analyzed' ? 'style="background: #dcfce7; color: #16a34a;"' : competitor.status === 'failed' ? 'style="background: #fee2e2; color: #dc2626;"' : 'style="background: #fef3c7; color: #d97706;"';
+                
+                return `
+                    <div style="background: white; padding: 20px; border-radius: 12px; border-left: 4px solid ${color}; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                            <div>
+                                <h4 style="margin: 0 0 4px 0; color: #1a1a2e;">${competitor.name}</h4>
+                                ${competitor.website ? `<p style="margin: 0; font-size: 12px; color: #666;">${competitor.website}</p>` : ''}
+                            </div>
+                            <span ${statusClass} style="padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;">${statusText}</span>
+                        </div>
+                        ${competitor.status === 'analyzed' ? `
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+                                <div style="background: #f8f9fa; padding: 8px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 18px; font-weight: bold; color: ${color};">${competitor.visibility_score || 0}</div>
+                                    <div style="font-size: 10px; color: #666;">可见度</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 8px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 18px; font-weight: bold; color: ${color};">${competitor.mention_rate || 0}%</div>
+                                    <div style="font-size: 10px; color: #666;">提及率</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 8px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 18px; font-weight: bold; color: ${color};">${competitor.positive_ratio || 0}%</div>
+                                    <div style="font-size: 10px; color: #666;">正面情感</div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="deleteCompetitor(${competitor.id})" style="background: #f87171; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">删除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 删除竞品
+        async function deleteCompetitor(competitorId) {
+            if (confirm('确定要删除该竞品吗？')) {
+                try {
+                    const response = await fetch(`/api/competitors/${competitorId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showToast('竞品已删除', 'success');
+                        const brandId = localStorage.getItem('selectedBrandId');
+                        if (brandId) {
+                            loadCompetitors(brandId);
+                        }
+                    } else {
+                        showToast('删除失败: ' + data.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('删除竞品失败:', error);
+                    showToast('删除失败，请稍后重试', 'error');
+                }
+            }
+        }
+        
+        // 批量分析竞品
+        async function analyzeCompetitors() {
+            const brandId = localStorage.getItem('selectedBrandId');
+            if (!brandId) {
+                showToast('请先选择一个品牌', 'warning');
+                return;
+            }
+            
+            try {
+                showToast('正在分析竞品数据...', 'info');
+                
+                const response = await fetch(`/api/competitors/batch-analyze/${brandId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('竞品分析完成', 'success');
+                    loadCompetitors(brandId);
+                    
+                    // 生成竞品洞察
+                    await generateCompetitorInsight(brandId);
+                } else {
+                    showToast('分析失败: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('分析竞品失败:', error);
+                showToast('分析失败，请稍后重试', 'error');
+            }
+        }
+        
+        // 生成竞品洞察
+        async function generateCompetitorInsight(brandId) {
+            try {
+                // 获取当前品牌数据
+                const brandResponse = await fetch(`/api/brands/${brandId}/analysis`);
+                const brandData = await brandResponse.json();
+                
+                const analysisData = brandData.success && brandData.data?.analysis ? brandData.data.analysis : {};
+                
+                const response = await fetch(`/api/competitors/insight/${brandId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        brandData: {
+                            name: localStorage.getItem('selectedBrandName') || '品牌',
+                            ...(analysisData.visibility || {}),
+                            ...(analysisData.overview || {})
+                        } 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.insight) {
+                    const insightElement = document.getElementById('competitor-insight');
+                    if (insightElement) {
+                        insightElement.textContent = data.insight;
+                    }
+                }
+            } catch (error) {
+                console.error('生成竞品洞察失败:', error);
+            }
+        }
+        
+        // 更新竞品对比图表
+        function updateCompetitorCharts(competitors) {
+            // 获取当前品牌数据
+            const currentAnalysis = window.currentAnalysis || {};
+            const visibilityData = currentAnalysis.visibility || {};
+            
+            // 准备主品牌数据
+            const brandName = localStorage.getItem('selectedBrandName') || '我的品牌';
+            const brandData = {
+                name: brandName,
+                visibility_score: visibilityData.ai_visibility_score || visibilityData.score || 0,
+                mention_rate: visibilityData.visibility_rate || visibilityData.mention_rate || 0,
+                avg_position: visibilityData.avg_position || 0,
+                positive_ratio: visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || 0,
+                share_of_voice: visibilityData.share_of_voice || 0
+            };
+            
+            // 合并数据
+            const allData = [brandData, ...competitors];
+            
+            // 更新柱状图
+            updateBarChart(allData);
+            
+            // 更新雷达图
+            updateRadarChart(allData);
+        }
+        
+        // 更新柱状图
+        function updateBarChart(data) {
+            const ctx = document.getElementById('competitorBarChart');
+            if (!ctx) return;
+            
+            // 销毁旧图表
+            if (competitorBarChart) {
+                competitorBarChart.destroy();
+            }
+            
+            const colors = ['#667eea', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+            
+            competitorBarChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: '可见度得分',
+                        data: data.map(d => d.visibility_score),
+                        backgroundColor: data.map((_, i) => colors[i % colors.length]),
+                        borderColor: data.map((_, i) => colors[i % colors.length]),
+                        borderWidth: 1,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: '#f1f5f9'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 更新雷达图
+        function updateRadarChart(data) {
+            const ctx = document.getElementById('competitorRadarChart');
+            if (!ctx) return;
+            
+            // 销毁旧图表
+            if (competitorRadarChart) {
+                competitorRadarChart.destroy();
+            }
+            
+            const colors = ['#667eea', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+            
+            const datasets = data.map((item, index) => ({
+                label: item.name,
+                data: [
+                    item.visibility_score || 0,
+                    item.mention_rate || 0,
+                    item.positive_ratio || 0,
+                    100 - (item.avg_position || 50),
+                    item.share_of_voice || 0
+                ],
+                backgroundColor: `${colors[index % colors.length]}20`,
+                borderColor: colors[index % colors.length],
+                borderWidth: 2,
+                pointBackgroundColor: colors[index % colors.length],
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: colors[index % colors.length]
+            }));
+            
+            competitorRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['可见度得分', '提及率', '正面情感', '排名位置', '提及份额'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            },
+                            angleLines: {
+                                color: '#e2e8f0'
+                            },
+                            pointLabels: {
+                                color: '#64748b',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 显示竞品对比表格
+        function displayCompetitorComparisonTable(competitors) {
+            const container = document.getElementById('competitor-comparison-table');
+            if (!container) return;
+            
+            // 获取当前品牌数据
+            const currentAnalysis = window.currentAnalysis || {};
+            const visibilityData = currentAnalysis.visibility || {};
+            const brandName = localStorage.getItem('selectedBrandName') || '我的品牌';
+            
+            const brandData = {
+                name: brandName,
+                isMain: true,
+                visibility_score: visibilityData.ai_visibility_score || visibilityData.score || '-',
+                mention_rate: visibilityData.visibility_rate || visibilityData.mention_rate || '-',
+                avg_position: visibilityData.avg_position || '-',
+                positive_ratio: visibilityData.positive_sentiment_rate || visibilityData.positive_ratio || '-',
+                share_of_voice: visibilityData.share_of_voice || '-',
+                status: 'completed'
+            };
+            
+            const allData = [brandData, ...competitors];
+            
+            const competitorColors = ['#667eea', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+            
+            container.innerHTML = allData.map((item, index) => {
+                const color = item.isMain ? '#667eea' : competitorColors[(index - 1) % competitorColors.length];
+                const statusText = item.status === 'analyzed' || item.status === 'completed' ? '已分析' : item.status === 'failed' ? '分析失败' : '待分析';
+                const statusStyle = item.status === 'analyzed' || item.status === 'completed' ? 'background: #dcfce7; color: #16a34a;' : item.status === 'failed' ? 'background: #fee2e2; color: #dc2626;' : 'background: #fef3c7; color: #d97706;';
+                
+                return `
+                    <tr style="border-bottom: 1px solid #e2e8f0;" ${item.isMain ? 'style="background: #f8fafc;"' : ''}>
+                        <td style="padding: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 10px; height: 10px; background: ${color}; border-radius: 50%;"></div>
+                                <span style="font-weight: ${item.isMain ? '600' : '400'}; color: #1a1a2e;">${item.name}</span>
+                                ${item.isMain ? '<span style="font-size: 11px; color: #667eea; background: #eef2ff; padding: 2px 6px; border-radius: 4px;">本品牌</span>' : ''}
+                            </div>
+                        </td>
+                        <td style="padding: 12px; text-align: center; font-weight: 600; color: ${color};">${item.visibility_score}</td>
+                        <td style="padding: 12px; text-align: center;">${item.mention_rate}%</td>
+                        <td style="padding: 12px; text-align: center;">${item.avg_position}</td>
+                        <td style="padding: 12px; text-align: center;">${item.positive_ratio}%</td>
+                        <td style="padding: 12px; text-align: center;">${item.share_of_voice}%</td>
+                        <td style="padding: 12px; text-align: center;"><span style="padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; ${statusStyle}">${statusText}</span></td>
+                        <td style="padding: 12px; text-align: center;">
+                            ${item.isMain ? '-' : `<button onclick="deleteCompetitor(${item.id})" style="background: #f87171; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">删除</button>`}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // 当切换到竞品分析模块时加载竞品列表
+        function loadCompetitorsOnShow() {
+            const brandId = localStorage.getItem('selectedBrandId');
+            if (brandId) {
+                loadCompetitors(brandId);
+            }
+        }
+        
         // 加载品牌列表
         async function loadBrandList() {
             const userId = getUserId();
@@ -6179,6 +6626,31 @@ ${improvementSuggestions?.suggestions?.slice(0, 3).map(s => `- [${s.priority}] $
         // 页面加载时加载品牌列表并恢复选中状态
         loadBrandList();
         restoreSelectedBrand();
+        
+        // 绑定竞品分析相关事件
+        document.addEventListener('DOMContentLoaded', () => {
+            // 添加竞品按钮
+            const addCompetitorBtn = document.getElementById('add-competitor-btn');
+            if (addCompetitorBtn) {
+                addCompetitorBtn.addEventListener('click', addCompetitor);
+            }
+            
+            // 批量分析竞品按钮
+            const analyzeCompetitorsBtn = document.getElementById('analyze-competitors-btn');
+            if (analyzeCompetitorsBtn) {
+                analyzeCompetitorsBtn.addEventListener('click', analyzeCompetitors);
+            }
+            
+            // 监听模块切换
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const mode = item.getAttribute('data-mode');
+                    if (mode === 'competitor-brand-analysis') {
+                        loadCompetitorsOnShow();
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

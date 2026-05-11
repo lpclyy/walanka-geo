@@ -261,6 +261,29 @@ async function createBrandTables(db) {
       )
     `);
 
+    // 竞品品牌表
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS competitors (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        brand_id INT NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        website VARCHAR(500),
+        visibility_score INT DEFAULT 0,
+        total_mentions INT DEFAULT 0,
+        mention_rate DECIMAL(5,2) DEFAULT 0,
+        avg_position DECIMAL(5,2) DEFAULT 0,
+        positive_ratio DECIMAL(5,2) DEFAULT 0,
+        share_of_voice DECIMAL(5,2) DEFAULT 0,
+        status ENUM('pending', 'analyzed', 'failed') DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_user_id (user_id),
+        INDEX idx_brand_id (brand_id),
+        INDEX idx_status (status)
+      )
+    `);
+
   } catch (error) {
     console.error('Create brand tables failed:', error);
   }

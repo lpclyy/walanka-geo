@@ -12,6 +12,7 @@ const chat = require('./chat');
 const brand = require('./brand');
 const userBrand = require('./userBrand');
 const analysis = require('./analysis');
+const competitor = require('./competitor');
 
 module.exports = {
   auth,
@@ -21,5 +22,6 @@ module.exports = {
   chat,
   brand,
   userBrand,
-  analysis
+  analysis,
+  competitor
 };
