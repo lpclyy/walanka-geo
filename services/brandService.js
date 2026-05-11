@@ -132,35 +132,30 @@ async function getAnalysisByBrandId(brandId) {
   
   const result = analysis[0];
   
-  // 解析JSON字段并转换为新的GEO模板结构
-  try {
-    const parsedResult = {
-      data_overview: result.overview ? JSON.parse(result.overview) : {},
-      brand_visibility: result.visibility ? JSON.parse(result.visibility) : {},
-      brand_perception: result.perception ? JSON.parse(result.perception) : {},
-      topic_analysis: result.topics ? JSON.parse(result.topics) : {},
-      citation_analysis: result.citations ? JSON.parse(result.citations) : {},
-      prompts_with_snapshots: result.snapshots ? JSON.parse(result.snapshots) : [],
-      improvement_suggestions: result.suggestions ? JSON.parse(result.suggestions) : {},
-      competitor_brand_analysis: result.competition ? JSON.parse(result.competition) : {},
-      // 保留原始字段以便兼容
-      overview: result.overview,
-      visibility: result.visibility,
-      perception: result.perception,
-      topics: result.topics,
-      citations: result.citations,
-      snapshots: result.snapshots,
-      suggestions: result.suggestions,
-      competition: result.competition,
-      strengths: result.strengths,
-      opportunities: result.opportunities,
-      risks: result.risks
-    };
-    return parsedResult;
-  } catch (e) {
-    console.error('解析分析结果失败:', e.message);
-    return result;
-  }
+  // 返回原始数据（字符串形式），让前端根据需要解析
+  // 这样可以避免重复解析导致的 "[object Object]" 错误
+  return {
+    data_overview: result.overview || '{}',
+    brand_visibility: result.visibility || '{}',
+    brand_perception: result.perception || '{}',
+    topic_analysis: result.topics || '{}',
+    citation_analysis: result.citations || '{}',
+    prompts_with_snapshots: result.snapshots || '[]',
+    improvement_suggestions: result.suggestions || '{}',
+    competitor_brand_analysis: result.competition || '{}',
+    // 保留原始字段以便兼容
+    overview: result.overview || '{}',
+    visibility: result.visibility || '{}',
+    perception: result.perception || '{}',
+    topics: result.topics || '{}',
+    citations: result.citations || '{}',
+    snapshots: result.snapshots || '[]',
+    suggestions: result.suggestions || '{}',
+    competition: result.competition || '{}',
+    strengths: result.strengths || '[]',
+    opportunities: result.opportunities || '[]',
+    risks: result.risks || '[]'
+  };
 }
 
 /**
