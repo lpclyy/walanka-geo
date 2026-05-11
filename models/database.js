@@ -284,6 +284,35 @@ async function createBrandTables(db) {
       )
     `);
 
+    // 品牌关键指标表 - 用于快速获取核心指标（二次解析优化）
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS brand_metrics (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        brand_id INT NOT NULL,
+        analysis_id INT NOT NULL,
+        -- 可见度指标
+        visibility_score INT DEFAULT 0 COMMENT '可见度得分(0-100)',
+        mention_rate DECIMAL(5,2) DEFAULT 0 COMMENT '提及率(%)',
+        avg_position DECIMAL(5,2) DEFAULT 0 COMMENT '平均排名',
+        share_of_voice DECIMAL(5,2) DEFAULT 0 COMMENT '提及份额(%)',
+        -- 美誉度指标（基于用户情感）
+        reputation_score DECIMAL(5,2) DEFAULT 0 COMMENT '美誉度得分(0-100)',
+        positive_sentiment_ratio DECIMAL(5,2) DEFAULT 0 COMMENT '正面情感占比(%)',
+        neutral_sentiment_ratio DECIMAL(5,2) DEFAULT 0 COMMENT '中性情感占比(%)',
+        negative_sentiment_ratio DECIMAL(5,2) DEFAULT 0 COMMENT '负面情感占比(%)',
+        -- 数据概览
+        total_mentions INT DEFAULT 0 COMMENT '总提及次数',
+        total_queries INT DEFAULT 0 COMMENT '总查询次数',
+        tested_platforms INT DEFAULT 0 COMMENT '测试平台数',
+        -- 元数据
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_brand_analysis (brand_id, analysis_id),
+        INDEX idx_brand_id (brand_id),
+        INDEX idx_created_at (created_at)
+      )
+    `);
+
   } catch (error) {
     console.error('Create brand tables failed:', error);
   }
